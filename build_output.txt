@@ -1,0 +1,7 @@
+[1/3] Building CXX object src/libai/CMakeFiles/libai.dir/libai.cpp.obj
+FAILED: [code=1] src/libai/CMakeFiles/libai.dir/libai.cpp.obj 
+C:\msys64\mingw64\bin\g++.exe  -IC:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai/../libworld -O3 -DNDEBUG -std=gnu++14 -MD -MT src/libai/CMakeFiles/libai.dir/libai.cpp.obj -MF src\libai\CMakeFiles\libai.dir\libai.cpp.obj.d -o src/libai/CMakeFiles/libai.dir/libai.cpp.obj -c C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai/libai.cpp
+[2/3] Building CXX object src/libai/CMakeFiles/libai.dir/maneuverFactory.cpp.obj
+FAILED: [code=1] src/libai/CMakeFiles/libai.dir/maneuverFactory.cpp.obj 
+C:\msys64\mingw64\bin\g++.exe  -IC:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai/../libworld -O3 -DNDEBUG -std=gnu++14 -MD -MT src/libai/CMakeFiles/libai.dir/maneuverFactory.cpp.obj -MF src\libai\CMakeFiles\libai.dir\maneuverFactory.cpp.obj.d -o src/libai/CMakeFiles/libai.dir/maneuverFactory.cpp.obj -c C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai/maneuverFactory.cpp
+ninja: build stopped: subcommand failed.

@@ -1,0 +1,16 @@
+APPCH:010,A,GPSC,GGES1,GGES1,AG,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,12000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,GGES1,GGESA,AG,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03200,     ,     ,-,180,    ,   , , , , , ,P,P,C;
+APPCH:030,A,GPSC,GGES1,GGESI,AG,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02800,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,A,GPSC,GGES2,GGES2,AG,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,12000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,GGES2,GGESB,AG,P,C,E  C, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03200,     ,     ,-,180,    ,   , , , , , ,P,P,C;
+APPCH:030,A,GPSC,GGES2,GGESI,AG,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02800,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,A,GPSC,GGES3,GGES3,AG,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,12000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,GGES3,GGESC,AG,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03200,     ,     ,-,180,    ,   , , , , , ,P,P,C;
+APPCH:030,A,GPSC,GGES3,GGESI,AG,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02800,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,P,GPSC, ,GGESI,AG,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02800,     ,12000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,P,GPSC, ,GGESF,AG,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,    ,0040,+,01700,     ,     , ,   ,    ,   ,AGGE,AG,P,A, ,P,P,C;
+APPCH:030,P,GPSC, ,GGESM,AG,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,    ,0040, ,01050,     ,     , ,   , 000,   , , , , , ,P,P,C;
+APPCH:040,P,GPSC, ,GGESH,AG,P,C,EYM ,R,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     ,-,180,    ,   , , , , , ,P,P,C;
+APPCH:050,P,GPSC, , , , , , E  , ,   ,VM, , , , , ,      ,    ,    ,1200,    ,+,03200,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+RWY:RW05 ,     ,      ,00003, ,    , ,   ;S06594353,E155524781,0000;
+RWY:RW23 ,     ,      ,00006, ,    , ,   ;S06591046,E155533018,0000;

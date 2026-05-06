@@ -1,0 +1,11 @@
+APPCH:010,A,RNVA,AMRTN,AMRTN,K6,E,A,EE C,L,   ,HF, , , , , ,      ,    ,    ,2980,0040,+,02000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,GRACO,GRACO,K6,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,GRACO,AMRTN,K6,E,A,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,AMRTN,K6,E,A,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,DENII,K6,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,2980,0064,+,01700,     ,     , ,   ,    ,   ,STRGL,K6,E,A, ,B,J,C;
+APPCH:030,R,RNVA, ,STRGL,K6,E,A,EY M, ,302,TF, , , , , ,      ,    ,    ,2980,0045, ,00231,     ,     , ,   ,-306,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,2980,    ,+,00434,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,AMRTN,K6,E,A,EY  ,L,010,DF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,AMRTN,K6,E,A,EE H,L,   ,HM, , , , , ,      ,    ,    ,2980,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW12 ,     ,      ,00032, ,    , ,   ;N38563666,W076341558,0476;
+RWY:RW30 ,     ,      ,00034, ,    , ,   ;N38563160,W076335502,0326;

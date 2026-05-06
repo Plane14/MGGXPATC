@@ -1,0 +1,18 @@
+APPCH:010,A,R27,INNAM,INNAM,K4,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R27,INNAM,NORNE,K4,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R27,INNAM,IBETE,K4,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R27,UKORE,UKORE,K4,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R27,UKORE,SOCOB,K4,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R27,UKORE,IBETE,K4,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R27,VILLO,VILLO,K4,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R27,VILLO,NORNE,K4,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R27,VILLO,IBETE,K4,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,R,R27, ,IBETE,K4,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,18000, ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R27, ,ZOLTI,K4,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,2720,0068,+,02700,     ,     , ,   ,    ,   ,RW27,K4,P,G, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R27, ,RW27,K4,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,2720,0058, ,00820,     ,     , ,   ,-305,   , , , , , ,B,J,S;
+APPCH:040,R,R27, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,2720,    ,+,01205,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R27, ,IBETE,K4,P,C,EY  ,R,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R27, ,IBETE,K4,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,2720,0050, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW09 ,     ,      ,00804, ,    , ,   ;N35515312,W092055254,0000;
+RWY:RW27 ,     ,      ,00780, ,    , ,   ;N35515114,W092045790,0000;

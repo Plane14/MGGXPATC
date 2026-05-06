@@ -1,0 +1,17 @@
+APPCH:010,A,R35,MOINT,MOINT,K2,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,A,J,S;
+APPCH:020,A,R35,MOINT,KONNE,K2,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,09100,     ,     , ,   ,    ,   , , , , , ,A,J,S;
+APPCH:030,A,R35,MOINT,WIZSI,K2,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,07100,     ,     , ,   ,    ,   , , , , , ,A,J,S;
+APPCH:010,A,R35,NUBGE,NUBGE,K2,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,A,J,S;
+APPCH:020,A,R35,NUBGE,KONNE,K2,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,09300,     ,     , ,   ,    ,   , , , , , ,A,J,S;
+APPCH:030,A,R35,NUBGE,WIZSI,K2,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,07100,     ,     , ,   ,    ,   , , , , , ,A,J,S;
+APPCH:010,A,R35,OGD,OGD,K2,D, ,V  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,A,J,S;
+APPCH:020,A,R35,OGD,WIZSI,K2,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,07100,     ,     , ,   ,    ,   , , , , , ,A,J,S;
+APPCH:010,R,R35, ,WIZSI,K2,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,07100,     ,18000, ,   ,    ,   , , , , , ,A,J,S;
+APPCH:020,R,R35, ,OZFEL,K2,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3580,0061,+,05900,     ,     , ,   ,    ,   ,XEXXA,K2,P,C, ,A,J,S;
+PRDAT:A,        LP, ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R35, ,XEXXA,K2,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,3580,0046, ,04428,     ,     , ,   ,-300,   , , , , , ,A,J,S;
+APPCH:040,R,R35, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,3580,    ,+,04630,     ,     , ,   ,    ,   , , , , , ,A,J,S;
+APPCH:050,R,R35, ,KONNE,K2,P,C,EY  ,L,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,07100,     ,     , ,   ,    ,   , , , , , ,A,J,S;
+APPCH:060,R,R35, ,KONNE,K2,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,0110,0070, ,     ,     ,     , ,   ,    ,   , , , , , ,A,J,S;
+RWY:RW17 ,     ,      ,04230, ,    , ,   ;N41335949,W112034457,0000;
+RWY:RW35 ,     ,      ,04230, ,    , ,   ;N41323158,W112034355,0000;

@@ -1,0 +1,9 @@
+APPCH:010,A,RNVA,DAYEL,DAYEL,K7,E,A,E  C,R,   ,HF, , , , , ,      ,    ,    ,3400,0070,+,07000,     ,18000, ,   ,    ,   , , , , , ,A,J,C;
+APPCH:020,A,RNVA,DAYEL,ECEBE,K7,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06300,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+APPCH:010,R,RNVA, ,ECEBE,K7,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,06300,     ,18000, ,   ,    ,   , , , , , ,A,J,C;
+APPCH:020,R,RNVA, ,JASVU,K7,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3400,0060,+,05700,     ,     , ,   ,    ,   ,KUYES,K7,P,C, ,A,J,C;
+APPCH:030,R,RNVA, ,KUYES,K7,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,3400,0052, ,04240,     ,     , ,   , 000,   , , , , , ,A,J,C;
+APPCH:040,R,RNVA, ,DAYEL,K7,E,A,EYM ,R,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,07000,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+APPCH:050,R,RNVA, ,DAYEL,K7,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,3400,0070, ,     ,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+RWY:RW07 ,     ,      ,02034, ,    , ,   ;N35131129,W083254003,0000;
+RWY:RW25 ,     ,      ,02010, ,    , ,   ;N35132937,W083244393,0000;

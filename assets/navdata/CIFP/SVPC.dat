@@ -1,0 +1,9 @@
+APPCH:010,A,VDMA,KOTUL,KOTUL,SV,E,A,E C , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,08000,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+APPCH:020,A,VDMA,KOTUL,D060J,SV,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,08000,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+APPCH:030,A,VDMA,KOTUL,MORON,SV,P,C,E CC,L,   ,AF, ,PBL,SV,D, ,      ,3570,0100,0600,    ,+,02700,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+APPCH:040,A,VDMA,KOTUL,FD121,SV,P,C,EE  ,L,   ,AF, ,PBL,SV,D, ,      ,3010,0100,3570,    ,+,02700,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+APPCH:020,D,VDMA, ,FD121,SV,P,C,E  F, ,   ,IF, ,PBL,SV,D, ,      ,3010,0100,    ,    ,+,02700,     ,     , ,   ,    ,   ,PBL,SV,D, , ,0, ,C;
+APPCH:030,D,VDMA, ,MD121,SV,P,C,EY M, ,   ,CF, ,PBL,SV,D, ,      ,3010,0050,1210,0050, ,01670,     ,     , ,   , 000,   , , , , , ,0, ,C;
+APPCH:040,D,VDMA, ,MORON,SV,P,C,EEMH,L,   ,CF,Y,PBL,SV,D, ,      ,3570,0100,3570,0060,+,05000,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+RWY:RW11 ,-0140,      ,00023, ,    , ,   ;N10285310,W068045635,0000;
+RWY:RW29 ,+0140,      ,00013, ,    , ,   ;N10284572,W068034726,0000;

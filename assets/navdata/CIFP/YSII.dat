@@ -1,0 +1,13 @@
+APPCH:010,A,RNVE,SI2EA,SI2EA,YB,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,11000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,A,RNVE,SI2EA,SI2EI,YB,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,A,RNVE,SI2EB,SI2EB,YB,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,11000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,A,RNVE,SI2EB,SI2EI,YB,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,A,RNVE,SI2EC,SI2EC,YB,P,C,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,11000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,A,RNVE,SI2EC,SI2EI,YB,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,R,RNVE, ,SI2EI,YB,P,C,E  I, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,11000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,R,RNVE, ,SI2EF,YB,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,3070,0050,+,01730,     ,     , ,   ,    ,   ,YSII,YB,P,A, ,B,U,C;
+APPCH:030,R,RNVE, ,SI2EM,YB,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,3070,0050, ,00138,     ,     , ,   ,-300,   , , , , , ,B,U,C;
+APPCH:040,R,RNVE, ,SI2EH,YB,P,C,E M ,L,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:050,R,RNVE, ,SI2EH,YB,P,C,EE  , ,010,FM, ,WP,YB,D, ,      ,0071,1969,1470,    ,+,02200,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+RWY:RW12 ,+0000,      ,00009, ,    , ,   ;S09223538,E142372260,0164;
+RWY:RW30 ,+0000,      ,00008, ,    , ,   ;S09224993,E142373896,0098;

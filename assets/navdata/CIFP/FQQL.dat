@@ -1,0 +1,17 @@
+APPCH:010,A,R18,GEVAD,GEVAD,FQ,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R18,GEVAD,TEXAX,FQ,P,C,E  B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R18,GEVAD,IBKOX,FQ,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,01600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R18,NEVOR,NEVOR,FQ,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R18,NEVOR,TEXAX,FQ,P,C,E  B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R18,NEVOR,IBKOX,FQ,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,01600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R18,TEXAX,TEXAX,FQ,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R18,TEXAX,IBKOX,FQ,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,01600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R18, ,IBKOX,FQ,P,C,E  F, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01600,     ,     , ,   ,    ,   ,FQQL,FQ,P,A, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R18, ,RW18,FQ,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,1840,0050, ,00086,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R18, ,QL600,FQ,P,C,E M , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R18, ,QL601,FQ,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R18, ,GEVAD,FQ,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:070,R,R18, ,GEVAD,FQ,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,2740,T010,+,02600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW18 ,     ,      ,00036, ,    , ,   ;S17505166,E036520430,0000;
+RWY:RW36 ,     ,      ,00036, ,    , ,   ;S17514988,E036521050,0000;

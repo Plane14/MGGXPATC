@@ -1,0 +1,17 @@
+APPCH:010,A,P10,GGKN1,GGKN1,AG,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,12000, ,   ,    ,   , , , , , ,P,P,S;
+APPCH:020,A,P10,GGKN1,GGKNH,AG,P,C,EY  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:030,A,P10,GGKN1,GGKNC,AG,P,C,E  C, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:040,A,P10,GGKN1,GGKNI,AG,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:010,A,P10,GGKNA,GGKN2,AG,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,12000, ,   ,    ,   , , , , , ,P,P,S;
+APPCH:020,A,P10,GGKNA,GGKNA,AG,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05000,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:030,A,P10,GGKNA,GGKNI,AG,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03930,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:010,A,P10,GGKNC,GGKN2,AG,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,12000, ,   ,    ,   , , , , , ,P,P,S;
+APPCH:020,A,P10,GGKNC,GGKNC,AG,P,C,E  C, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:030,A,P10,GGKNC,GGKNI,AG,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:010,P,P10, ,GGKNI,AG,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,12000, ,   ,    ,   , , , , , ,P,P,S;
+APPCH:020,P,P10, ,GGKNF,AG,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,    ,0040,+,02655,     ,     , ,   ,    ,   ,AGGK,AG,P,A, ,P,P,S;
+APPCH:030,P,P10, ,GGKNM,AG,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,    ,0060, ,00757,     ,     , ,   ,-300,   , , , , , ,P,P,S;
+APPCH:040,P,P10, ,GGKNH,AG,P,C,EYM ,L,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:050,P,P10, ,GGKNC,AG,P,C,EE  , ,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+RWY:RW10 ,     ,      ,00008, ,    , ,   ;S10265092,E161533660,0000;
+RWY:RW28 ,     ,      ,00007, ,    , ,   ;S10270566,E161541350,0000;

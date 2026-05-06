@@ -1,0 +1,15 @@
+SID:010,4,CABOT1,RW02, , , , ,    , ,   ,VA, , , , , ,      ,    ,    ,0180,    ,+,00523,     ,18000, ,   ,    ,   ,PFZK,PA,P,A, , , , ;
+SID:020,4,CABOT1,RW02,CABOT,PA,E,A,EE  , ,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:010,4,CABOT1,RW20, , , , ,    , ,   ,VA, , , , , ,      ,    ,    ,1980,    ,+,00523,     ,18000, ,   ,    ,   ,PFZK,PA,P,A, , , , ;
+SID:020,4,CABOT1,RW20,CABOT,PA,E,A,EE  ,R,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,ROLLR,ROLLR,PA,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,ROLLR,FIROT,PA,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,01700,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,FIROT,PA,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01700,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,ECADI,PA,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,0980,0050,+,01700,     ,     , ,   ,    ,   ,PFZK,PA,P,A, ,B,J,C;
+APPCH:025,R,RNVA, ,ANZEO,PA,P,C,E S , ,302,TF, , , , , ,      ,    ,    ,0980,0033,+,01000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,R,RNVA, ,QOKUT,PA,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,0980,0027, ,00480,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,0980,    ,+,00500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,CABOT,PA,E,A,EY  , ,010,DF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,CABOT,PA,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,0480,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW02 ,     ,      ,00023, ,    , ,   ;N60543517,W161295085,0000;
+RWY:RW20 ,     ,      ,00023, ,    , ,   ;N60550426,W161292112,0000;

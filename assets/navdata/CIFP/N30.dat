@@ -1,0 +1,17 @@
+APPCH:010,A,RNVB,TALLI,TALLI,K6,E,A,E  C,R,   ,HF, , , , , ,      ,    ,    ,3310,0040,+,04000,     ,18000, ,   ,    ,   , , , , , ,A,J,C;
+APPCH:020,A,RNVB,TALLI,AYUKU,K6,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+APPCH:020,R,RNVB, ,AYUKU,K6,P,C,E  F, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,03500,     ,18000, ,   ,    ,   ,WIRAK,K6,P,C, ,A,J,C;
+APPCH:030,R,RNVB, ,WIRAK,K6,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,3600,0061, ,02080,     ,     , ,   , 000,   , , , , , ,A,J,C;
+APPCH:040,R,RNVB, ,TALLI,K6,E,A,EYM ,R,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+APPCH:050,R,RNVB, ,TALLI,K6,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,3310,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+APPCH:010,A,VORA,LVZ,LVZ,K6,D, ,V  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,0, ,C;
+APPCH:020,A,VORA,LVZ,MOSKO,K6,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+APPCH:010,A,VORA,MOSKO,MOSKO,K6,P,C,EE C,R,   ,HF, , , , , ,      ,    ,    ,0640,T010,+,04000,     ,18000, ,   ,    ,   , , , , , ,0, ,C;
+APPCH:010,V,VORA, ,MOSKO,K6,P,C,E  I, ,   ,IF, ,LVZ,K6,D, ,      ,0635,0118,    ,    ,+,04000,     ,18000, ,   ,    ,   , , , , , ,0, ,C;
+APPCH:020,V,VORA, ,ARIEL,K6,P,C,E  F, ,   ,CF, ,LVZ,K6,D, ,      ,0635,0184,0640,0066,+,03200,     ,     , ,   ,    ,   ,LVZ,K6,D, , ,0, ,C;
+APPCH:030,V,VORA, ,CFNRV,K6,P,C,E  M, ,   ,CF, ,LVZ,K6,D, ,      ,0635,0245,0640,0061, ,02180,     ,     , ,   , 000,   , , , , , ,0, ,C;
+APPCH:040,V,VORA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,0640,    ,+,02180,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+APPCH:050,V,VORA, ,MOSKO,K6,P,C,E   ,R,   ,CF,Y,LVZ,K6,D, ,      ,0635,0118,2440,0127,+,04000,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+APPCH:060,V,VORA, ,MOSKO,K6,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,0640,T010, ,     ,     ,     , ,   ,    ,   , , , , , ,0, ,C;
+RWY:RW18 ,     ,      ,01348, ,    , ,   ;N41310551,W075150851,0519;
+RWY:RW36 ,     ,      ,01338, ,    , ,   ;N41304743,W075150293,0589;

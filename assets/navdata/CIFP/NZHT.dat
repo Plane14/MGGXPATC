@@ -1,0 +1,14 @@
+SID:010,5,KABUV1,ALL,HT518,NZ,P,C,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,00400,     ,13000, ,   ,    ,   ,NZHT,NZ,P,A, , , , ;
+SID:020,5,KABUV1,ALL,OMBIL,NZ,P,C,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:030,5,KABUV1,ALL,KABUV,NZ,E,A,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,KABUV,KABUV,NZ,E,A,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,KABUV,OREVU,NZ,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,LUPDO,LUPDO,NZ,P,C,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,LUPDO,OREVU,NZ,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,OREVU,NZ,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,UPGEK,NZ,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,1630,0040,+,01800,     ,     , ,   ,    ,   ,NZHT,NZ,P,A, ,B,J,C;
+APPCH:030,R,RNVA, ,HT405,NZ,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,1630,0040, ,00530,     ,     , ,   ,-300,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,LUPDO,NZ,P,C,E M ,R,010,DF, , , , , ,      ,    ,    ,    ,    ,+,01200,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,LUPDO,NZ,P,C,EE H,L,   ,HM, , , , , ,      ,    ,    ,0730,T010,+,01200,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW16 ,+0140,      ,00018, ,    , ,   ;S43514540,E169022720,0066;
+RWY:RW34 ,-0140,      ,00022, ,    , ,   ;S43520674,E169022878,0066;

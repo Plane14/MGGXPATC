@@ -1,0 +1,14 @@
+APPCH:010,A,RNVA,BAYJY,BAYJY,K2,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,BAYJY,JASER,K2,E,A,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,JASER,JASER,K2,E,A,EE C,R,   ,HF, , , , , ,      ,    ,    ,0920,0040,+,03800,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,PRADO,PRADO,K2,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,PRADO,JASER,K2,E,A,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,JASER,K2,E,A,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,03800,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:015,R,RNVA, ,UZOHO,K2,P,C,E S , ,010,TF, , , , , ,      ,    ,    ,0920,0040,+,03200,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,HASIV,K2,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,0920,0040,+,02700,     ,     , ,   ,-304,   ,RW06,K2,P,G, ,B,J,C;
+APPCH:030,R,RNVA, ,RW06,K2,P,G,GY M, ,302,TF, , , , , ,      ,    ,    ,0640,0059, ,00790,     ,     , ,   ,-304,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,0640,    ,+,01170,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,PDZ,K2,D, ,VY  ,R,010,DF, , , , , ,      ,    ,    ,    ,    ,+,03200,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,PDZ,K2,D, ,VE H,R,   ,HM, , , , , ,      ,    ,    ,2580,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW06 ,     ,      ,00750, ,    , ,   ;N33591602,W117245411,0000;
+RWY:RW24 ,     ,      ,00767, ,    , ,   ;N33592325,W117241724,0000;

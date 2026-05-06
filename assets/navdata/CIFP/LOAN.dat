@@ -1,0 +1,11 @@
+SID:010,5,GESG1A,ALL,AN803,LO,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01400,     ,10000, ,   ,    ,   ,GESGI,LO,E,A, , , , ;
+SID:020,5,GESG1A,ALL,GESGI,LO,E,A,EB H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,GESGI,GESGI,LO,E,A,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,GESGI,AN800,LO,P,C,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,AN800,LO,P,C,E  F, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   ,GESGI,LO,E,A, ,B,J,C;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,C;
+APPCH:030,R,RNVA, ,AN802,LO,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,2690,0041, ,01480,     ,     , ,   ,-350,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,GESGI,LO,E,A,E M ,R,010,DF, , , , , ,      ,    ,    ,    ,    , ,03000,     ,     ,-,130,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,GESGI,LO,E,A,EE H,L,   ,HM, , , , , ,      ,    ,    ,3200,T010,+,03000,     ,     ,-,140,    ,   , , , , , ,B,J,C;
+RWY:RW09 ,-0580,      ,00896, ,    , ,   ;N47503800,E016151100,0000;
+RWY:RW27 ,+0580,      ,00870, ,    , ,   ;N47503400,E016160200,0000;

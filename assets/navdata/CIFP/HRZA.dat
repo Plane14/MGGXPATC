@@ -1,0 +1,14 @@
+SID:010,5,KARO2D,RW02, , , , ,    , ,   ,CA, , , , , ,      ,    ,    ,0150,    ,+,06200,     ,09000, ,   ,    ,   ,HRZA,HR,P,A, , , , ;
+SID:020,5,KARO2D,RW02,KAROS,HR,E,A,EE  , ,   ,CF, ,GOM,FZ,D, ,      ,1762,0311,0570,0240,+,FL110,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,R20,APNEV,APNEV,HR,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,FL110,     ,11000,-,210,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R20,APNEV,IF20,HR,P,C,E  B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,B,08000,06900,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R20,APNEV,ESRIT,HR,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06800,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R20, ,ESRIT,HR,P,C,E  F, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,06800,     ,11000, ,   ,    ,   ,HRZA,HR,P,A, ,B,J,S;
+PRDAT: ,          ,A, LNAV/VNAV,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R20, ,EGTOG,HR,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,1950,0038, ,05579,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R20, ,EPNUN,HR,P,C,EYM , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R20, ,ERBUB,HR,P,C,EY  , ,   ,CF, ,GOM,FZ,D, ,      ,1962,0567,1050,0057,-,07900,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R20, ,XALNO,HR,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     ,-,180,    ,   , , , , , ,B,J,S;
+APPCH:070,R,R20, ,APNEV,HR,P,C,EE H, ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,FL110,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW02 ,     ,      ,05214, ,    , ,   ;S02280696,E028542190,0059;
+RWY:RW20 ,     ,      ,05210, ,    , ,   ;S02272120,E028543559,0059;

@@ -1,0 +1,10 @@
+APPCH:010,A,RNVA,EMETT,EMETT,K1,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,A,J,C;
+APPCH:020,A,RNVA,EMETT,WUVOK,K1,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,04400,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+APPCH:010,R,RNVA, ,WUVOK,K1,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04400,     ,18000, ,   ,    ,   , , , , , ,A,J,C;
+APPCH:020,R,RNVA, ,GACEP,K1,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,3010,0061,+,04000,     ,     , ,   ,    ,   ,RW30,K1,P,G, ,A,J,C;
+APPCH:030,R,RNVA, ,RW30,K1,P,G,GY M, ,302,TF, , , , , ,      ,    ,    ,3010,0057, ,02170,     ,     , ,   ,-305,   , , , , , ,A,J,C;
+APPCH:040,R,RNVA, ,FOVAK,K1,P,C,E M , ,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+APPCH:050,R,RNVA, ,HOVEL,K1,E,A,EY  , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,09000,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+APPCH:060,R,RNVA, ,HOVEL,K1,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,1450,0070, ,     ,     ,     , ,   ,    ,   , , , , , ,A,J,C;
+RWY:RW12 ,     ,      ,02111, ,    , ,   ;N44123095,W116575700,0000;
+RWY:RW30 ,     ,      ,02120, ,    , ,   ;N44120261,W116571876,0000;

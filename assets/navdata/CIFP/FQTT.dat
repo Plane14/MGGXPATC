@@ -1,0 +1,16 @@
+APPCH:010,A,R19,EPTUV,EPTUV,FQ,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R19,EPTUV,OKSUR,FQ,P,C,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R19,EPTUV,UVIXA,FQ,P,C,E  B, ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:040,A,R19,EPTUV,TT500,FQ,P,C,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,02100,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R19,NETEP,NETEP,FQ,P,C,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R19,NETEP,UVIXA,FQ,P,C,E  B, ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R19,NETEP,TT500,FQ,P,C,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,02100,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R19, ,TT500,FQ,P,C,E  F, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,02100,     ,     , ,   ,    ,   ,FQTT,FQ,P,A, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R19, ,RW19,FQ,P,G,GY M, ,302,TF, , , , , ,      ,    ,    ,1880,0050, ,00553,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R19, ,TT600,FQ,P,C,E M , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R19, ,TT601,FQ,P,C,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R19, ,NETEP,FQ,P,C,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:070,R,R19, ,NETEP,FQ,P,C,EE H,L,   ,HM, , , , , ,      ,    ,    ,2780,T010, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW01 ,     ,      ,00454, ,    , ,   ;S16065771,E033382410,0000;
+RWY:RW19 ,     ,      ,00503, ,    , ,   ;S16053639,E033382612,0000;

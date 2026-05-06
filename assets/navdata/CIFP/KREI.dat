@@ -1,0 +1,12 @@
+APPCH:010,A,RNVA,HDF,HDF,K2,D, ,V  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,HDF,WEEDD,K2,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,PDZ,PDZ,K2,D, ,V   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,PDZ,WEEDD,K2,P,C,EY  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,PDZ,WEEDD,K2,P,C,EE C,R,   ,HF, , , , , ,      ,    ,    ,3460,0050,+,06000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,WEEDD,K2,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,06000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,ERGOH,K2,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3460,0059,+,04500,     ,     , ,   ,    ,   ,LUHLU,K2,P,C, ,B,J,C;
+APPCH:030,R,RNVA, ,LUHLU,K2,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,3460,0050, ,03820,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,WEEDD,K2,P,C,EYM ,L,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,07000,     ,     ,-,230,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,WEEDD,K2,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,3460,0050,+,07000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW08 ,     ,      ,01472, ,    , ,   ;N34050682,W117091374,0000;
+RWY:RW26 ,     ,      ,01574, ,    , ,   ;N34050708,W117082022,0000;

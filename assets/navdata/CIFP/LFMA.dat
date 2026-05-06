@@ -1,0 +1,16 @@
+STAR:010,5,CM3R,ALL,CM,LF,D,B,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   ,LFMA,LF,P,A, , , , ;
+STAR:020,5,CM3R,ALL,SIMON,LF,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:025,5,CM3R,ALL,MA400,LF,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05000,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:030,5,CM3R,ALL,ALM,LF,D,B,EE H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,B,05000,03000,     , ,   ,    ,   , , , , , , , , ;
+STAR:010,5,LACA3R,ALL,LACAZ,LF,E,A,E C , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   ,LFMA,LF,P,A, , , , ;
+STAR:020,5,LACA3R,ALL,ALM,LF,D,B,EE H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,B,05000,03000,     , ,   ,    ,   , , , , , , , , ;
+STAR:010,2,LANK3A,ALL,LANKO,LF,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,-,FL120,     ,     , ,   ,    ,   ,LFMA,LF,P,A, , , , ;
+STAR:020,2,LANK3A,ALL,OB,LF,D,B,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:030,2,LANK3A,ALL,POMEG,LF,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     ,-,200,    ,   , , , , , , , , ;
+STAR:040,2,LANK3A,ALL,MRM,LF,D, ,V   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05000,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:050,2,LANK3A,ALL,ALM,LF,D,B,EE H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,B,05000,03000,     , ,   ,    ,   , , , , , , , , ;
+STAR:010,2,LANK3B,ALL,LANKO,LF,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,-,FL120,     ,     , ,   ,    ,   ,LFMA,LF,P,A, , , , ;
+STAR:015,2,LANK3B,ALL,D053H,LF,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05000,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:020,2,LANK3B,ALL,ALM,LF,D,B,EE H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,B,05000,03000,     , ,   ,    ,   , , , , , , , , ;
+RWY:RW14 ,     ,      ,00341, ,    , ,   ;N43303756,E005214533,0000;
+RWY:RW32 ,     ,      ,00360, ,    , ,   ;N43300749,E005221357,0410;

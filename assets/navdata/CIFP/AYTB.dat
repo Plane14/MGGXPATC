@@ -1,0 +1,14 @@
+APPCH:010,Q,CNDM, ,RIPNA,AY,P,C,E  I, ,   ,IF, ,OKT,AY,D,B,      ,    ,    ,    ,    ,+,06000,     ,21000, ,   ,    ,   , , , , , ,0, ,C;
+APPCH:020,Q,CNDM, ,FF321,AY,P,C,E  F, ,   ,CF, ,OKT,AY,D,B,      ,    ,    ,3210,0050,+,04000,     ,     , ,   ,    ,   ,OKT,AY,D,B, ,0, ,C;
+APPCH:030,Q,CNDM, ,OKT,AY,D,B,E  M, ,   ,CF, ,OKT,AY,D, ,      ,    ,0000,3210,0050, ,03100,     ,     , ,   , 000,   , , , , , ,0, ,C;
+APPCH:040,Q,CNDM, , , , , , EM ,L,   ,VM,Y, , , , ,      ,    ,    ,1800,    ,+,06000,     ,     ,-,150,    ,   , , , , , ,0, ,C;
+APPCH:010,A,GPSC,YTBSB,YTBSB,AY,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,05200,     ,21000,-,185,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,YTBSB,YTBSI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04700,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,A,GPSC,YTBSC,YTBSC,AY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,05200,     ,21000,-,185,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,YTBSC,YTBSI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04700,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,P,GPSC, ,YTBSI,AY,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04700,     ,21000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,P,GPSC, ,YTBSF,AY,P,C,EY F, ,   ,TF, , , , , ,      ,    ,    ,    ,0050,+,04000,     ,     , ,   ,    ,   ,AYTB,AY,P,A, ,P,P,C;
+APPCH:030,P,GPSC, ,YTBSM,AY,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,    ,0050, ,03150,     ,     , ,   , 000,   , , , , , ,P,P,C;
+APPCH:040,P,GPSC, ,YTBSB,AY,P,C,EEMH,L,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,05200,     ,     ,-,150,    ,   , , , , , ,P,P,C;
+RWY:RW14 ,-2400,      ,01603, ,    , ,   ;S05163039,E141132506,0000;
+RWY:RW32 ,+2400,      ,01494, ,    , ,   ;S05170474,E141135022,0000;

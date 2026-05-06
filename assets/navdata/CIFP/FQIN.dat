@@ -1,0 +1,17 @@
+APPCH:010,A,R16,EGLUG,EGLUG,FQ,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R16,EGLUG,IMTON,FQ,P,C,E  B, ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R16,EGLUG,IN500,FQ,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R16,IMTON,IMTON,FQ,P,C,E  B, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R16,IMTON,IN500,FQ,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R16,OKNOK,OKNOK,FQ,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R16,OKNOK,IMTON,FQ,P,C,E  B, ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R16,OKNOK,IN500,FQ,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R16, ,IN500,FQ,P,C,E  F, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,01500,     ,     , ,   ,    ,   ,FQIN,FQ,P,A, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R16, ,RW16,FQ,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,1660,0050, ,00067,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R16, ,IN600,FQ,P,C,E M , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,00430,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R16, ,IN601,FQ,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R16, ,OKNOK,FQ,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:070,R,R16, ,OKNOK,FQ,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,2560,T010,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW16 ,     ,      ,00017, ,    , ,   ;S23521467,E035241705,0000;
+RWY:RW34 ,     ,      ,00031, ,    , ,   ;S23525641,E035244446,0000;

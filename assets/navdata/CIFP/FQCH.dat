@@ -1,0 +1,15 @@
+APPCH:010,A,R01,AVAGA,AVAGA,FQ,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04500,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R01,AVAGA,IMVET,FQ,P,C,E  B, ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R01,AVAGA,CH500,FQ,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,03800,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R01,AVIXU,AVIXU,FQ,E,A,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04500,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R01,AVIXU,IMVET,FQ,P,C,E  B, ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R01,AVIXU,CH500,FQ,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,03800,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R01, ,CH500,FQ,P,C,E  F, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,03800,     ,     , ,   ,    ,   ,FQCH,FQ,P,A, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R01, ,RW01,FQ,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,0150,0050, ,02322,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R01, ,CH600,FQ,P,C,E M , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02680,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R01, ,CH601,FQ,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R01, ,AVIXU,FQ,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,04500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:070,R,R01, ,AVIXU,FQ,E,A,EE H,L,   ,HM, , , , , ,      ,    ,    ,2850,T010,+,04500,     ,     ,-,200,    ,   , , , , , ,B,J,S;
+RWY:RW01 ,     ,      ,02272, ,    , ,   ;S19094373,E033254052,0000;
+RWY:RW19 ,     ,      ,02265, ,    , ,   ;S19082565,E033254726,0000;

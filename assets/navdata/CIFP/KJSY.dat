@@ -1,0 +1,13 @@
+APPCH:010,A,RNVA,SLING,SLING,K1,P,C,EE C,R,   ,HF, , , , , ,      ,    ,    ,1420,0070,+,08600,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,STASY,STASY,K1,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,STASY,SLING,K1,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,08600,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,STELE,STELE,K1,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,STELE,SLING,K1,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,08600,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,SLING,K1,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,08600,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,KLONE,K1,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,1420,0115,+,06500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,R,RNVA, ,XUBIJ,K1,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,1420,0051, ,04353,     ,     , ,   ,-400,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,1420,    ,+,04526,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,SLING,K1,P,C,EY  ,L,010,DF, , , , , ,      ,    ,    ,    ,    ,+,08600,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,SLING,K1,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,1420,0070,+,08600,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW15 ,     ,      ,04063, ,    , ,   ;N45215938,W117152210,0000;
+RWY:RW33 ,     ,      ,04126, ,    , ,   ;N45210938,W117150554,0000;

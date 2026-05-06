@@ -1,0 +1,12 @@
+APPCH:010,A,GPSC,YMNSA,YMNSA,AY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,21000,-,180,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,YMNSA,YMNSI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,A,GPSC,YMNSB,YMNSB,AY,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,21000,-,180,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,YMNSB,YMNSI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,A,GPSC,YMNSC,YMNSC,AY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,21000,-,180,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,YMNSC,YMNSI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,P,GPSC, ,YMNSI,AY,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,21000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,P,GPSC, ,YMNSF,AY,P,C,EY F, ,   ,TF, , , , , ,      ,    ,    ,    ,0050,+,10000,     ,     , ,   ,    ,   ,AYMN,AY,P,A, ,P,P,C;
+APPCH:030,P,GPSC, ,YMNSM,AY,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,    ,0050, ,08400,     ,     , ,   , 000,   , , , , , ,P,P,C;
+APPCH:040,P,GPSC, ,YMNSB,AY,P,C,EEMH,L,   ,DF, , , , , ,      ,    ,    ,    ,    , ,10000,     ,     ,-,160,    ,   , , , , , ,P,P,C;
+RWY:RW17 ,     ,      ,05690, ,    , ,   ;S06083180,E143392295,0000;
+RWY:RW35 ,     ,      ,05658, ,    , ,   ;S06091650,E143392856,0000;

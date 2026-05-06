@@ -1,0 +1,13 @@
+APPCH:010,A,R32-Z,ILMAD,ILMAD,SL,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,05000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R32-Z,ILMAD,BIXIN,SL,P,C,EE H, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03700,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R32-Z,RIXON,RIXON,SL,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,05000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R32-Z,RIXON,BIXIN,SL,P,C,EE H, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03700,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,R,R32-Z, ,BIXIN,SL,P,C,E  I, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,03700,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R32-Z, ,EDNAX,SL,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,3160,0050,+,02100,     ,     , ,   ,    ,   ,SLRI,SL,P,A, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R32-Z, ,RW32,SL,P,G,GY M, ,302,TF, , , , , ,      ,    ,    ,3160,0050, ,00513,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R32-Z, ,RAXOD,SL,P,C,E M , ,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R32-Z, ,SEKBA,SL,P,C,EY  , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R32-Z, ,SEKBA,SL,P,C,EE H,L,   ,HM, , , , , ,      ,    ,    ,1060,T010, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW14 ,+0410,      ,00440, ,    , ,   ;S11002072,W066044693,0000;
+RWY:RW32 ,-0410,      ,00463, ,    , ,   ;S11005463,W066040106,0000;

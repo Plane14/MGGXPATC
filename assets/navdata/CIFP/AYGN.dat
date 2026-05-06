@@ -1,0 +1,13 @@
+APPCH:010,A,RNVA,TAVEX,TAVEX,AY,P,C,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,21000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,TAVEX,YGNWD,AY,P,C,E  C, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,05800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,TAVEX,YGNWI,AY,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,05800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,YGNWI,AY,P,C,E  I, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,05800,     ,21000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:015,R,RNVA, ,YGNWX,AY,P,C,E S , ,010,TF, , , , , ,      ,    ,    ,0620,0045,+,04530,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,YGNWF,AY,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,0620,0025,+,03600,     ,     , ,   ,-350,   ,AYGN,AY,P,A, ,B,J,C;
+APPCH:023,R,RNVA, ,YGNWY,AY,P,C,E S , ,302,TF, , , , , ,      ,    ,    ,0920,0028,+,02550,     ,     , ,   ,-350,   , , , , , ,B,J,C;
+APPCH:027,R,RNVA, ,YGNWZ,AY,P,C,E S , ,302,TF, , , , , ,      ,    ,    ,0920,0030,+,01440,     ,     , ,   ,-350,   , , , , , ,B,J,C;
+APPCH:030,R,RNVA, ,YGNWM,AY,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,0920,0020, ,00690,     ,     , ,   ,-350,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,YGNWH,AY,P,C,E M , ,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, , , , , , E  , ,   ,VM, , , , , ,      ,    ,    ,1000,    ,+,05100,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW09 ,-0740,      ,00082, ,    , ,   ;S10183211,E150193565,0000;
+RWY:RW27 ,     ,      ,00035, ,    , ,   ;S10184447,E150203878,0000;

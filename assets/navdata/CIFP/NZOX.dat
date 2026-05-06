@@ -1,0 +1,11 @@
+APPCH:010,A,RNVA,ADGOP,ADGOP,NZ,P,C,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,ADGOP,OLNAN,NZ,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,EKOGU,EKOGU,NZ,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,EKOGU,OLNAN,NZ,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,OLNAN,NZ,P,C,E  D, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,RULVU,NZ,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,1500,0036,+,02230,     ,     , ,   ,    ,   ,NZOX,NZ,P,A, ,B,J,C;
+APPCH:030,R,RNVA, ,OX701,NZ,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,1500,0050, ,00640,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,ADGOP,NZ,P,C,E M ,L,010,DF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,     ,-,130,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,ADGOP,NZ,P,C,EE H,R,010,HM, , , , , ,      ,    ,    ,2400,T010,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW18 ,+0140,      ,00006, ,    , ,   ;S36083550,E175251059,0000;
+RWY:RW36 ,-0140,      ,00010, ,    , ,   ;S36085797,E175245910,0000;

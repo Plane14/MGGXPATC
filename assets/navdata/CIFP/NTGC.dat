@@ -1,0 +1,18 @@
+APPCH:010,A,R06,KABLU,KABLU,NT,P,C,E CA, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R06,KABLU,KEVOL,NT,P,C,EECB, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R06,KILIL,KILIL,NT,P,C,E CA, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R06,KILIL,KEVOL,NT,P,C,EECB, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R06,OLKID,OLKID,NT,P,C,E CC, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R06,OLKID,GC403,NT,P,C,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R06,OLKID,KABLU,NT,P,C,E C , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:040,A,R06,OLKID,KEVOL,NT,P,C,EECB,L,010,TF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,R,R06, ,KEVOL,NT,P,C,E CD, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R06, ,GC401,NT,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,0630,0050, ,01500,     ,     , ,   ,    ,   ,OLKID,NT,P,C, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R06, ,RW06,NT,P,G,GY M, ,302,TF, , , , , ,      ,    ,    ,0630,0045, ,00061,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R06, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,0630,    ,+,00800,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R06, ,GC403,NT,P,C,E   ,L,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R06, ,KABLU,NT,P,C,E C , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:070,R,R06, ,KEVOL,NT,P,C,EEC ,L,010,TF, , , , , ,      ,    ,    ,    ,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW06 ,     ,      ,00012, ,    , ,   ;S15071636,W148141316,0000;
+RWY:RW24 ,     ,      ,00012, ,    , ,   ;S15070570,W148133097,0000;

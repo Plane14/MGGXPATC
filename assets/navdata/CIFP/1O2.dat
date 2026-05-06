@@ -1,0 +1,18 @@
+SID:010,5,LAKPT3,RW10, , , , ,    , ,   ,VA, , , , , ,      ,    ,    ,1030,    ,+,01880,     ,18000, ,   ,    ,   , , , , , , , , ;
+SID:020,5,LAKPT3,RW10,CEVLA,K2,E,A,E   , ,   ,CF, ,ENI,K2,D, ,      ,0745,0234,0330,0063, ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:030,5,LAKPT3,RW10,HEBLU,K2,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     ,-,175,    ,   , , , , , , , , ;
+SID:040,5,LAKPT3,RW10,ENI,K2,D, ,VE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,ENI,ENI,K2,D, ,V   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,ENI,SAVPE,K2,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06700,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,ENI,TAPNE,K2,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,WEPLO,WEPLO,K2,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,WEPLO,SAVPE,K2,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06700,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,WEPLO,TAPNE,K2,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,TAPNE,K2,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,05800,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,NADIE,K2,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,1640,0060,+,04700,     ,     , ,   ,    ,   ,MUFEL,K2,P,C, ,B,J,C;
+APPCH:030,R,RNVA, ,MUFEL,K2,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,1640,0057, ,02580,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,1640,    ,+,02580,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,WEPLO,K2,E,A,EY  ,L,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,08000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,WEPLO,K2,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,0210,0070, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW10 ,     ,      ,01380, ,    , ,   ;N38593483,W122542250,0000;
+RWY:RW28 ,     ,      ,01371, ,    , ,   ;N38591793,W122534361,0085;

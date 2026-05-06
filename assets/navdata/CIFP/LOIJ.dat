@@ -1,0 +1,16 @@
+SID:010,5,ERKI2G,ALL,IJ601,LO,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,05000,     ,10000, ,   ,    ,   ,ERKIR,LO,E,A, , , , ;
+SID:020,5,ERKI2G,ALL,IJ602,LO,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06000,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:030,5,ERKI2G,ALL,ERKIR,LO,E,A,EB H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,09000,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,ERKIR,ERKIR,LO,E,A,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,09000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,ERKIR,IJ801,LO,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,06500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,IJ801,LO,P,C,E  I, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,06500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,IJ802,LO,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,0910,0026,+,06000,     ,     , ,   ,    ,   ,ERKIR,LO,E,A, ,B,J,C;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,C;
+APPCH:030,R,RNVA, ,IJ803,LO,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,0890,0061, ,05460,     ,     , ,   ,-260,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,IJ804,LO,P,C,EYM , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,IJ805,LO,P,C,E   ,L,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,IJ806,LO,P,C,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:080,R,RNVA, ,ERKIR,LO,E,A,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,09000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:090,R,RNVA, ,ERKIR,LO,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,0910,T010,+,09000,     ,     ,-,170,    ,   , , , , , ,B,J,C;
+RWY:RW13 ,     ,      ,02183, ,    , ,   ;N47312106,E012264458,0000;
+RWY:RW31 ,     ,      ,02206, ,    , ,   ;N47310570,E012271002,0098;

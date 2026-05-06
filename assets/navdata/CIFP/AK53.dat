@@ -1,0 +1,16 @@
+SID:010,5,FAMEK1,ALL,HOTIM,PA,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,18000, ,   ,    ,   , , , , , , , , ;
+SID:020,5,FAMEK1,ALL,WOGAP,PA,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:030,5,FAMEK1,ALL,JUDBU,PA,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:040,5,FAMEK1,ALL,FAMEK,PA,E,A,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,07000,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,FAMEK,FAMEK,PA,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,FAMEK,JUDBU,PA,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,FAMEK,WOGAP,PA,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,WOGAP,PA,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04800,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,COBON,PA,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,0310,0059,+,03200,     ,     , ,   ,    ,   ,HOTIM,PA,P,C, ,B,J,C;
+APPCH:030,R,RNVA, ,HOTIM,PA,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,0320,0054, ,02500,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,0320,    ,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,WOGAP,PA,P,C,E   ,R,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,JUDBU,PA,P,C,EY  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,06000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:070,R,RNVA, ,JUDBU,PA,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,1010,0050, ,     ,     ,     ,-,175,    ,   , , , , , ,B,J,C;
+RWY:RW03 ,     ,      ,01197, ,    , ,   ;N61152029,W153475864,0000;
+RWY:RW21 ,     ,      ,01197, ,    , ,   ;N61153076,W153474610,0000;

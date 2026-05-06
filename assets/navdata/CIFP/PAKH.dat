@@ -1,0 +1,15 @@
+SID:010,5,JOGMO1,RW04, , , , ,    , ,   ,VA, , , , , ,      ,    ,    ,0440,    ,+,01000,     ,18000, ,   ,    ,   , , , , , , , , ;
+SID:020,5,JOGMO1,RW04,CODUR,PA,P,C,E   ,R,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:030,5,JOGMO1,RW04,JOGMO,PA,E,A,EE H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,11000,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,JOGMO,JOGMO,PA,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,JOGMO,FONUR,PA,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03200,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,JOGMO,FONUR,PA,P,C,E  C,R,   ,HF, , , , , ,      ,    ,    ,3270,0040,+,03200,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:040,A,RNVA,JOGMO,GUBEY,PA,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,GUBEY,PA,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,BIYAN,PA,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3270,0016,+,01600,     ,     , ,   ,    ,   ,CEREM,PA,P,C, ,B,J,C;
+APPCH:030,R,RNVA, ,CEREM,PA,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,3270,0029, ,01360,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,3270,    ,+,01360,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,FONUR,PA,P,C,EY  ,R,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,03200,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,FONUR,PA,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,3270,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW04 ,     ,      ,00044, ,    , ,   ;N56561168,W154112369,0000;
+RWY:RW22 ,     ,      ,00039, ,    , ,   ;N56562598,W154103390,0000;

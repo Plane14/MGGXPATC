@@ -1,0 +1,13 @@
+APPCH:010,A,RNVA,BAMVE,BAMVE,PA,E,A,EE C,L,   ,HF, , , , , ,      ,    ,    ,0960,0070,+,06600,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,DEYEP,DEYEP,PA,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,DEYEP,ZESIK,PA,E,A,E  A, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,07800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,DEYEP,BAMVE,PA,E,A,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,06600,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,BAMVE,PA,E,A,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,06600,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,WERVU,PA,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,1060,0100,+,04600,     ,     , ,   ,    ,   ,IPERE,PA,P,C, ,B,J,C;
+APPCH:025,R,RNVA, ,AYACO,PA,P,C,E S , ,302,TF, , , , , ,      ,    ,    ,0880,0035,+,03920,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,R,RNVA, ,IPERE,PA,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,0880,0056, ,03020,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,0880,    ,+,03020,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,BAMVE,PA,E,A,EY  ,L,010,DF, , , , , ,      ,    ,    ,    ,    ,+,06600,     ,     ,-,210,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,BAMVE,PA,E,A,EE H,L,   ,HM, , , , , ,      ,    ,    ,0960,0070,+,06600,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW07 ,     ,      ,00901, ,    , ,   ;N64464190,W141094007,0000;
+RWY:RW25 ,     ,      ,00907, ,    , ,   ;N64464038,W141081710,0000;

@@ -1,0 +1,14 @@
+APPCH:010,A,VDMA,NELMY,NELMY,K7,P,C,E  A, ,   ,IF, ,SQS,K7,D, ,      ,0860,0160,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,3, ,C;
+APPCH:020,A,VDMA,NELMY,LXTON,K7,P,C,EE  ,R,   ,AF, ,SQS,K7,D, ,      ,1450,0160,0860,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,3, ,C;
+APPCH:010,A,VDMA,NELYE,NELYE,K7,P,C,E  A, ,   ,IF, ,SQS,K7,D, ,      ,1710,0160,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,3, ,C;
+APPCH:020,A,VDMA,NELYE,LXTON,K7,P,C,EE  ,L,   ,AF, ,SQS,K7,D, ,      ,1450,0160,1710,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,3, ,C;
+APPCH:010,A,VDMA,SQS,SQS,K7,D, ,V  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,3, ,C;
+APPCH:020,A,VDMA,SQS,LXTON,K7,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,3, ,C;
+APPCH:010,D,VDMA, ,LXTON,K7,P,C,E  I, ,   ,IF, ,SQS,K7,D, ,      ,1450,0160,    ,    ,+,02000,     ,18000, ,   ,    ,   , , , , , ,3, ,C;
+APPCH:020,D,VDMA, ,CAMOE,K7,P,C,E  F, ,   ,CF, ,SQS,K7,D, ,      ,1450,0210,1450,0050,+,01400,     ,     , ,   ,    ,   ,SQS,K7,D, , ,3, ,C;
+APPCH:030,D,VDMA, ,MAFHE,K7,P,C,E  M, ,   ,CF, ,SQS,K7,D, ,      ,1450,0239,1450,0029, ,01020,     ,     , ,   , 000,   , , , , , ,3, ,C;
+APPCH:040,D,VDMA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,1450,    ,+,01020,     ,     , ,   ,    ,   , , , , , ,3, ,C;
+APPCH:050,D,VDMA, ,LXTON,K7,P,C,E   ,L,   ,CF,Y,SQS,K7,D, ,      ,1450,0160,3250,0070,+,02000,     ,     , ,   ,    ,   , , , , , ,3, ,C;
+APPCH:060,D,VDMA, ,LXTON,K7,P,C,EE H,L,   ,HM, , , , , ,      ,    ,    ,1450,T010, ,     ,     ,     , ,   ,    ,   , , , , , ,3, ,C;
+RWY:RW01 ,     ,      ,00324, ,    , ,   ;N33071618,W090013583,0000;
+RWY:RW19 ,     ,      ,00339, ,    , ,   ;N33074716,W090012812,0000;

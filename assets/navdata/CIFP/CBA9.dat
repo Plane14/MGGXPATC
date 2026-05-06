@@ -1,0 +1,10 @@
+APPCH:010,A,RNVA,LEREP,LEREP,CY,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,A,RNVA,LEREP,MEGDI,CY,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,06100,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,R,RNVA, ,MEGDI,CY,P,C,E  I, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,06100,     ,18000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,R,RNVA, ,OBTIB,CY,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,3230,0060,+,05900,     ,     , ,   ,    ,   ,DUPUK,CY,P,C, ,B,U,C;
+APPCH:025,R,RNVA, ,XESIL,CY,P,C,E S , ,302,TF, , , , , ,      ,    ,    ,3530,0037,+,05800,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:030,R,RNVA, ,DUPUK,CY,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,3530,0055, ,05600,     ,     , ,   , 000,   , , , , , ,B,U,C;
+APPCH:040,R,RNVA, ,KEDAM,CY,P,C,EYM , ,010,DF, , , , , ,      ,    ,    ,    ,    , ,08300,     ,     ,-,165,    ,   , , , , , ,B,U,C;
+APPCH:050,R,RNVA, ,KEDAM,CY,P,C,EE H,L,010,HM, , , , , ,      ,    ,    ,3000,0060, ,     ,     ,     ,-,210,    ,   , , , , , ,B,U,C;
+RWY:RW03 ,-0630,      ,02353, ,    , ,   ;N56155623,W124043012,0000;
+RWY:RW21 ,     ,      ,02316, ,    , ,   ;N56163311,W124030966,0000;

@@ -1,0 +1,16 @@
+SID:010,4,MOVO1A,RW13R,AV807,LO,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01400,     ,10000, ,   ,    ,   ,MOVOS,LO,E,A, , , , ;
+SID:020,4,MOVO1A,RW13R,MOVOS,LO,E,A,EB H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:010,4,MOVO1A,RW31L,AV807,LO,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01400,     ,10000, ,   ,    ,   ,MOVOS,LO,E,A, , , , ;
+SID:020,4,MOVO1A,RW31L,MOVOS,LO,E,A,EB H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:010,5,MOVO1A, ,MOVOS,LO,E,A,EE H, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,10000, ,   ,    ,   ,MOVOS,LO,E,A, , , , ;
+APPCH:010,A,RNVA,MOVOS,MOVOS,LO,E,A,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,MOVOS,AV806,LO,P,C,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,AV806,LO,P,C,E  F, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   ,MOVOS,LO,E,A, ,B,J,C;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,C;
+APPCH:030,R,RNVA, ,AV807,LO,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,2850,0036, ,01640,     ,     , ,   ,-360,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,MOVOS,LO,E,A,E M ,R,010,DF, , , , , ,      ,    ,    ,    ,    , ,03000,     ,     ,-,120,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,MOVOS,LO,E,A,EE H,L,   ,HM, , , , , ,      ,    ,    ,3600,T010,+,03000,     ,     ,-,120,    ,   , , , , , ,B,J,C;
+RWY:RW13L,     ,      ,00767, ,    , ,   ;N47575857,E016153779,0000;
+RWY:RW13R,     ,      ,00761, ,    , ,   ;N47580251,E016152187,0000;
+RWY:RW31L,     ,      ,00767, ,    , ,   ;N47574277,E016155697,0000;
+RWY:RW31R,     ,      ,00767, ,    , ,   ;N47574516,E016160194,0000;

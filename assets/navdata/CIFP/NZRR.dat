@@ -1,0 +1,17 @@
+SID:010,5,OLRES1,ALL,RR401,NZ,P,C,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,01100,     ,13000, ,   ,    ,   ,NZRR,NZ,P,A, , , , ;
+SID:020,5,OLRES1,ALL,OLRES,NZ,P,C,EB  , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:010,6,OLRES1,BODEM,OLRES,NZ,P,C,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,13000, ,   ,    ,   ,NZRR,NZ,P,A, , , , ;
+SID:020,6,OLRES1,BODEM,BODEM,NZ,E,A,EE  , ,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:010,6,OLRES1,IDPIN,OLRES,NZ,P,C,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,13000, ,   ,    ,   ,NZRR,NZ,P,A, , , , ;
+SID:020,6,OLRES1,IDPIN,IDPIN,NZ,E,A,EE  , ,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,APENU,APENU,NZ,E,A,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,APENU,AKSOB,NZ,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02300,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,BODEM,BODEM,NZ,E,A,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,BODEM,AKSOB,NZ,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,02300,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,AKSOB,NZ,P,C,E  D, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,02300,     ,15000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,AGRAK,NZ,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,2230,0040,+,02300,     ,     , ,   ,    ,   ,NZRR,NZ,P,A, ,B,J,C;
+APPCH:030,R,RNVA, ,OLRES,NZ,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,2230,0040, ,01020,     ,     , ,   ,-300,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,APENU,NZ,E,A,E M ,L,010,DF, , , , , ,      ,    ,    ,    ,    ,+,02300,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,APENU,NZ,E,A,EE H,R,010,HM, , , , , ,      ,    ,    ,3130,T010,+,02300,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW09 ,-0910,      ,00250, ,    , ,   ;S37525042,E178170704,0000;
+RWY:RW27 ,+0910,      ,00220, ,    , ,   ;S37530726,E178173719,0328;

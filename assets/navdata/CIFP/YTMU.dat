@@ -1,0 +1,13 @@
+APPCH:010,A,RNVS,TMUSA,TMUSA,YM,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,06900,     ,11000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVS,TMUSA,TMUSI,YM,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,06240,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVS,TMUSB,TMUSB,YM,P,C,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,06900,     ,11000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVS,TMUSB,TMUSI,YM,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,06240,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVS,TMUSC,TMUSC,YM,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,06900,     ,11000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVS,TMUSC,TMUSI,YM,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,06240,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVS, ,TMUSI,YM,P,C,E  I, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,06240,     ,11000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVS, ,TMUSF,YM,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,0120,0040,+,04800,     ,     , ,   ,    ,   ,YTMU,YM,P,A, ,B,J,C;
+APPCH:030,R,RNVS, ,TMUSM,YM,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,3420,0100, ,01184,     ,     , ,   ,-340,   , , , , , ,B,J,C;
+APPCH:040,R,RNVS, ,TMUST,YM,P,C,EYM , ,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVS, ,TMUSA,YM,P,C,EE  ,L,010,DF, , , , , ,      ,    ,    ,    ,    ,+,06900,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW17 ,     ,      ,00845, ,    , ,   ;S35154839,E148142652,0000;
+RWY:RW35 ,-0500,      ,00863, ,    , ,   ;S35162276,E148142509,0000;

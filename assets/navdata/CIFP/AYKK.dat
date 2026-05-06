@@ -1,0 +1,13 @@
+APPCH:010,A,P12,YKKWA,YKKWA,AY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,21000, ,   ,    ,   , , , , , ,P,P,S;
+APPCH:020,A,P12,YKKWA,YKKWI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:010,A,P12,YKKWB,YKKWB,AY,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,21000, ,   ,    ,   , , , , , ,P,P,S;
+APPCH:020,A,P12,YKKWB,YKKWI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:010,A,P12,YKKWC,YKKWC,AY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,21000, ,   ,    ,   , , , , , ,P,P,S;
+APPCH:020,A,P12,YKKWC,YKKWI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:010,P,P12, ,YKKWI,AY,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,21000, ,   ,    ,   , , , , , ,P,P,S;
+APPCH:020,P,P12, ,YKKWF,AY,P,C,EY F, ,   ,TF, , , , , ,      ,    ,    ,    ,0040,+,01100,     ,     , ,   ,    ,   ,AYKK,AY,P,A, ,P,P,S;
+APPCH:030,P,P12, ,YKKWM,AY,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,    ,0040, ,00087,     ,     , ,   ,-300,   , , , , , ,P,P,S;
+APPCH:040,P,P12, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,1180,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+APPCH:050,P,P12, ,YKKWH,AY,P,C,EE  , ,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,02200,     ,     , ,   ,    ,   , , , , , ,P,P,S;
+RWY:RW12 ,     ,      ,00037, ,    , ,   ;S07252250,E144145082,0000;
+RWY:RW30 ,     ,      ,00044, ,    , ,   ;S07253504,E144150966,0000;

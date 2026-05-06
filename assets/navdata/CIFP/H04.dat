@@ -1,0 +1,13 @@
+APPCH:010,A,RNVA,ITEJO,ITEJO,K4,P,C,EE C,R,   ,HF, , , , , ,      ,    ,    ,0800,0040,+,03000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,NEYIN,NEYIN,K4,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,NEYIN,ITEJO,K4,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,WUDUM,WUDUM,K4,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,WUDUM,ITEJO,K4,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,ITEJO,K4,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,DEZBO,K4,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,0800,0050,+,02500,     ,     , ,   ,    ,   ,H04,K4,P,A, ,B,J,C;
+APPCH:030,R,RNVA, ,GADAY,K4,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,0800,0042, ,01460,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,0800,    ,+,01460,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,ITEJO,K4,P,C,EY  ,R,010,DF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,ITEJO,K4,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,0800,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW17 ,     ,      ,00695, ,    , ,   ;N36371135,W095090615,0210;
+RWY:RW35 ,     ,      ,00679, ,    , ,   ;N36363181,W095090604,0000;

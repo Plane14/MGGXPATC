@@ -1,0 +1,17 @@
+STAR:010,4,TRSTN4,LORAA,LORAA,K6,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , , , , ;
+STAR:020,4,TRSTN4,LORAA,DORRN,K6,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:030,4,TRSTN4,LORAA,PERKN,K6,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:040,4,TRSTN4,LORAA,CABRL,K6,E,A,E  H, ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:050,4,TRSTN4,LORAA,TRSTN,K6,E,A,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:010,4,TRSTN4,THHMP,THHMP,K6,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , , , , ;
+STAR:015,4,TRSTN4,THHMP,CABRL,K6,E,A,E  H, ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:020,4,TRSTN4,THHMP,TRSTN,K6,E,A,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:010,5,TRSTN4,ALL,TRSTN,K6,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , , , , ;
+STAR:020,5,TRSTN4,ALL,ASHLN,K6,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:030,5,TRSTN4,ALL,MRB,K6,D, ,V   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:040,5,TRSTN4,ALL,CPTAL,K6,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:050,5,TRSTN4,ALL,TWIRK,K6,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:060,5,TRSTN4,ALL,BRILA,K6,E,A,EY  , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:070,5,TRSTN4,ALL,W50,K6,P,A,AE  , ,   ,VM, , , , , ,      ,    ,    ,1930,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+RWY:RW08 ,     ,      ,00589, ,    , ,   ;N39143034,W077091810,0000;
+RWY:RW26 ,     ,      ,00609, ,    , ,   ;N39144092,W077084800,0000;

@@ -1,0 +1,14 @@
+APPCH:010,A,RNVA,FJC,FJC,K6,D, ,V   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,FJC,BUDRY,K6,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,FJC,FABDU,K6,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,SBJ,SBJ,K6,D, ,V   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,SBJ,ASMEC,K6,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,SBJ,FABDU,K6,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,FABDU,K6,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02500,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,COWPA,K6,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3590,0035,+,02000,     ,     , ,   ,    ,   ,RW36,K6,P,G, ,B,J,C;
+APPCH:030,R,RNVA, ,RW36,K6,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,3590,0046, ,00424,     ,     , ,   ,-320,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,3590,    ,+,00797,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,ASMEC,K6,P,C,EY  ,R,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,ASMEC,K6,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,2820,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW18 ,     ,      ,00397, ,    , ,   ;N40443931,W075143707,0192;
+RWY:RW36 ,     ,      ,00384, ,    , ,   ;N40442239,W075143151,0000;

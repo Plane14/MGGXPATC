@@ -1,0 +1,13 @@
+APPCH:010,A,R04,CAITA,CAITA,FN,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R04,CAITA,SOMBO,FN,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04240,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R04,DEMBE,DEMBE,FN,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R04,DEMBE,SOMBO,FN,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04240,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,R,R04, ,SOMBO,FN,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04240,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R04, ,KANDA,FN,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,0420,0050,+,04240,     ,     , ,   ,    ,   ,FNDU,FN,P,A, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R04, ,RW04,FN,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,0420,0053, ,02550,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R04, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,0420,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R04, ,CAITA,FN,P,C,E   ,R,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R04, ,CAITA,FN,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,3320,T010,+,05500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW04 ,     ,      ,02500, ,    , ,   ;S07243548,E020483807,0656;
+RWY:RW22 ,     ,      ,02433, ,    , ,   ;S07233901,E020492741,0000;

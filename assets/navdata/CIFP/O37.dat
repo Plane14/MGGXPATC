@@ -1,0 +1,15 @@
+APPCH:010,A,RNVA,DURHA,DURHA,K2,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,DURHA,JEVLA,K2,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,SATNE,SATNE,K2,E,A,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,SATNE,JEVLA,K2,P,C,EY  , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,SATNE,JEVLA,K2,P,C,EE C,R,   ,HF, , , , , ,      ,    ,    ,2800,0040,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,TALUM,TALUM,K2,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,TALUM,JEVLA,K2,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,JEVLA,K2,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,JILOX,K2,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,2800,0060,+,02300,     ,     , ,   ,    ,   ,O37,K2,P,A, ,B,J,C;
+APPCH:030,R,RNVA, ,MARBN,K2,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,2800,0048, ,00820,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,2800,    ,+,00820,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,JITIM,K2,E,A,EY  , ,010,DF, , , , , ,      ,    ,    ,    ,    ,+,04800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,JITIM,K2,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,1670,0050,+,04800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW15 ,     ,      ,00218, ,    , ,   ;N39433494,W122085409,0000;
+RWY:RW33 ,     ,      ,00210, ,    , ,   ;N39425186,W122083978,0000;

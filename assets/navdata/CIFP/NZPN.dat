@@ -1,0 +1,10 @@
+SID:010,5,SEDS3R,ALL,VASLU,NZ,E,A,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,01200,     ,13000, ,   ,    ,   ,NZPN,NZ,P,A, , , , ;
+SID:020,5,SEDS3R,ALL,SEDSI,NZ,E,A,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:010,6,SEDS3R,AVPOD,SEDSI,NZ,E,A,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,13000, ,   ,    ,   ,NZPN,NZ,P,A, , , , ;
+SID:020,6,SEDS3R,AVPOD,AVPOD,NZ,E,A,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:010,6,SEDS3R,IGMUL,SEDSI,NZ,E,A,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,13000, ,   ,    ,   ,NZPN,NZ,P,A, , , , ;
+SID:020,6,SEDS3R,IGMUL,IGMUL,NZ,E,A,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:010,6,SEDS3R,IPMIR,SEDSI,NZ,E,A,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,13000, ,   ,    ,   ,NZPN,NZ,P,A, , , , ;
+SID:020,6,SEDS3R,IPMIR,IPMIR,NZ,E,A,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    ,-,06000,     ,     , ,   ,    ,   , , , , , , , , ;
+RWY:RW18 ,     ,      ,00140, ,    , ,   ;S41203884,E173573059,0361;
+RWY:RW36 ,     ,      ,00140, ,    , ,   ;S41205752,E173571580,0000;

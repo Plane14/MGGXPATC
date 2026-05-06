@@ -1,0 +1,11 @@
+APPCH:010,A,GPSC,GBESB,GBESB,AY,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02800,     ,21000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,GBESB,GBESI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02300,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,A,GPSC,GBESC,GBESC,AY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02800,     ,21000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,A,GPSC,GBESC,GBESI,AY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02300,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:010,P,GPSC, ,GBESI,AY,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02300,     ,21000, ,   ,    ,   , , , , , ,P,P,C;
+APPCH:020,P,GPSC, ,GBESF,AY,P,C,EY F, ,   ,TF, , , , , ,      ,    ,    ,    ,0050,+,01800,     ,     , ,   ,    ,   ,SAPRI,AY,E,A, ,P,P,C;
+APPCH:030,P,GPSC, ,GBESM,AY,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,    ,0050, ,01000,     ,     , ,   , 000,   , , , , , ,P,P,C;
+APPCH:040,P,GPSC, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,3100,    ,+,01500,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+APPCH:050,P,GPSC, ,GBESB,AY,P,C,EE H,L,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,02800,     ,     , ,   ,    ,   , , , , , ,P,P,C;
+RWY:RW14 ,     ,      ,00181, ,    , ,   ;S06522760,E143430648,0000;
+RWY:RW32 ,     ,      ,00180, ,    , ,   ;S06525286,E143433114,0000;

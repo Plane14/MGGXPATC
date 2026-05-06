@@ -1,0 +1,15 @@
+APPCH:010,A,R35,MUXAP,MUXAP,CY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R35,MUXAP,LEPAN,CY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R35,NANBI,NANBI,CY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R35,NANBI,LEPAN,CY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R35,OMTIM,OMTIM,CY,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R35,OMTIM,LEPAN,CY,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,03600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,R,R35, ,LEPAN,CY,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,03600,     ,18000, ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R35, ,APGUG,CY,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3540,0050,+,02400,     ,     , ,   ,    ,   ,RW35,CY,P,G, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:025,R,R35, ,IPVEN,CY,P,C,E S , ,   ,TF, , , , , ,      ,    ,    ,3540,0039,+,02100,     ,     , ,   ,-395,   , , , , , ,B,J,S;
+APPCH:030,R,R35, ,RW35,CY,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,3540,0021, ,01219,     ,     , ,   ,-395,   , , , , , ,B,J,S;
+APPCH:040,R,R35, ,SEGAG,CY,P,C,EYM ,L,   ,TF, , , , , ,      ,    ,    ,    ,    , ,03300,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R35, ,SEGAG,CY,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,2340,T010, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW17 ,     ,      ,01158, ,    , ,   ;N49395004,W098395548,0000;
+RWY:RW35 ,     ,      ,01169, ,    , ,   ;N49391931,W098395533,0000;

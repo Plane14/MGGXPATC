@@ -1,0 +1,13 @@
+APPCH:010,A,RNVA,OSECU,OSECU,K6,P,C,EE C,R,   ,HF, , , , , ,      ,    ,    ,3600,0040,+,04000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,WOTIB,WOTIB,K6,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,WOTIB,OSECU,K6,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,ZAKTU,ZAKTU,K6,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,ZAKTU,OSECU,K6,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,OSECU,K6,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,HURPU,K6,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3600,0057,+,02500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,R,RNVA, ,JELIV,K6,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,3600,0053, ,01260,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,3600,    ,+,01680,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,KUPPS,K6,E,A,EY  ,R,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,KUPPS,K6,E,A,EE H,L,   ,HM, , , , , ,      ,    ,    ,1680,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW13 ,     ,      ,00482, ,    , ,   ;N40171680,W076344836,0000;
+RWY:RW31 ,     ,      ,00471, ,    , ,   ;N40170930,W076342946,0300;

@@ -1,0 +1,17 @@
+STAR:010,5,GUGPU1,ALL,GUGPU,AY,E,A,E   , ,010,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,21000, ,   ,    ,   ,AYMH,AY,P,A, , , , ;
+STAR:020,5,GUGPU1,ALL,ESNON,AY,P,C,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:030,5,GUGPU1,ALL,YABAL,AY,E,A,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+STAR:040,5,GUGPU1,ALL,YMHEB,AY,P,C,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,YMHEA,YMHEA,AY,P,C,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,12200,     ,21000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,A,RNVA,YMHEA,YMHEI,AY,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,A,RNVA,YMHEB,YMHEB,AY,P,C,E  A, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,10800,     ,21000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,A,RNVA,YMHEB,YMHEI,AY,P,C,EE B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,R,RNVA, ,YMHEI,AY,P,C,E  I, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,21000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,R,RNVA, ,YMHEF,AY,P,C,E  F, ,010,TF, , , , , ,      ,    ,    ,2670,0050,+,08800,     ,     , ,   ,    ,   ,AYMH,AY,P,A, ,B,U,C;
+APPCH:030,R,RNVA, ,YMHEM,AY,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,2370,0077, ,07830,     ,     , ,   , 000,   , , , , , ,B,U,C;
+APPCH:040,R,RNVA, ,OTGIS,AY,P,C,EYM , ,010,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:050,R,RNVA, ,BETLA,AY,E,A,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,09400,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+RWY:RW08 ,-0880,      ,05377, ,    , ,   ;S05493480,E144173430,0000;
+RWY:RW12 ,-0640,      ,05394, ,    , ,   ;S05492286,E144172745,0000;
+RWY:RW26 ,     ,      ,05348, ,    , ,   ;S05493170,E144180984,0000;
+RWY:RW30 ,     ,      ,05348, ,    , ,   ;S05500015,E144182801,0000;

@@ -1,0 +1,16 @@
+APPCH:010,A,R11,CMA,CMA,SV,D, ,V C , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R11,CMA,VAKIL,SV,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,09800,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R11,CMA,ASDAR,SV,P,C,E  C, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:040,A,R11,CMA,GIKBO,SV,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R11,ICA,ICA,SV,P,C,E C , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R11,ICA,UKENE,SV,P,C,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:030,A,R11,ICA,GIKBO,SV,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,05500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,R,R11, ,GIKBO,SV,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,05500,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R11, ,ANDOT,SV,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,1170,0038,+,04200,     ,     , ,   ,    ,   ,SVSE,SV,P,A, ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R11, ,RW11,SV,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,1170,0036, ,03004,     ,     , ,   ,-310,   , , , , , ,B,J,S;
+APPCH:040,R,R11, ,UVBOK,SV,P,C,EYM , ,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R11, ,ASDAR,SV,P,C,EY  ,L,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,06600,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:060,R,R11, ,ASDAR,SV,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,1610,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW11 ,-0300,      ,02949, ,    , ,   ;N04332268,W061090894,0000;
+RWY:RW29 ,+0300,      ,02930, ,    , ,   ;N04331138,W061081659,0000;

@@ -1,0 +1,14 @@
+APPCH:010,A,RNVB,ENO,ENO,K6,D, ,V   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVB,ENO,UKIEY,K6,E,A,E  A, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVB,ENO,RANRE,K6,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVB,OOD,OOD,K6,D, ,V   , ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVB,OOD,RANRE,K6,P,C,EY  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVB,OOD,RANRE,K6,P,C,EE C,L,   ,HF, , , , , ,      ,    ,    ,3330,0040,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVB, ,RANRE,K6,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVB, ,SWIMN,K6,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3330,0050,+,01800,     ,     , ,   ,    ,   ,ZUDUV,K6,P,C, ,B,J,C;
+APPCH:030,R,RNVB, ,ZUDUV,K6,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,3330,0053, ,00800,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVB, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,3330,    ,+,00800,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVB, ,RANRE,K6,P,C,EY  ,L,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVB, ,RANRE,K6,P,C,EE H,L,   ,HM, , , , , ,      ,    ,    ,3330,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW13 ,     ,      ,00101, ,    , ,   ;N39343219,W075522511,0288;
+RWY:RW31 ,     ,      ,00063, ,    , ,   ;N39342325,W075520094,0601;

@@ -1,0 +1,13 @@
+APPCH:010,A,RNVA,HOLUX,HOLUX,K6,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,HOLUX,WAKOB,K6,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04100,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,WAKOB,WAKOB,K6,P,C,EE C,R,   ,HF, , , , , ,      ,    ,    ,1380,0050,+,04100,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,YOWED,YOWED,K6,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,YOWED,WAKOB,K6,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04100,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,WAKOB,K6,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04100,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,TOCAR,K6,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,1380,0076,+,03000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,R,RNVA, ,RW14,K6,P,G,GY M, ,   ,TF, , , , , ,      ,    ,    ,1380,0055, ,01263,     ,     , ,   ,-300,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,1380,    ,+,01636,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,WAKOB,K6,P,C,EY  ,R,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,04100,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,WAKOB,K6,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,1380,0050, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW14 ,     ,      ,01236, ,    , ,   ;N40145172,W080004747,0000;
+RWY:RW32 ,     ,      ,01205, ,    , ,   ;N40143551,W080002319,0000;

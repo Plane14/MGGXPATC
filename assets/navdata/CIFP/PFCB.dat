@@ -1,0 +1,15 @@
+SID:010,5,CHNGA1,ALL,JODRO,PA,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,01000,     ,18000, ,   ,    ,   , , , , , , , , ;
+SID:020,5,CHNGA1,ALL,WICOL,PA,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:030,5,CHNGA1,ALL,NAKED,PA,E,A,EE H, ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,JOH,JOH,PA,D, ,V  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,JOH,WICOL,PA,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,A,RNVA,PEPPI,PEPPI,PA,E,A,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,PEPPI,WICOL,PA,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,WICOL,PA,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,ZEPNA,PA,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,2010,0079,+,02200,     ,     , ,   ,    ,   ,JODRO,PA,P,C, ,B,J,C;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,C;
+APPCH:030,R,RNVA, ,JODRO,PA,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,2240,0059, ,01020,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,ZIMUR,PA,E,A,EYM ,L,   ,DF, , , , , ,      ,    ,    ,    ,    ,+,04400,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,ZIMUR,PA,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,0910,0040, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW16 ,     ,      ,00064, ,    , ,   ;N60045758,W147594242,0000;
+RWY:RW34 ,     ,      ,00069, ,    , ,   ;N60042806,W147593967,0000;

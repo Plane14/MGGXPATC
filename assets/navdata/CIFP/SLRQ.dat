@@ -1,0 +1,14 @@
+APPCH:010,A,R14-Y,MAKLO,MAKLO,SL,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,05800,     ,     ,-,160,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R14-Y,MAKLO,PABOL,SL,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R14-Y,NELIX,NELIX,SL,P,C,E  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,05500,     ,     ,-,160,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R14-Y,NELIX,PABOL,SL,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,A,R14-Y,OGTOS,OGTOS,SL,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,05000,     ,     ,-,160,    ,   , , , , , ,B,J,S;
+APPCH:020,A,R14-Y,OGTOS,PABOL,SL,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:010,R,R14-Y, ,PABOL,SL,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:020,R,R14-Y, ,REDUT,SL,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,1450,0050, ,02400,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,S;
+APPCH:030,R,R14-Y, ,UTLAS,SL,P,C,EYCM, ,   ,TF, , , , , ,      ,    ,    ,1450,0044, ,00953,     ,     , ,   ,-300,   , , , , , ,B,J,S;
+APPCH:040,R,R14-Y, ,KIDAR,SL,P,C,E M , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+APPCH:050,R,R14-Y, ,KIDAR,SL,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,2830,T010,+,04000,     ,     , ,   ,    ,   , , , , , ,B,J,S;
+RWY:RW14 ,+0380,      ,00645, ,    , ,   ;S14252273,W067300910,0000;
+RWY:RW32 ,-0380,      ,00666, ,    , ,   ;S14255766,W067293412,0000;

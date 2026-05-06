@@ -1,0 +1,17 @@
+SID:010,5,NANI1G,ALL,WZ601,LO,P,C,E   , ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,04800,     ,10000, ,   ,    ,   ,NANIT,LO,E,A, , , , ;
+SID:020,5,NANI1G,ALL,WZ602,LO,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,07000,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:030,5,NANI1G,ALL,WZ603,LO,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,07600,     ,     , ,   ,    ,   , , , , , , , , ;
+SID:040,5,NANI1G,ALL,WZ604,LO,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,08700,     ,     ,-,165,    ,   , , , , , , , , ;
+SID:050,5,NANI1G,ALL,NANIT,LO,E,A,EB H, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,     ,-,165,    ,   , , , , , , , , ;
+APPCH:010,A,RNVA,NANIT,NANIT,LO,E,A,E  C, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,NANIT,WZ801,LO,P,C,E  B, ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,08500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:030,A,RNVA,NANIT,WZ804,LO,P,C,E   , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,07700,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:040,A,RNVA,NANIT,WZ802,LO,P,C,EE  , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,07200,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,WZ802,LO,P,C,E  F, ,010,IF, , , , , ,      ,    ,    ,    ,    ,+,07200,     ,     , ,   ,    ,   ,NANIT,LO,E,A, ,B,J,C;
+PRDAT: ,          , ,          ,A,      LNAV, ,   , ,   , ,   , ,   ,J,C;
+APPCH:030,R,RNVA, ,WZ803,LO,P,C,EY M, ,302,TF, , , , , ,      ,    ,    ,0820,0064, ,05680,     ,     , ,   ,-320,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, ,WZ805,LO,P,C,EYM , ,010,TF, , , , , ,      ,    ,    ,    ,    ,+,07500,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,NANIT,LO,E,A,E   ,L,010,DF, , , , , ,      ,    ,    ,    ,    ,+,10000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,NANIT,LO,E,A,EE H,L,010,HM, , , , , ,      ,    ,    ,1550,T010,+,10000,     ,     ,-,170,    ,   , , , , , ,B,J,C;
+RWY:RW07 ,     ,      ,02471, ,    , ,   ;N47172748,E012471494,0394;
+RWY:RW25 ,     ,      ,02469, ,    , ,   ;N47173172,E012473969,0394;

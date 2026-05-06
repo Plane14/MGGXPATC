@@ -1,0 +1,12 @@
++ JetB like Cessna Cititation
++ JetC like 320/737
+- JetD
+- JetE
+- JetF
++ TurbopropB like beech A350
++ TurbopropC like ATR72
++ SingleA like C172
++ SingleB like Pilatus
++ TwinA like Beechcraft B58
++ TwinB like Beechcraft C90
+

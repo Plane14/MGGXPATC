@@ -1,0 +1,13 @@
+APPCH:010,A,RNVA,ARIES,ARIES,NF,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,15000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,A,RNVA,ARIES,ORION,NF,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,A,RNVA,ORION,ORION,NF,P,C,EE C,R,   ,HF, , , , , ,      ,    ,    ,3030,0040,+,02000,     ,15000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,A,RNVA,VIRGO,VIRGO,NF,P,C,E  A, ,   ,IF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,15000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,A,RNVA,VIRGO,ORION,NF,P,C,EE  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:010,R,RNVA, ,ORION,NF,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,02000,     ,15000, ,   ,    ,   , , , , , ,B,U,C;
+APPCH:020,R,RNVA, ,FF303,NF,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3030,0040,+,00640,     ,     , ,   ,    ,   ,NFTO,NF,P,A, ,B,U,C;
+APPCH:030,R,RNVA, ,MA303,NF,P,C,E  M, ,   ,TF, , , , , ,      ,    ,    ,3030,0030, ,00640,     ,     , ,   , 000,   , , , , , ,B,U,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,3030,    ,+,00640,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:050,R,RNVA, ,VENUS,NF,P,C,E   , ,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+APPCH:060,R,RNVA, ,VENUS,NF,P,C,EE H,R,   ,HM, , , , , ,      ,    ,    ,1230,0040, ,02000,     ,     , ,   ,    ,   , , , , , ,B,U,C;
+RWY:RW08 ,     ,      ,00149, ,    , ,   ;S15341416,W175380575,0000;
+RWY:RW26 ,     ,      ,00110, ,    , ,   ;S15341419,W175373022,0000;

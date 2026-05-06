@@ -1,0 +1,12 @@
+APPCH:010,A,RNVA,CPN,CPN,K1,D, ,V  C, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,11100,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,A,RNVA,CPN,ZISON,K1,P,C,EE B, ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,08300,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:010,R,RNVA, ,ZISON,K1,P,C,E  I, ,   ,IF, , , , , ,      ,    ,    ,    ,    ,+,08300,     ,18000, ,   ,    ,   , , , , , ,B,J,C;
+APPCH:020,R,RNVA, ,AYUNO,K1,P,C,E  F, ,   ,TF, , , , , ,      ,    ,    ,3590,0048,+,06900,     ,     , ,   ,    ,   ,CITSU,K1,P,C, ,B,J,C;
+APPCH:030,R,RNVA, ,CITSU,K1,P,C,EY M, ,   ,TF, , , , , ,      ,    ,    ,3470,0068, ,06300,     ,     , ,   , 000,   , , , , , ,B,J,C;
+APPCH:040,R,RNVA, , , , , ,  M , ,   ,CA, , , , , ,      ,    ,    ,3470,    ,+,06300,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:050,R,RNVA, ,JOGUT,K1,P,C,E   , ,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:060,R,RNVA, ,APICI,K1,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:070,R,RNVA, ,WAKIX,K1,E,A,EY  , ,   ,TF, , , , , ,      ,    ,    ,    ,    ,+,13000,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+APPCH:080,R,RNVA, ,WAKIX,K1,E,A,EE H,R,   ,HM, , , , , ,      ,    ,    ,1210,0080, ,     ,     ,     , ,   ,    ,   , , , , , ,B,J,C;
+RWY:RW13 ,     ,      ,04693, ,    , ,   ;N46233445,W112461860,0000;
+RWY:RW31 ,     ,      ,04628, ,    , ,   ;N46225007,W112452636,0000;
