@@ -1767,15 +1767,19 @@ private:
         };
 
         // Helper to calculate appropriate cruise altitude (capped at aircraft ceiling)
-        const auto calculateCruiseAltitudeFeet = [](int ceilingFl, Flight::RulesType rulesType) -> float {
+        const auto calculateCruiseAltitudeFeet = [this](int ceilingFl, Flight::RulesType rulesType) -> float {
             // Convert ceiling FL to feet
             float maxAltitudeFeet = ceilingFl * 100.0f;
 
-            // For VFR flights, typically fly lower (below FL 100)
+            // For VFR flights, apply hemispheric rule (odd+500 east, even+500 west)
             if (rulesType == Flight::RulesType::VFR)
             {
-                // VFR flights typically cruise at 3000-8000 ft, but respect ceiling
-                return min(6500.0f, maxAltitudeFeet * 0.8f);
+                float baseAltitude = min(8500.0f, maxAltitudeFeet * 0.8f);
+                const int altitudeSteps[] = { 3500, 4500, 5500, 6500, 7500, 8500 };
+                const int stepCount = sizeof(altitudeSteps) / sizeof(altitudeSteps[0]);
+                int selectedIndex = m_host->getNextRandom(stepCount);
+                float selected = static_cast<float>(altitudeSteps[selectedIndex]);
+                return min(selected, baseAltitude);
             }
 
             // For IFR, choose a reasonable cruise altitude but stay below ceiling
