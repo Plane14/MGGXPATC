@@ -352,6 +352,43 @@ TEST(XPAirportReaderTest, readAptDat_runways) {
     EXPECT_FLOAT_EQ(rwy2->widthMeters(), 60.00);
 }
 
+TEST(XPAirportReaderTest, readAptDat_trafficFlows) {
+    XPAirportReader builder(makeHost());
+    stringstream aptDat = makeAptDat({
+        "1 123 0 0 KSEA Seattle Tacoma Intl",
+        "100 46.02 1 0 0.00 1 3 0 16C  47.4410 -122.3090 277  0 3 2 1 0 34C  47.4630 -122.3090  314  0 3 8 1 0",
+        "100 46.02 1 0 0.00 1 3 0 16L  47.4410 -122.3030 277  0 3 2 1 0 34R  47.4630 -122.3030  314  0 3 8 1 0",
+        "1000 Calm and South flow",
+        "1001 KSEA 070 250 15",
+        "1001 KSEA 000 359 5",
+        "1002 KSEA 800",
+        "1003 KSEA 3.0",
+        "1100 16C 11920 arrivals|departures jets|turboprops|props 160340 161161 Arrival 16C",
+        "1100 16L 11920 arrivals heavy 000359 161161 Arrival Heavy Jets",
+    });
+
+    builder.readAirport(aptDat);
+    const auto airport = builder.getAirport();
+
+    ASSERT_EQ(airport->trafficFlows().size(), 1);
+    const auto flow = airport->trafficFlows().at(0);
+    EXPECT_EQ(flow->name(), "Calm and South flow");
+    EXPECT_EQ(flow->windRules().size(), 2);
+    EXPECT_TRUE(flow->matchesWind(180.0f, 12.0f));
+    EXPECT_TRUE(flow->matchesWind(320.0f, 4.0f));
+    EXPECT_FALSE(flow->matchesWind(320.0f, 12.0f));
+    EXPECT_FLOAT_EQ(flow->ceiling(), 800.0f);
+    EXPECT_FLOAT_EQ(flow->visibility(), 3.0f);
+
+    const auto departures = flow->getDepartureRunways();
+    const auto arrivals = flow->getArrivalRunways();
+    ASSERT_EQ(departures.size(), 1);
+    ASSERT_EQ(arrivals.size(), 2);
+    EXPECT_EQ(departures.at(0), "16C");
+    EXPECT_EQ(arrivals.at(0), "16C");
+    EXPECT_EQ(arrivals.at(1), "16L");
+}
+
 TEST(XPAirportReaderTest, readAptDat_assignRunwaysHeaderElevation) {
     XPAirportReader builder(makeHost());
     stringstream aptDat = makeAptDat({

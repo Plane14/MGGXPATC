@@ -167,6 +167,26 @@ namespace ai
                 }
             }
 
+            if (category == world::Aircraft::Category::Helicopter)
+            {
+                if (normalizedIcao == "R22" || normalizedIcao == "R44" || normalizedIcao == "R66")
+                {
+                    return apply(55.0f, 300.0f, 4.0f, 15.0f, 6.0f, 5.0f, 0.0f, 2.8f, 0.0f, 15.0f, 60.0f, 2.2f, 4.0f, 1000.0f, 260.0f, 140);
+                }
+
+                if (normalizedIcao == "EC35" || normalizedIcao == "H135" || normalizedIcao == "EC45" ||
+                    normalizedIcao == "H145" || normalizedIcao == "A109" || normalizedIcao == "B429")
+                {
+                    return apply(65.0f, 350.0f, 5.0f, 18.0f, 8.0f, 6.0f, 0.0f, 3.2f, 0.0f, 18.0f, 75.0f, 2.6f, 4.5f, 1500.0f, 350.0f, 200);
+                }
+
+                if (normalizedIcao == "S76" || normalizedIcao == "S92" || normalizedIcao == "B412" ||
+                    normalizedIcao == "UH60" || normalizedIcao == "H60" || normalizedIcao == "CH47")
+                {
+                    return apply(75.0f, 400.0f, 6.0f, 20.0f, 10.0f, 8.0f, 0.0f, 3.5f, 0.0f, 22.0f, 90.0f, 2.8f, 5.0f, 1800.0f, 450.0f, 200);
+                }
+            }
+
             if (category == world::Aircraft::Category::Fighter)
             {
                 if (normalizedIcao == "F22")
@@ -1039,19 +1059,20 @@ namespace ai
                 profile.ceilingFl = 130;             // Light GA typically FL 100-150 (C172: FL 130)
                 break;
             case world::Aircraft::Category::Helicopter:
-                profile.approachSpeedKt = 70.0f;
-                profile.descentRateFpm = 300.0f;
-                profile.minutesToThreshold = 5.0f;  // Increased from 2.0
-                profile.flareBufferFeet = 20.0f;
-                profile.landingTouchdownDistanceMeters = 20.0f;
-                profile.landingTouchdownSpeedKt = 18.0f;
+                profile.approachSpeedKt = 65.0f;
+                profile.descentRateFpm = 350.0f;
+                profile.minutesToThreshold = 5.0f;  // Helicopter approaches include hover/transition time.
+                profile.flareBufferFeet = 15.0f;
+                profile.landingTouchdownDistanceMeters = 8.0f;
+                profile.landingTouchdownSpeedKt = 6.0f;
                 profile.landingExitSpeedKt = 0.0f;
-                profile.landingRolloutDecelerationKtPerSecond = 4.0f;
-                profile.takeoffRotateSpeedKt = 35.0f;
-                profile.takeoffLiftOffSpeedKt = 45.0f;
-                profile.takeoffInitialClimbSpeedKt = 70.0f;
-                profile.takeoffAccelerationKtPerSecond = 4.0f;
-                profile.takeoffRotatePitchDegrees = 6.0f;
+                profile.landingRolloutDecelerationKtPerSecond = 3.2f;
+                profile.takeoffRotateSpeedKt = 0.0f;
+                profile.takeoffLiftOffSpeedKt = 18.0f;
+                profile.takeoffInitialClimbSpeedKt = 75.0f;
+                profile.takeoffAccelerationKtPerSecond = 2.6f;
+                profile.takeoffRotatePitchDegrees = 4.5f;
+                profile.initialClimbRocFpm = 1500.0f;
                 profile.rangeNm = 350.0f;            // Helicopters (EC35: ~340 NM, B412: ~400 NM)
                 profile.ceilingFl = 200;             // Helicopters typically FL 150-200 (EC35: FL 200)
                 break;

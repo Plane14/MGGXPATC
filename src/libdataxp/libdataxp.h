@@ -93,9 +93,11 @@ private:
     void parseMetadata1302(istream &input);
     void parseControlFrequency(int lineCode, istream &input);
     bool isControlFrequencyLine(int lineCode);
-    void parseTrafficFlow1100(istream &input);
-    void parseTrafficFlowRules1101(istream &input, shared_ptr<TrafficFlow> flow);
-    void parseRunwayFlow1102(istream &input, shared_ptr<TrafficFlow> flow);
+    void parseTrafficFlow1000(istream &input);
+    void parseTrafficFlowWindRule1001(istream &input, shared_ptr<TrafficFlow> flow);
+    void parseTrafficFlowCeilingRule1002(istream &input, shared_ptr<TrafficFlow> flow);
+    void parseTrafficFlowVisibilityRule1003(istream &input, shared_ptr<TrafficFlow> flow);
+    void parseRunwayInUseRule(istream &input, shared_ptr<TrafficFlow> flow);
     bool invokeFilterCallback();
     shared_ptr<Airport> assembleAirportOrThrow();
     string formatErrorMessage(istream &input, const streampos& position, int extractedLineCode, const char *what);

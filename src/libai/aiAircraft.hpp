@@ -319,7 +319,7 @@ namespace ai
 
             flightPtr->setPhase(Flight::Phase::Arrival);
 
-            m_locationTimespamp = host()->getWorld()->timestamp();
+            m_locationTimestamp = host()->getWorld()->timestamp();
 
             if (useProcedureStart)
             {
@@ -518,7 +518,7 @@ namespace ai
         }
 
         GeoPoint m_location;
-        chrono::microseconds m_locationTimespamp;
+        chrono::microseconds m_locationTimestamp;
         chrono::microseconds m_touchdownTimestamp;
         AircraftAttitude m_attitude;
         Altitude m_altitude;
@@ -573,7 +573,7 @@ namespace ai
             m_gearState(1.0f),
             m_flapState(0),
             m_spoilerState(0),
-            m_locationTimespamp(chrono::seconds(-1)),
+            m_locationTimestamp(chrono::seconds(-1)),
             m_touchdownTimestamp(chrono::seconds(-1)),
             m_altitude(Altitude::ground()),
             m_lights(LightBits::None),
@@ -591,7 +591,7 @@ namespace ai
         }
 
         const GeoPoint& location() const override { return m_location; }
-        chrono::microseconds locationTiemstamp() const { return m_locationTimespamp; }
+        chrono::microseconds locationTimestamp() const { return m_locationTimestamp; }
         const AircraftAttitude& attitude() const override { return m_attitude; }
         double track() const override { return m_track; }
         const Altitude& altitude() const override { return m_altitude; }
@@ -732,12 +732,12 @@ namespace ai
             setAttitude(AircraftAttitude(approachHeading, -1.0f, 0.0f));
 
             flightPtr->setPhase(Flight::Phase::Arrival);
-            m_locationTimespamp = host()->getWorld()->timestamp();
+            m_locationTimestamp = host()->getWorld()->timestamp();
         }
 
         void progressTo(chrono::microseconds timestamp) override
         {
-            chrono::microseconds lastTimestamp = m_locationTimespamp;
+            chrono::microseconds lastTimestamp = m_locationTimestamp;
             if (lastTimestamp.count() < 0)
             {
                 lastTimestamp = chrono::microseconds(0);
@@ -749,7 +749,7 @@ namespace ai
                 {
                 }
 
-                m_locationTimespamp = lastTimestamp;
+                m_locationTimestamp = lastTimestamp;
             }
 
             m_locationExplicitlyControlledThisTick = false;
@@ -768,7 +768,7 @@ namespace ai
             moveFor(elapsedMicroseconds, touchedDown);
             m_inTimedProgress = false;
 
-            m_locationTimespamp = timestamp;
+            m_locationTimestamp = timestamp;
             if (touchedDown)
             {
                 m_touchdownTimestamp = timestamp;
@@ -950,8 +950,8 @@ namespace ai
 
                 const double minSpeed = 0.0;
                 const double maxSpeed = (flightPtr && flightPtr->phase() == Flight::Phase::Arrival)
-                    ? 120.0
-                    : 145.0;
+                    ? max(120.0, static_cast<double>(m_performanceProfile.approachSpeedKt) * 1.35)
+                    : max(145.0, static_cast<double>(m_performanceProfile.takeoffInitialClimbSpeedKt) * 1.35);
                 return make_tuple(minSpeed, maxSpeed);
             }
 
@@ -998,7 +998,7 @@ namespace ai
             {
                 if (onGround)
                 {
-                    return make_tuple(-200.0, departurePhase ? 2800.0 : 1200.0);
+                    return make_tuple(0.0, departurePhase ? 900.0 : 250.0);
                 }
 
                 const double climbMax = max(900.0, min(3800.0, static_cast<double>(m_performanceProfile.initialClimbRocFpm) * 1.05));

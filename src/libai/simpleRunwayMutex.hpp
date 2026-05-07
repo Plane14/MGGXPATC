@@ -310,6 +310,7 @@ namespace ai
             float departureRollSeconds = 35.0f;
             float lineupSeconds = 8.0f;
             float crossingSeconds = 18.0f;
+            bool rotorcraft = false;
         };
 
         static string uppercaseCopy(string value)
@@ -364,6 +365,8 @@ namespace ai
         {
             SeparationProfile profile;
             profile.wakeClass = inferWakeClass(flight);
+            profile.rotorcraft = flight && flight->aircraft() &&
+                flight->aircraft()->category() == Aircraft::Category::Helicopter;
 
             switch (profile.wakeClass)
             {
@@ -392,6 +395,14 @@ namespace ai
                 profile.lineupSeconds = 8.0f;
                 profile.crossingSeconds = 18.0f;
                 break;
+            }
+
+            if (profile.rotorcraft)
+            {
+                profile.referenceArrivalSpeedKt = 70.0f;
+                profile.departureRollSeconds = 10.0f;
+                profile.lineupSeconds = 4.0f;
+                profile.crossingSeconds = 10.0f;
             }
 
             if (flight && flight->aircraft())
@@ -455,12 +466,13 @@ namespace ai
 
             const auto departureProfile = getSeparationProfile(departure->flight);
             const auto arrivalProfile = getSeparationProfile(arrival->flight);
-            return departureProfile.departureRollSeconds +
-                wakeSeparationSeconds(
+            const float wakeSeconds = departureProfile.rotorcraft
+                ? 0.0f
+                : wakeSeparationSeconds(
                     departureProfile.wakeClass,
                     arrivalProfile.wakeClass,
-                    arrivalProfile.referenceArrivalSpeedKt) +
-                5.0f;
+                    arrivalProfile.referenceArrivalSpeedKt);
+            return departureProfile.departureRollSeconds + wakeSeconds + 5.0f;
         }
 
         float requiredLuawGapSeconds(shared_ptr<FlightStrip> departure, shared_ptr<FlightStrip> arrival) const
@@ -921,7 +933,9 @@ namespace ai
         {
             return m_board.clearedToTakeoff &&
                 m_board.clearedToTakeoff->flight->aircraft() &&
-                m_board.clearedToTakeoff->flight->aircraft()->groundSpeedKt() > 45;
+                (m_board.clearedToTakeoff->flight->aircraft()->category() == Aircraft::Category::Helicopter
+                    ? !m_board.clearedToTakeoff->flight->aircraft()->altitude().isGround()
+                    : m_board.clearedToTakeoff->flight->aircraft()->groundSpeedKt() > 45);
         }
 
         shared_ptr<FlightStrip> checkIn(
