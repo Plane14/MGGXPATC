@@ -10,9 +10,16 @@
 #include <memory>
 #include <thread>
 #include <future>
+#include <atomic>
+#include <unordered_set>
+#include <algorithm>
+#include <cctype>
+#include <cstring>
+#include <cmath>
 
 // SDK
 #include "XPLMPlugin.h"
+#include "XPLMNavigation.h"
 #if !XPLM300
 #error This plugin requires version 300 of the SDK
 #endif
@@ -150,13 +157,15 @@ private:
             shared_ptr<PluginHostServices> _host,
             PluginMenu& _menu,
             function<void(shared_ptr<World> world)> _onAssembled,
-            function<void()> _onFailed
+            function<void()> _onFailed,
+            unordered_set<string> _bubbleIcaos
         ) : PluginState(PluginStateId::WorldAssembling, "WORLD-ASSEMBLING"),
             m_host(std::move(_host)),
             m_assemblingItem(_menu, "World is being assembled, please wait...", [](){}),
             m_onAssembled(std::move(_onAssembled)),
             m_onFailed(std::move(_onFailed)),
-            m_done(false)
+            m_done(false),
+            m_bubbleIcaos(std::move(_bubbleIcaos))
         {
         }
 
@@ -167,13 +176,7 @@ private:
             m_worldFuture = std::async(std::launch::async, [this] {
                 try
                 {
-                    auto world = assembleWorld();
-                    if (world)
-                    {
-                        m_host->useWorld(world);
-                        startServer();
-                    }
-                    return world;
+                    return assembleWorld();
                 }
                 catch (const exception& e)
                 {
@@ -205,6 +208,8 @@ private:
 
                 if (world)
                 {
+                    m_host->useWorld(world);
+                    startServer();
                     m_onAssembled(world);
                 }
                 else
@@ -216,13 +221,22 @@ private:
         }
 
     private:
+        unordered_set<string> m_bubbleIcaos;
 
         shared_ptr<World> assembleWorld()
         {
             try
             {
                 PluginWorldLoader loader(m_host);
-                loader.loadWorld();
+                if (!m_bubbleIcaos.empty())
+                {
+                    m_host->writeLog("PLUGIN|assembleWorld: loading %d airports within traffic bubble", static_cast<int>(m_bubbleIcaos.size()));
+                    loader.loadWorld(m_bubbleIcaos);
+                }
+                else
+                {
+                    loader.loadWorld();
+                }
                 return loader.getWorld();
             }
             catch (const exception& e)
@@ -290,6 +304,8 @@ private:
         PluginMenu::Item m_worldIsStarting;
         function<void(shared_ptr<Airport> userAirport)> m_onStarted;
         shared_ptr<Airport> m_userAirport;
+        future<shared_ptr<Airport>> m_scheduleFuture;
+        atomic<bool> m_done;
     public:
         SchedulesStartingState(
             shared_ptr<HostServices> _host,
@@ -304,48 +320,79 @@ private:
             m_worldIsStarting(_menu, "Starting schedules, please wait...", [](){}),
             m_loadFactor(_loadFactor),
             m_offlineRandomTraffic(_offlineRandomTraffic),
-            m_onStarted(std::move(_onStarted))
+            m_onStarted(std::move(_onStarted)),
+            m_done(false)
         {
         }
 
         void enter() override
         {
-            DemoScheduleLoader scheduleLoader(m_host, m_world);
-            scheduleLoader.loadSchedules(m_loadFactor, m_offlineRandomTraffic);
+            m_scheduleFuture = std::async(std::launch::async, [this] {
+                try
+                {
+                    DemoScheduleLoader scheduleLoader(m_host, m_world);
+                    scheduleLoader.loadSchedules(m_loadFactor, m_offlineRandomTraffic);
 
-            m_host->writeLog(
-                "PLUGIN|The world now has [%d] airports, [%d] control facilities, [%d] AI flights",
-                m_world->airports().size(),
-                m_world->controlFacilities().size(),
-                m_world->flights().size());
+                    m_host->writeLog(
+                        "PLUGIN|The world now has [%d] airports, [%d] control facilities, [%d] AI flights",
+                        m_world->airports().size(),
+                        m_world->controlFacilities().size(),
+                        m_world->flights().size());
 
-            m_userAirport = scheduleLoader.airport();
-            WorldBuilder::tidyAirportElevations(m_host, m_userAirport);
-
-            logUserAirportElevations();
+                    auto userAirport = scheduleLoader.airport();
+                    WorldBuilder::tidyAirportElevations(m_host, userAirport);
+                    return userAirport;
+                }
+                catch (const exception& e)
+                {
+                    m_host->writeLog("PLUGIN|SchedulesStartingState background task CRASHED!!! %s", e.what());
+                    return shared_ptr<Airport>();
+                }
+            });
         }
 
         void ping() override
         {
-            m_onStarted(m_userAirport);
+            if (m_scheduleFuture.wait_for(chrono::milliseconds(0)) != future_status::ready)
+            {
+                return;
+            }
+
+            if (!m_scheduleFuture.valid())
+            {
+                return;
+            }
+
+            auto userAirport = m_scheduleFuture.get();
+            m_done = true;
+
+            if (userAirport)
+            {
+                logUserAirportElevations(userAirport);
+                m_onStarted(userAirport);
+            }
+            else
+            {
+                m_host->writeLog("PLUGIN|ERROR: schedules failed to load - see previous errors");
+            }
         }
 
     private:
 
-        void logUserAirportElevations()
+        void logUserAirportElevations(const shared_ptr<Airport>& airport)
         {
-            const auto logRunwayEndElevation = [this](const Runway::End& end) {
+            const auto logRunwayEndElevation = [this, &airport](const Runway::End& end) {
                 const auto& centerlinePoint = end.centerlinePoint().geo();
                 m_host->writeLog(
                     "PLUGIN|User airport elevations [%s/%s] at (%f,%f) elevation [%f]",
-                    m_userAirport->header().icao().c_str(),
+                    airport->header().icao().c_str(),
                     end.name().c_str(),
                     centerlinePoint.latitude,
                     centerlinePoint.longitude,
                     end.elevationFeet());
             };
 
-            for (const auto& runway : m_userAirport->runways())
+            for (const auto& runway : airport->runways())
             {
                 logRunwayEndElevation(runway->end1());
                 logRunwayEndElevation(runway->end2());
@@ -445,23 +492,11 @@ private:
 
             if (changeSet)
             {
-                processWorldChanges(changeSet);
+                m_aircraftObjectService->processEvents(m_world->timestamp(), changeSet);
             }
         }
 
-        void exit() override
-        {
-            m_transcript->setUserActionsMenu(nullptr);
-            m_world->clearAllFlights();
-            m_userPilotWorkflow.reset();
-        }
-
     private:
-
-        void processWorldChanges(shared_ptr<World::ChangeSet> changeSet)
-        {
-            m_aircraftObjectService->processEvents(changeSet);
-        }
 
         void tuneToClearance()
         {
@@ -559,19 +594,21 @@ private:
                     }
                 }
 
-                if (bestRunway.empty())
+                if (!bestRunway.empty())
                 {
-                    try
+                    return bestRunway;
+                }
+
+                try
+                {
+                    const auto longest = airport->findLongestRunway();
+                    if (longest && longest->lengthMeters() >= minimumRunwayLengthMeters)
                     {
-                        const auto runway = airport->findLongestRunway();
-                        if (runway && runway->lengthMeters() >= minimumRunwayLengthMeters)
-                        {
-                            bestRunway = runway->end1().name();
-                        }
+                        return longest->end1().name();
                     }
-                    catch(const exception&)
-                    {
-                    }
+                }
+                catch(const exception&)
+                {
                 }
 
                 return bestRunway;
@@ -888,8 +925,78 @@ private:
         return make_shared<StoppedState>(m_hostServices);
     }
 
+    unordered_set<string> collectBubbleAirportIcaos()
+    {
+        unordered_set<string> icaos;
+
+        auto configuration = m_hostServices->services().get<PluginConfiguration>();
+        const float radiusNm = configuration ? configuration->trafficBubbleRadiusNm : 80.0f;
+
+        const float userLat = static_cast<float>(static_cast<double>(m_userAircraftLatitude));
+        const float userLon = static_cast<float>(static_cast<double>(m_userAircraftLongitude));
+
+        m_hostServices->writeLog(
+            "PLUGIN|collectBubbleAirportIcaos: user at (%f,%f) radius %.0f nm",
+            userLat, userLon, radiusNm);
+
+        const float radiusMeters = radiusNm * static_cast<float>(METERS_IN_1_NAUTICAL_MILE);
+
+        XPLMNavRef navRef = XPLMFindFirstNavAidOfType(xplm_Nav_Airport);
+        while (navRef != XPLM_NAV_NOT_FOUND)
+        {
+            XPLMNavType navType = xplm_Nav_Unknown;
+            float lat = 0.0f, lon = 0.0f;
+            char icaoId[64] = { 0 };
+
+            XPLMGetNavAidInfo(navRef, &navType, &lat, &lon, nullptr, nullptr, nullptr, icaoId, nullptr, nullptr);
+            if (navType != xplm_Nav_Airport)
+            {
+                break;
+            }
+
+            if (icaoId[0] != '\0')
+            {
+                const float dlat = lat - userLat;
+                const float dlon = (lon - userLon) * cosf(userLat * 3.14159265f / 180.0f);
+                const float approxDistMeters = sqrtf(dlat * dlat + dlon * dlon) * 111120.0f;
+
+                if (approxDistMeters <= radiusMeters * 1.15f)
+                {
+                    string icaoStr(icaoId);
+                    transform(icaoStr.begin(), icaoStr.end(), icaoStr.begin(), [](unsigned char c) {
+                        return static_cast<char>(toupper(c));
+                    });
+                    icaos.insert(icaoStr);
+                }
+            }
+
+            navRef = XPLMGetNextNavAid(navRef);
+        }
+
+        char nearestIcao[10] = { 0 };
+        float lat = userLat, lon = userLon;
+        XPLMNavRef nearestRef = XPLMFindNavAid(nullptr, nullptr, &lat, &lon, nullptr, xplm_Nav_Airport);
+        if (nearestRef != XPLM_NAV_NOT_FOUND)
+        {
+            XPLMGetNavAidInfo(nearestRef, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nearestIcao, nullptr, nullptr);
+            if (nearestIcao[0] != '\0')
+            {
+                string nearestStr(nearestIcao);
+                transform(nearestStr.begin(), nearestStr.end(), nearestStr.begin(), [](unsigned char c) {
+                    return static_cast<char>(toupper(c));
+                });
+                icaos.insert(nearestStr);
+            }
+        }
+
+        m_hostServices->writeLog("PLUGIN|collectBubbleAirportIcaos: found %d airports within %.0f nm", static_cast<int>(icaos.size()), radiusNm);
+        return icaos;
+    }
+
     shared_ptr<PluginState> createWorldAssemblingState()
     {
+        auto bubbleIcaos = collectBubbleAirportIcaos();
+
         const auto onAssembled = [this](shared_ptr<World> world) {
             m_hostServices->writeLog("PLUGIN|createWorldAssemblingState");
             m_world = world;
@@ -904,7 +1011,7 @@ private:
             });
         };
 
-        return make_shared<WorldAssemblingState>(m_hostServices, m_menu, onAssembled, onFailed);
+        return make_shared<WorldAssemblingState>(m_hostServices, m_menu, onAssembled, onFailed, std::move(bubbleIcaos));
     }
 
     shared_ptr<PluginState> createWorldAssembledState()

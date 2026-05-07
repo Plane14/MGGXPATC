@@ -391,9 +391,26 @@ namespace ai
                     return -performanceBasedDescent;
                 }
             case FlightPlan::LegType::Landing:
-                return -performance.descentRateFpm;
+                {
+                    if (helicopter)
+                    {
+                        return -max(300.0f, min(600.0f, performance.descentRateFpm * 0.55f));
+                    }
+                    return -max(650.0f, min(900.0f, performance.descentRateFpm * 0.45f));
+                }
             case FlightPlan::LegType::GoAround:
-                return 1200.0f;
+                {
+                    if (helicopter)
+                    {
+                        return max(800.0f, performance.initialClimbRocFpm * 0.4f);
+                    }
+                    const bool fighter = m_aircraft->category() == Aircraft::Category::Fighter;
+                    if (fighter)
+                    {
+                        return max(3000.0f, performance.initialClimbRocFpm * 0.5f);
+                    }
+                    return max(1200.0f, min(2500.0f, performance.initialClimbRocFpm * 0.45f));
+                }
             default:
                 return 0.0f;
             }
