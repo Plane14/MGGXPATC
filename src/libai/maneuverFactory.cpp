@@ -165,7 +165,7 @@ namespace ai
 
             if (enterRoundTurn)
             {
-                float speedFactor = (typeOfTaxi == TaxiType::HighSpeed ? 12.0f : (typeOfTaxi == TaxiType::Pushback ? 2.5f : 6.0f));
+                float speedFactor = (typeOfTaxi == TaxiType::HighSpeed ? 18.0f : (typeOfTaxi == TaxiType::Pushback ? 2.5f : 6.0f));
                 auto turnDuration = chrono::milliseconds((int)(1000 * turnArc.arcLengthMeters / speedFactor));
                 steps.push_back(taxiTurn(flight, turnArc, turnDuration, typeOfTaxi));
             }
@@ -245,7 +245,7 @@ namespace ai
             auto world = m_host->getWorld();
             auto aircraft = getAIAircraft(flight);
             const float startSpeedKnots = static_cast<float>(aircraft->groundSpeedKt());
-            float speedFactor = (typeOfTaxi == TaxiType::HighSpeed ? 12.0f : (typeOfTaxi == TaxiType::Pushback ? 2.5f : 6.0f));
+            float speedFactor = (typeOfTaxi == TaxiType::HighSpeed ? 18.0f : (typeOfTaxi == TaxiType::Pushback ? 2.5f : 6.0f));
             const float targetSpeedKnots = speedFactor * 1.94384f;
 
             // Shared state for smooth speed transitions

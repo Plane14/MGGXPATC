@@ -10,6 +10,8 @@
 #include <vector>
 #include <unordered_set>
 #include <stdexcept>
+#include <algorithm>
+#include <cctype>
 
 // SDK
 #include "XPLMProcessing.h"
@@ -39,6 +41,14 @@ class PluginWorldLoader
 private:
     shared_ptr<HostServices> m_host;
     shared_ptr<World> m_world;
+    string normalizeIcao(string value) const
+    {
+        transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
+            return static_cast<char>(toupper(c));
+        });
+        return value;
+    }
+
 
 private:
     static string buildHostPath(shared_ptr<HostServices> host, const vector<string>& relativePathParts)
@@ -77,7 +87,11 @@ private:
         candidatePaths.push_back(buildHostPath(m_host, { "Resources", "default scenery", "default apt dat", "Earth nav data", "apt.dat" }));
     }
 
-    void loadAptDatFile(const string& aptDatFilePath, vector<shared_ptr<Airport>>& airports)
+    void loadAptDatFile(
+        const string& aptDatFilePath,
+        vector<shared_ptr<Airport>>& airports,
+        const unordered_set<string>& requestedIcaos,
+        unordered_set<string>& loadedIcaos)
     {
         m_host->writeLog("LWORLD|trying apt.dat file path [%s]", aptDatFilePath.c_str());
 
@@ -95,12 +109,28 @@ private:
                         ? airspace
                         : WorldBuilder::assembleSampleAirportControlZone(header);
                 },
-                [](const Airport::Header&) {
-                    return true;
+                [&](const Airport::Header& header) {
+                    const string normalizedIcao = normalizeIcao(header.icao());
+                    if (normalizedIcao.empty() || loadedIcaos.find(normalizedIcao) != loadedIcaos.end())
+                    {
+                        return false;
+                    }
+                    return requestedIcaos.empty() || requestedIcaos.find(normalizedIcao) != requestedIcaos.end();
                 },
                 [&](shared_ptr<Airport> airport) {
+                    if (!airport)
+                    {
+                        return;
+                    }
+                    const string normalizedIcao = normalizeIcao(airport->header().icao());
+                    if (normalizedIcao.empty() || loadedIcaos.find(normalizedIcao) != loadedIcaos.end())
+                    {
+                        return;
+                    }
                     airports.push_back(airport);
-                }
+                    loadedIcaos.insert(normalizedIcao);
+                },
+                false
             );
 
             m_host->writeLog(
@@ -114,7 +144,7 @@ private:
         }
     }
 
-    void loadAirports(vector<shared_ptr<Airport>>& airports)
+    void loadAirports(vector<shared_ptr<Airport>>& airports, const unordered_set<string>& requestedIcaos)
     {
         m_host->writeLog("LWORLD|--- begin load airports ---");
 
@@ -122,6 +152,7 @@ private:
         appendAptDatCandidates(aptDatPathCandidates);
 
         unordered_set<string> seenPaths;
+        unordered_set<string> loadedIcaos;
         for (const auto& candidatePath : aptDatPathCandidates)
         {
             if (!seenPaths.insert(candidatePath).second)
@@ -129,7 +160,7 @@ private:
                 continue;
             }
 
-            loadAptDatFile(candidatePath, airports);
+            loadAptDatFile(candidatePath, airports, requestedIcaos, loadedIcaos);
         }
 
         if (airports.empty())
@@ -150,10 +181,21 @@ public:
     void loadWorld()
     {
         vector<shared_ptr<Airport>> airports;
-        loadAirports(airports);
+        loadAirports(airports, {});
 
         m_world = WorldBuilder::assembleSampleWorld(m_host, airports);
         m_host->writeLog("World initialized");
+    }
+
+    void loadWorld(const unordered_set<string>& requestedIcaos)
+    {
+        vector<shared_ptr<Airport>> airports;
+        loadAirports(airports, requestedIcaos);
+
+        m_world = WorldBuilder::assembleSampleWorld(m_host, airports);
+        m_host->writeLog(
+            "World initialized with [%d] airport(s) from filtered startup load",
+            static_cast<int>(airports.size()));
     }
 
     shared_ptr<World> getWorld() const { return m_world; }
