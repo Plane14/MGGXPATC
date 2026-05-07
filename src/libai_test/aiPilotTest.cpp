@@ -483,7 +483,40 @@ TEST(AIPilotTest, fighterFlightCycleIncludesUnrestrictedClimboutWhenHostRandomAl
 
     auto cycle = pilot->getFlightCycle();
     ASSERT_TRUE(!!cycle);
+    EXPECT_TRUE(containsManeuverId(cycle, "reset_cycle_state"));
     EXPECT_TRUE(containsManeuverId(cycle, "unrestricted_climbout"));
+}
+
+TEST(AIPilotTest, fighterWingmanFlightCycleSkipsOwnIfrAndUnrestrictedClimbout)
+{
+    auto host = make_shared<ZeroRandomTestHostServices>();
+    auto intentFactory = make_shared<IntentFactory>(host);
+    auto maneuverFactory = make_shared<ManeuverFactory>(host);
+    host->services().use<IntentFactory>(intentFactory);
+
+    auto departureAirport = createMinimalDepartureAirport(host);
+    auto world = WorldBuilder::assembleSampleWorld(host, { departureAirport });
+    host->useWorld(world);
+
+    const time_t departureTime = world->currentTime() + 3600;
+    const time_t arrivalTime = departureTime + 7200;
+
+    auto leaderAircraft = make_shared<AIAircraft>(host, 204, "F22", "USA", "F204", Aircraft::Category::Fighter);
+    auto aircraft = make_shared<AIAircraft>(host, 205, "F22", "USA", "F205", Aircraft::Category::Fighter);
+    aircraft->setFormationLeader(leaderAircraft, 0.35, -0.18, -40.0);
+
+    auto plan = make_shared<FlightPlan>(departureTime, arrivalTime, "KAAA", "KBBB");
+    auto flight = make_shared<Flight>(host, 205, Flight::RulesType::IFR, "USA", "205", "USA 205", plan);
+    flight->setAircraft(aircraft);
+
+    auto pilot = make_shared<AIPilot>(host, 5, Actor::Gender::Male, flight, maneuverFactory, intentFactory);
+    flight->setPilot(pilot);
+
+    auto cycle = pilot->getFlightCycle();
+    ASSERT_TRUE(!!cycle);
+    EXPECT_TRUE(containsManeuverId(cycle, "wait_for_formation_leader_airborne"));
+    EXPECT_FALSE(containsManeuverId(cycle, "await_ifr_clr"));
+    EXPECT_FALSE(containsManeuverId(cycle, "unrestricted_climbout"));
 }
 
 TEST(AIPilotTest, helicopterFlightCycleUsesRunwayFreeHelipadRoutingWhenNoRunwaysAreAssigned)
