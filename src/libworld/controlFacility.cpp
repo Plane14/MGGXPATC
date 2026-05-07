@@ -107,7 +107,38 @@ namespace world
             return pointInPolygon(collectPolygonVertices(polygon), location);
         }
 
-        int positionMatchScore(const shared_ptr<ControllerPosition>& position, const GeoPoint& location)
+        bool isAltitudeInAirspace(
+            const shared_ptr<ControlledAirspace>& airspace,
+            float altitudeFeetMsl)
+        {
+            if (!airspace || altitudeFeetMsl < 0.0f)
+            {
+                return true;
+            }
+
+            const auto geometry = airspace->geometry();
+            if (!geometry)
+            {
+                return true;
+            }
+
+            if (geometry->hasLowerBound() && altitudeFeetMsl < geometry->lowerBoundFeet())
+            {
+                return false;
+            }
+
+            if (geometry->hasUpperBound() && altitudeFeetMsl > geometry->upperBoundFeet())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        int positionMatchScore(
+            const shared_ptr<ControllerPosition>& position,
+            const GeoPoint& location,
+            float altitudeFeetMsl)
         {
             if (!position)
             {
@@ -120,6 +151,11 @@ namespace world
             }
 
             const auto radarScope = position->radarScope();
+            if (!isAltitudeInAirspace(radarScope ? radarScope->airspace() : nullptr, altitudeFeetMsl))
+            {
+                return 0;
+            }
+
             if (radarScope && !radarScope->scopeLimit().isEmpty())
             {
                 return polygonContainsLocation(radarScope->scopeLimit(), location) ? 3 : 0;
@@ -138,7 +174,8 @@ namespace world
         shared_ptr<ControllerPosition> tryFindBestPosition(
             const vector<shared_ptr<ControllerPosition>>& positions,
             ControllerPosition::Type type,
-            const GeoPoint& location)
+            const GeoPoint& location,
+            float altitudeFeetMsl)
         {
             shared_ptr<ControllerPosition> bestPosition;
             int bestScore = 0;
@@ -150,7 +187,7 @@ namespace world
                     continue;
                 }
 
-                const int score = positionMatchScore(position, location);
+                const int score = positionMatchScore(position, location, altitudeFeetMsl);
                 if (score > bestScore)
                 {
                     bestScore = score;
@@ -162,9 +199,12 @@ namespace world
         }
     }
 
-    shared_ptr<ControllerPosition> ControlFacility::tryFindPosition(ControllerPosition::Type type, const GeoPoint& location) const
+    shared_ptr<ControllerPosition> ControlFacility::tryFindPosition(
+        ControllerPosition::Type type,
+        const GeoPoint& location,
+        float altitudeFeetMsl) const
     {
-        auto exactMatch = tryFindBestPosition(m_positions, type, location);
+        auto exactMatch = tryFindBestPosition(m_positions, type, location, altitudeFeetMsl);
 
         if (exactMatch)
         {
@@ -173,13 +213,21 @@ namespace world
 
         if (type == ControllerPosition::Type::ClearanceDelivery)
         {
-            auto groundFallback = tryFindBestPosition(m_positions, ControllerPosition::Type::Ground, location);
+            auto groundFallback = tryFindBestPosition(
+                m_positions,
+                ControllerPosition::Type::Ground,
+                location,
+                altitudeFeetMsl);
             if (groundFallback)
             {
                 return groundFallback;
             }
 
-            auto localFallback = tryFindBestPosition(m_positions, ControllerPosition::Type::Local, location);
+            auto localFallback = tryFindBestPosition(
+                m_positions,
+                ControllerPosition::Type::Local,
+                location,
+                altitudeFeetMsl);
             if (localFallback)
             {
                 return localFallback;
@@ -189,9 +237,12 @@ namespace world
         return nullptr;
     }
 
-    shared_ptr<ControllerPosition> ControlFacility::findPositionOrThrow(ControllerPosition::Type type, const GeoPoint& location) const 
+    shared_ptr<ControllerPosition> ControlFacility::findPositionOrThrow(
+        ControllerPosition::Type type,
+        const GeoPoint& location,
+        float altitudeFeetMsl) const
     {
-        auto positionOrNull = tryFindPosition(type, location);
+        auto positionOrNull = tryFindPosition(type, location, altitudeFeetMsl);
         if (positionOrNull)
         {
             return positionOrNull;

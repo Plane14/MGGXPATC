@@ -177,3 +177,36 @@ TEST(ControllerPositionTest, clearanceDeliveryFallbackRespectsScopedFallbackPosi
 
     EXPECT_EQ(tower->tryFindPosition(ControllerPosition::Type::ClearanceDelivery, outsideLocalScope), nullptr);
 }
+
+TEST(ControllerPositionTest, appliesVerticalAirspaceBoundsWhenSelectingPosition)
+{
+    auto host = TestHostServices::create();
+    Airport::Header header("KAAA", "Vertical Scope Test", GeoPoint(30.0, 40.0), 0);
+    auto airspace = WorldBuilder::assembleSampleAirportControlZone(header);
+    auto tower = WorldBuilder::assembleAirportTower(host, header, airspace, {
+        { ControllerPosition::Type::Approach, 124700, GeoPolygon::empty(), "" },
+        { ControllerPosition::Type::Area, 133500, GeoPolygon::empty(), "" }
+    });
+
+    const GeoPoint probePoint = GeoMath::getPointAtDistance(header.datum(), 90.0f, 20.0f * 1852.0f);
+
+    auto approachAtLowAltitude = tower->tryFindPosition(
+        ControllerPosition::Type::Approach,
+        probePoint,
+        3000.0f);
+    ASSERT_TRUE(approachAtLowAltitude);
+    EXPECT_EQ(approachAtLowAltitude->type(), ControllerPosition::Type::Approach);
+
+    auto approachAtHighAltitude = tower->tryFindPosition(
+        ControllerPosition::Type::Approach,
+        probePoint,
+        30000.0f);
+    EXPECT_EQ(approachAtHighAltitude, nullptr);
+
+    auto areaAtHighAltitude = tower->tryFindPosition(
+        ControllerPosition::Type::Area,
+        probePoint,
+        30000.0f);
+    ASSERT_TRUE(areaAtHighAltitude);
+    EXPECT_EQ(areaAtHighAltitude->type(), ControllerPosition::Type::Area);
+}
