@@ -292,9 +292,15 @@ namespace ai
                     auto state = obstacleScanSemaphore(
                         world, flight, typeOfTaxi == TaxiType::Pushback, previousState, totalWaitDuration);
 
+                    auto aircraft = getAIAircraft(flight);
                     // Update braking state based on semaphore
                     bool wasBraking = speedState->isBraking;
                     speedState->isBraking = (state == Maneuver::SemaphoreState::Closed);
+                    if (speedState->isBraking)
+                    {
+                        speedState->currentSpeed = 0.0f;
+                        aircraft->hardStop(heading);
+                    }
 
                     // Log transition
                     if (wasBraking && !speedState->isBraking) {
@@ -306,8 +312,10 @@ namespace ai
                     return state;
                 },
                 [=]() {
-                    // Stop callback: set braking flag (actual deceleration happens in apply)
+                    auto aircraft = getAIAircraft(flight);
                     speedState->isBraking = true;
+                    speedState->currentSpeed = 0.0f;
+                    aircraft->hardStop(heading);
                 }
             ));
         });
@@ -406,15 +414,22 @@ namespace ai
                     auto state = obstacleScanSemaphore(
                         world, flight, typeOfTaxi == TaxiType::Pushback, previousState, totalWaitDuration);
 
+                    auto aircraft = getAIAircraft(flight);
                     // Update braking state based on semaphore
-                    bool wasBraking = speedState->isBraking;
                     speedState->isBraking = (state == Maneuver::SemaphoreState::Closed);
+                    if (speedState->isBraking)
+                    {
+                        speedState->currentSpeed = 0.0f;
+                        aircraft->hardStop(static_cast<float>(aircraft->attitude().heading()));
+                    }
 
                     return state;
                 },
                 [=]() {
-                    // Stop callback: set braking flag (actual deceleration happens in apply)
+                    auto aircraft = getAIAircraft(flight);
                     speedState->isBraking = true;
+                    speedState->currentSpeed = 0.0f;
+                    aircraft->hardStop(static_cast<float>(aircraft->attitude().heading()));
                 }
             ));
         });
