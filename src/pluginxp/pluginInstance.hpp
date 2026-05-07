@@ -176,13 +176,7 @@ private:
             m_worldFuture = std::async(std::launch::async, [this] {
                 try
                 {
-                    auto world = assembleWorld();
-                    if (world)
-                    {
-                        m_host->useWorld(world);
-                        startServer();
-                    }
-                    return world;
+                    return assembleWorld();
                 }
                 catch (const exception& e)
                 {
@@ -214,6 +208,8 @@ private:
 
                 if (world)
                 {
+                    m_host->useWorld(world);
+                    startServer();
                     m_onAssembled(world);
                 }
                 else
