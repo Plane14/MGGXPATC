@@ -949,7 +949,7 @@ private:
 
         const bool isGroundBased = source->altitude().isGroundBased();
         const float groundSpeedKt = static_cast<float>(std::fabs(source->groundSpeedKt()));
-        const bool shouldTaxi = isGroundBased && groundSpeedKt > 1.5f && groundSpeedKt < 40.0f;
+        const bool shouldTaxi = isGroundBased && groundSpeedKt > 1.5f && groundSpeedKt < 50.0f;
 
         if (shouldTaxi)
         {
