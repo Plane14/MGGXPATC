@@ -82,7 +82,7 @@ namespace ai
                 auto weather = weatherService->getWeatherAt(airportLocation, airport->header().elevation() / FEET_IN_1_METER);
                 
                 // First try parsed traffic flows from apt.dat
-                auto flow = airport->getActiveFlow(weather.windDirectionTrueDegrees);
+                auto flow = airport->getActiveFlow(weather, airport->header().elevation());
                 
                 if (flow)
                 {
@@ -223,7 +223,7 @@ namespace ai
             }
 
             // Find the apt.dat traffic flow that matches the new wind
-            auto flow = airport->getActiveFlow(newWindDir);
+            auto flow = airport->getActiveFlow(weather, airport->header().elevation());
             if (!flow)
             {
                 m_lastMonitoredWindDirDegrees = newWindDir;

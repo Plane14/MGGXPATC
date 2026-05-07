@@ -346,13 +346,22 @@ namespace ai
         float procedureLegVerticalSpeed(FlightPlan::LegType legType, const shared_ptr<FlightPlan::Leg>& leg) const
         {
             const auto& performance = m_aircraft->performanceProfile();
+            const bool helicopter = m_aircraft->category() == Aircraft::Category::Helicopter;
 
             switch (legType)
             {
             case FlightPlan::LegType::TakeOff:
+                if (helicopter)
+                {
+                    return max(450.0f, performance.initialClimbRocFpm * 0.35f);
+                }
                 return 1500.0f;
             case FlightPlan::LegType::Sid:
                 {
+                    if (helicopter)
+                    {
+                        return max(650.0f, performance.initialClimbRocFpm * 0.5f);
+                    }
                     float baseClimbRate = max(800.0f, leg->targetAltitude() > 0 ? leg->targetAltitude() / 10.0f : 1500.0f);
                     // Fighters with unrestricted climbout: much steeper climb (4500-6000 fpm)
                     if (m_doUnrestrictedClimbout)
@@ -365,13 +374,17 @@ namespace ai
             case FlightPlan::LegType::EnRoute:
                 return 0.0f;
             case FlightPlan::LegType::Star:
+                if (helicopter)
+                {
+                    return -max(450.0f, performance.descentRateFpm * 1.2f);
+                }
                 return -max(700.0f, leg->targetAltitude() > 0 ? leg->targetAltitude() / 10.0f : 1200.0f);
             case FlightPlan::LegType::Approach:
                 {
                     // Use Eurocontrol performance-based descent rate for approach
                     // Base on aircraft's nominal descent rate capability with minimum for steep approach
                     const float baseDescentRate = performance.descentRateFpm;
-                    const float minApproachDescent = 700.0f;
+                    const float minApproachDescent = helicopter ? 250.0f : 700.0f;
                     const float performanceBasedDescent = leg->targetAltitude() > 0
                         ? max(minApproachDescent, baseDescentRate * 0.8f)
                         : max(minApproachDescent, baseDescentRate);
@@ -395,7 +408,31 @@ namespace ai
                     : defaultSpeed;
             };
 
-            const float approachSpeed = max(90.0f, performance.approachSpeedKt);
+            const bool helicopter = m_aircraft->category() == Aircraft::Category::Helicopter;
+            const float approachSpeed = helicopter ? max(45.0f, performance.approachSpeedKt) : max(90.0f, performance.approachSpeedKt);
+
+            if (helicopter)
+            {
+                switch (legType)
+                {
+                case FlightPlan::LegType::TakeOff:
+                    return constrainedSpeed(max(35.0f, performance.takeoffInitialClimbSpeedKt * 0.75f));
+                case FlightPlan::LegType::Sid:
+                    return constrainedSpeed(max(55.0f, min(105.0f, performance.takeoffInitialClimbSpeedKt)));
+                case FlightPlan::LegType::EnRoute:
+                    return constrainedSpeed(max(80.0f, min(135.0f, approachSpeed + 45.0f)));
+                case FlightPlan::LegType::Star:
+                    return constrainedSpeed(max(65.0f, min(115.0f, approachSpeed + 25.0f)));
+                case FlightPlan::LegType::Approach:
+                    return constrainedSpeed(approachSpeed);
+                case FlightPlan::LegType::Landing:
+                    return constrainedSpeed(max(10.0f, min(45.0f, approachSpeed * 0.55f)));
+                case FlightPlan::LegType::GoAround:
+                    return constrainedSpeed(max(55.0f, performance.takeoffInitialClimbSpeedKt));
+                default:
+                    return leg->targetSpeed();
+                }
+            }
 
             switch (legType)
             {
@@ -3930,4 +3967,3 @@ namespace ai
         }
     };
 }
-

@@ -2051,7 +2051,7 @@ namespace world
         virtual void progressTo(chrono::microseconds timestamp) = 0;
     };
 
-    // Traffic flow runway usage configuration (from apt.dat 1102 lines)
+    // Traffic flow runway usage configuration (from apt.dat 1100/1110 lines)
     struct TrafficFlowRunwayUse
     {
         string runwayName;
@@ -2062,7 +2062,21 @@ namespace world
             : runwayName(name), useForArrival(arrival), useForDeparture(departure) {}
     };
 
-    // Traffic flow definition (from apt.dat 1100/1101 lines)
+    struct TrafficFlowWindRule
+    {
+        string reportingStationIcao;
+        float windFromDegrees;
+        float windToDegrees;
+        float maximumWindSpeedKt;
+
+        TrafficFlowWindRule(const string& reportingStation, float from, float to, float maxWindSpeedKt)
+            : reportingStationIcao(reportingStation),
+              windFromDegrees(from),
+              windToDegrees(to),
+              maximumWindSpeedKt(maxWindSpeedKt) {}
+    };
+
+    // Traffic flow definition (from apt.dat 1000-1004 and 1100/1110 lines)
     class TrafficFlow
     {
     private:
@@ -2070,40 +2084,114 @@ namespace world
     private:
         string m_name;
         string m_icaoCode;
-        // Wind direction range that activates this flow (true degrees)
+        // Wind direction range that activates this flow (magnetic degrees in apt.dat; compared to simulator wind)
         float m_windFromDegrees;
         float m_windToDegrees;
-        float m_ceiling;
-        float m_visibility;
+        float m_minimumCeilingFeetAgl;
+        float m_minimumVisibilityStatuteMiles;
+        vector<TrafficFlowWindRule> m_windRules;
         vector<TrafficFlowRunwayUse> m_runwayUses;
     public:
         TrafficFlow(const string& name, const string& icao, float windFrom, float windTo, 
                     float ceiling = -1, float visibility = -1)
             : m_name(name), m_icaoCode(icao), m_windFromDegrees(windFrom), m_windToDegrees(windTo),
-              m_ceiling(ceiling), m_visibility(visibility) {}
+              m_minimumCeilingFeetAgl(ceiling), m_minimumVisibilityStatuteMiles(visibility) {}
         
         const string& name() const { return m_name; }
         const string& icaoCode() const { return m_icaoCode; }
         float windFromDegrees() const { return m_windFromDegrees; }
         float windToDegrees() const { return m_windToDegrees; }
-        float ceiling() const { return m_ceiling; }
-        float visibility() const { return m_visibility; }
+        float ceiling() const { return m_minimumCeilingFeetAgl; }
+        float visibility() const { return m_minimumVisibilityStatuteMiles; }
         
         // Check if wind direction matches this flow
-        bool matchesWind(float windDirectionDegrees) const
+        bool matchesWind(float windDirectionDegrees, float windSpeedKt = 0.0f) const
         {
+            if (!m_windRules.empty())
+            {
+                return any_of(m_windRules.begin(), m_windRules.end(), [windDirectionDegrees, windSpeedKt](const TrafficFlowWindRule& rule) {
+                    const bool directionMatches = rule.windFromDegrees > rule.windToDegrees
+                        ? windDirectionDegrees >= rule.windFromDegrees || windDirectionDegrees <= rule.windToDegrees
+                        : windDirectionDegrees >= rule.windFromDegrees && windDirectionDegrees <= rule.windToDegrees;
+                    const bool speedMatches = rule.maximumWindSpeedKt < 0.0f || rule.maximumWindSpeedKt >= 999.0f || windSpeedKt <= rule.maximumWindSpeedKt;
+                    return directionMatches && speedMatches;
+                });
+            }
+
             // Handle wrap-around case (e.g., 350° to 010°)
             if (m_windFromDegrees > m_windToDegrees)
             {
                 return windDirectionDegrees >= m_windFromDegrees || windDirectionDegrees <= m_windToDegrees;
             }
+
             return windDirectionDegrees >= m_windFromDegrees && windDirectionDegrees <= m_windToDegrees;
+        }
+
+        bool matchesWeather(const WeatherSnapshot& weather, float airportElevationFeet) const
+        {
+            if (!weather.available)
+            {
+                return false;
+            }
+
+            if (!matchesWind(weather.windDirectionTrueDegrees, weather.windSpeedMetersPerSecond * KNOT_IN_1_METER_PER_SEC))
+            {
+                return false;
+            }
+
+            if (m_minimumVisibilityStatuteMiles >= 0.0f)
+            {
+                const float visibilityStatuteMiles = weather.visibilityMeters / 1609.344f;
+                if (visibilityStatuteMiles < m_minimumVisibilityStatuteMiles)
+                {
+                    return false;
+                }
+            }
+
+            if (m_minimumCeilingFeetAgl >= 0.0f)
+            {
+                float ceilingFeetAgl = -1.0f;
+                for (size_t i = 0; i < weather.cloudLayerCoverages.size(); ++i)
+                {
+                    if (weather.cloudLayerCoverages.at(i) < 0.5f || i >= weather.cloudLayerBasesMeters.size())
+                    {
+                        continue;
+                    }
+
+                    const float baseFeetAgl = weather.cloudLayerBasesMeters.at(i) * FEET_IN_1_METER - airportElevationFeet;
+                    ceilingFeetAgl = ceilingFeetAgl < 0.0f ? baseFeetAgl : min(ceilingFeetAgl, baseFeetAgl);
+                }
+
+                if (ceilingFeetAgl >= 0.0f && ceilingFeetAgl < m_minimumCeilingFeetAgl)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
         
         void setWindRange(float from, float to)
         {
             m_windFromDegrees = from;
             m_windToDegrees = to;
+        }
+
+        void addWindRule(const string& reportingStationIcao, float from, float to, float maximumWindSpeedKt)
+        {
+            m_windRules.push_back(TrafficFlowWindRule(reportingStationIcao, from, to, maximumWindSpeedKt));
+        }
+
+        const vector<TrafficFlowWindRule>& windRules() const { return m_windRules; }
+
+        void setMinimumCeilingFeetAgl(float ceilingFeetAgl)
+        {
+            m_minimumCeilingFeetAgl = ceilingFeetAgl;
+        }
+
+        void setMinimumVisibilityStatuteMiles(float visibilityStatuteMiles)
+        {
+            m_minimumVisibilityStatuteMiles = visibilityStatuteMiles;
         }
         
         void addRunwayUse(const string& runwayName, bool arrival, bool departure)
@@ -2214,6 +2302,7 @@ namespace world
         bool hasTrafficFlows() const { return !m_trafficFlows.empty(); }
         // Get active flow based on wind direction, returns nullptr if no matching flow
         shared_ptr<TrafficFlow> getActiveFlow(float windDirectionDegrees) const;
+        shared_ptr<TrafficFlow> getActiveFlow(const WeatherSnapshot& weather, float airportElevationFeet) const;
     public:
         shared_ptr<ControllerPosition> getControllerPositionOrThrow(ControllerPosition::Type type, const GeoPoint& location) const {
             return m_tower->findPositionOrThrow(type, location);
