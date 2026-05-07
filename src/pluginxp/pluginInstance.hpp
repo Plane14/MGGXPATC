@@ -492,7 +492,7 @@ private:
 
             if (changeSet)
             {
-                m_aircraftObjectService->processEvents(m_world->timestamp(), changeSet);
+                m_aircraftObjectService->processEvents(changeSet);
             }
         }
 
