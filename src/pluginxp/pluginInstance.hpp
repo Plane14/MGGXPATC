@@ -19,6 +19,7 @@
 
 // SDK
 #include "XPLMPlugin.h"
+#include "XPLMNavigation.h"
 #if !XPLM300
 #error This plugin requires version 300 of the SDK
 #endif
