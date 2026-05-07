@@ -899,8 +899,14 @@ namespace world
         const shared_ptr<Airport> airport() const { return m_airport; }
         const vector<shared_ptr<ControllerPosition>>& positions() const { return m_positions; }
         const vector<shared_ptr<InformationService>>& services() const { return m_services; }
-        shared_ptr<ControllerPosition> tryFindPosition(ControllerPosition::Type type, const GeoPoint& location) const;
-        shared_ptr<ControllerPosition> findPositionOrThrow(ControllerPosition::Type type, const GeoPoint& location) const;
+        shared_ptr<ControllerPosition> tryFindPosition(
+            ControllerPosition::Type type,
+            const GeoPoint& location,
+            float altitudeFeetMsl = -1.0f) const;
+        shared_ptr<ControllerPosition> findPositionOrThrow(
+            ControllerPosition::Type type,
+            const GeoPoint& location,
+            float altitudeFeetMsl = -1.0f) const;
     public:
         void progressTo(chrono::microseconds timestamp);
         void clearFlights();
@@ -2304,23 +2310,26 @@ namespace world
         shared_ptr<TrafficFlow> getActiveFlow(float windDirectionDegrees) const;
         shared_ptr<TrafficFlow> getActiveFlow(const WeatherSnapshot& weather, float airportElevationFeet) const;
     public:
-        shared_ptr<ControllerPosition> getControllerPositionOrThrow(ControllerPosition::Type type, const GeoPoint& location) const {
-            return m_tower->findPositionOrThrow(type, location);
+        shared_ptr<ControllerPosition> getControllerPositionOrThrow(
+            ControllerPosition::Type type,
+            const GeoPoint& location,
+            float altitudeFeetMsl = -1.0f) const {
+            return m_tower->findPositionOrThrow(type, location, altitudeFeetMsl);
         }
-        shared_ptr<ControllerPosition> clearanceDeliveryAt(const GeoPoint& location) const {
-            return m_tower->findPositionOrThrow(ControllerPosition::Type::ClearanceDelivery, location);
+        shared_ptr<ControllerPosition> clearanceDeliveryAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            return m_tower->findPositionOrThrow(ControllerPosition::Type::ClearanceDelivery, location, altitudeFeetMsl);
         }
-        shared_ptr<ControllerPosition> groundAt(const GeoPoint& location) const {
-            return m_tower->findPositionOrThrow(ControllerPosition::Type::Ground, location);
+        shared_ptr<ControllerPosition> groundAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            return m_tower->findPositionOrThrow(ControllerPosition::Type::Ground, location, altitudeFeetMsl);
         }
-        shared_ptr<ControllerPosition> localAt(const GeoPoint& location) const {
-            return m_tower->findPositionOrThrow(ControllerPosition::Type::Local, location);
+        shared_ptr<ControllerPosition> localAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            return m_tower->findPositionOrThrow(ControllerPosition::Type::Local, location, altitudeFeetMsl);
         }
-        shared_ptr<ControllerPosition> departureAt(const GeoPoint& location) const {
-            return m_tower->findPositionOrThrow(ControllerPosition::Type::Departure, location);
+        shared_ptr<ControllerPosition> departureAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            return m_tower->findPositionOrThrow(ControllerPosition::Type::Departure, location, altitudeFeetMsl);
         }
-        shared_ptr<ControllerPosition> approachAt(const GeoPoint& location) const {
-            return m_tower->findPositionOrThrow(ControllerPosition::Type::Approach, location);
+        shared_ptr<ControllerPosition> approachAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            return m_tower->findPositionOrThrow(ControllerPosition::Type::Approach, location, altitudeFeetMsl);
         }
     public:
         void selectActiveRunways();

@@ -3882,9 +3882,23 @@ namespace ai
                 }
 
                 const GeoPoint location = flight()->aircraft()->location();
+                const auto altitude = flight()->aircraft()->altitude();
+                float altitudeMslFeet = -1.0f;
+                if (altitude.type() == Altitude::Type::MSL)
+                {
+                    altitudeMslFeet = altitude.feet();
+                }
+                else if (altitude.type() == Altitude::Type::AGL)
+                {
+                    altitudeMslFeet = altitude.feet() + host()->queryTerrainElevationAt(location);
+                }
+                else if (altitude.type() == Altitude::Type::Ground)
+                {
+                    altitudeMslFeet = host()->queryTerrainElevationAt(location);
+                }
                 try
                 {
-                    return airport->localAt(location);
+                    return airport->localAt(location, altitudeMslFeet);
                 }
                 catch (const exception&)
                 {
@@ -3908,7 +3922,7 @@ namespace ai
                 {
                     try
                     {
-                        auto candidate = tower->tryFindPosition(fallbackType, location);
+                        auto candidate = tower->tryFindPosition(fallbackType, location, altitudeMslFeet);
                         if (candidate)
                         {
                             return candidate;
