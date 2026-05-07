@@ -147,8 +147,6 @@ private:
     {
     private:
         shared_ptr<PluginHostServices> m_host;
-        future<shared_ptr<World>> m_worldFuture;
-        atomic<bool> m_done;
         PluginMenu::Item m_assemblingItem;
         function<void(shared_ptr<World> world)> m_onAssembled;
         function<void()> m_onFailed;
@@ -164,7 +162,6 @@ private:
             m_assemblingItem(_menu, "World is being assembled, please wait...", [](){}),
             m_onAssembled(std::move(_onAssembled)),
             m_onFailed(std::move(_onFailed)),
-            m_done(false),
             m_bubbleIcaos(std::move(_bubbleIcaos))
         {
         }
@@ -173,39 +170,9 @@ private:
 
         void enter() override
         {
-            m_worldFuture = std::async(std::launch::async, [this] {
-                try
-                {
-                    return assembleWorld();
-                }
-                catch (const exception& e)
-                {
-                    m_host->writeLog("PLUGIN|WorldAssemblingState background task CRASHED!!! %s", e.what());
-                    return shared_ptr<World>();
-                }
-            });
-        }
-
-        void exit() override
-        {
-            if (!m_done && m_worldFuture.wait_for(chrono::milliseconds(0)) != future_status::ready)
+            try
             {
-                m_host->writeLog("PLUGIN|WARNING: leaving WORLD-ASSEMBLING state while the assembly is still in progress!");
-            }
-        }
-
-        void ping() override
-        {
-            if (m_worldFuture.wait_for(chrono::milliseconds(0)) != future_status::ready)
-            {
-                m_host->writeLog("PLUGIN|ping WORLD-ASSEMBLING: in progress");
-            }
-            else if (m_worldFuture.valid())
-            {
-                m_host->writeLog("PLUGIN|ping WORLD-ASSEMBLING: done");
-                auto world = m_worldFuture.get();
-                m_done = true;
-
+                auto world = assembleWorld();
                 if (world)
                 {
                     m_host->useWorld(world);
@@ -218,6 +185,19 @@ private:
                     m_onFailed();
                 }
             }
+            catch (const exception& e)
+            {
+                m_host->writeLog("PLUGIN|WorldAssemblingState enter() CRASHED!!! %s", e.what());
+                m_onFailed();
+            }
+        }
+
+        void exit() override
+        {
+        }
+
+        void ping() override
+        {
         }
 
     private:
@@ -304,8 +284,6 @@ private:
         PluginMenu::Item m_worldIsStarting;
         function<void(shared_ptr<Airport> userAirport)> m_onStarted;
         shared_ptr<Airport> m_userAirport;
-        future<shared_ptr<Airport>> m_scheduleFuture;
-        atomic<bool> m_done;
     public:
         SchedulesStartingState(
             shared_ptr<HostServices> _host,
@@ -320,61 +298,45 @@ private:
             m_worldIsStarting(_menu, "Starting schedules, please wait...", [](){}),
             m_loadFactor(_loadFactor),
             m_offlineRandomTraffic(_offlineRandomTraffic),
-            m_onStarted(std::move(_onStarted)),
-            m_done(false)
+            m_onStarted(std::move(_onStarted))
         {
         }
 
         void enter() override
         {
-            m_scheduleFuture = std::async(std::launch::async, [this] {
-                try
-                {
-                    DemoScheduleLoader scheduleLoader(m_host, m_world);
-                    scheduleLoader.loadSchedules(m_loadFactor, m_offlineRandomTraffic);
+            try
+            {
+                DemoScheduleLoader scheduleLoader(m_host, m_world);
+                scheduleLoader.loadSchedules(m_loadFactor, m_offlineRandomTraffic);
 
-                    m_host->writeLog(
-                        "PLUGIN|The world now has [%d] airports, [%d] control facilities, [%d] AI flights",
-                        m_world->airports().size(),
-                        m_world->controlFacilities().size(),
-                        m_world->flights().size());
+                m_host->writeLog(
+                    "PLUGIN|The world now has [%d] airports, [%d] control facilities, [%d] AI flights",
+                    m_world->airports().size(),
+                    m_world->controlFacilities().size(),
+                    m_world->flights().size());
 
-                    auto userAirport = scheduleLoader.airport();
-                    WorldBuilder::tidyAirportElevations(m_host, userAirport);
-                    return userAirport;
-                }
-                catch (const exception& e)
+                auto userAirport = scheduleLoader.airport();
+                WorldBuilder::tidyAirportElevations(m_host, userAirport);
+
+                if (userAirport)
                 {
-                    m_host->writeLog("PLUGIN|SchedulesStartingState background task CRASHED!!! %s", e.what());
-                    return shared_ptr<Airport>();
+                    logUserAirportElevations(userAirport);
+                    m_onStarted(userAirport);
                 }
-            });
+                else
+                {
+                    m_host->writeLog("PLUGIN|ERROR: schedules failed to load - see previous errors");
+                }
+            }
+            catch (const exception& e)
+            {
+                m_host->writeLog("PLUGIN|SchedulesStartingState enter() CRASHED!!! %s", e.what());
+                m_host->writeLog("PLUGIN|ERROR: schedules failed to load - see previous errors");
+            }
         }
 
         void ping() override
         {
-            if (m_scheduleFuture.wait_for(chrono::milliseconds(0)) != future_status::ready)
-            {
-                return;
-            }
-
-            if (!m_scheduleFuture.valid())
-            {
-                return;
-            }
-
-            auto userAirport = m_scheduleFuture.get();
-            m_done = true;
-
-            if (userAirport)
-            {
-                logUserAirportElevations(userAirport);
-                m_onStarted(userAirport);
-            }
-            else
-            {
-                m_host->writeLog("PLUGIN|ERROR: schedules failed to load - see previous errors");
-            }
         }
 
     private:
