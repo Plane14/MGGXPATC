@@ -10,10 +10,12 @@
 #include <memory>
 #include <thread>
 #include <future>
+#include <atomic>
 #include <unordered_set>
 #include <algorithm>
 #include <cctype>
 #include <cstring>
+#include <cmath>
 
 // SDK
 #include "XPLMPlugin.h"
@@ -933,8 +935,8 @@ private:
         auto configuration = m_hostServices->services().get<PluginConfiguration>();
         const float radiusNm = configuration ? configuration->trafficBubbleRadiusNm : 80.0f;
 
-        const float userLat = static_cast<float>(m_userAircraftLatitude.value());
-        const float userLon = static_cast<float>(m_userAircraftLongitude.value());
+        const float userLat = static_cast<float>(static_cast<double>(m_userAircraftLatitude));
+        const float userLon = static_cast<float>(static_cast<double>(m_userAircraftLongitude));
 
         m_hostServices->writeLog(
             "PLUGIN|collectBubbleAirportIcaos: user at (%f,%f) radius %.0f nm",
