@@ -1,7 +1,223 @@
-[1/3] Building CXX object src/libai/CMakeFiles/libai.dir/libai.cpp.obj
-FAILED: [code=1] src/libai/CMakeFiles/libai.dir/libai.cpp.obj 
-C:\msys64\mingw64\bin\g++.exe  -IC:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai/../libworld -O3 -DNDEBUG -std=gnu++14 -MD -MT src/libai/CMakeFiles/libai.dir/libai.cpp.obj -MF src\libai\CMakeFiles\libai.dir\libai.cpp.obj.d -o src/libai/CMakeFiles/libai.dir/libai.cpp.obj -c C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai/libai.cpp
-[2/3] Building CXX object src/libai/CMakeFiles/libai.dir/maneuverFactory.cpp.obj
-FAILED: [code=1] src/libai/CMakeFiles/libai.dir/maneuverFactory.cpp.obj 
-C:\msys64\mingw64\bin\g++.exe  -IC:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai/../libworld -O3 -DNDEBUG -std=gnu++14 -MD -MT src/libai/CMakeFiles/libai.dir/maneuverFactory.cpp.obj -MF src\libai\CMakeFiles\libai.dir\maneuverFactory.cpp.obj.d -o src/libai/CMakeFiles/libai.dir/maneuverFactory.cpp.obj -c C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai/maneuverFactory.cpp
-ninja: build stopped: subcommand failed.
+ninja: Entering directory `C:\Users\marti\source\repos\Plane14\MGGXPATC\build'
+[0/1] Re-running CMake...
+CMake Deprecation Warning at CMakeLists.txt:8 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+------ atcbuild: environment ------
+Warning: ATCBUILD_PLATFORM_BIN not specified, using 'build'
+ATCBUILD_PLATFORM_BIN=build
+ATCBUILD_CAN_RUN_TESTS=TRUE
+CMAKE_SYSTEM_NAME=Windows
+CMAKE_HOST_SYSTEM_NAME=Windows
+CMAKE_CURRENT_BINARY_DIR=C:/Users/marti/source/repos/Plane14/MGGXPATC/build
+CMAKE_CXX_COMPILER_ID=GNU
+ATC_LIBS_PATH=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs
+GTEST_INCLUDE_DIR=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/googletest/include
+GTEST_LIBRARY_PATH=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/build/lib/
+CMAKE_LIBRARY_OUTPUT_DIRECTORY=C:/Users/marti/source/repos/Plane14/MGGXPATC/build/lib
+CMAKE_ARCHIVE_OUTPUT_DIRECTORY=C:/Users/marti/source/repos/Plane14/MGGXPATC/build/lib
+CMAKE_RUNTIME_OUTPUT_DIRECTORY=C:/Users/marti/source/repos/Plane14/MGGXPATC/build/bin
+------ atcbuild: end of environment ------
+CMake Warning (dev) at src/CMakeLists.txt:7 (find_package):
+  Policy CMP0144 is not set: find_package uses upper-case <PACKAGENAME>_ROOT
+  variables.  Run "cmake --help-policy CMP0144" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+  CMake variable GTEST_ROOT is set to:
+
+    C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/build/lib/
+
+  For compatibility, find_package is ignoring the variable, but code in a
+  .cmake module might still use it.
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+PPL_LIBRARY=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/PPL/lib/libPPL.a
+XPMP2_LIBRARY=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/XPMP2/build/libXPMP2.a
+OPENAL_LIBRARY=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/PPL/include/openal-soft/build/libOpenAL32.dll.a
+SPEECH_LIBRARY=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/libspeechwin/build/Release/libspeechwin.lib
+PROTOBUF_LIBRARY=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/protobuf/win/lib/libprotobuf.a
+CMake Deprecation Warning at src/libworld/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at src/libworld_test/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+GTEST_INCLUDE_DIR = C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/googletest/include
+CMAKE_CURRENT_SOURCE_DIR = C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libworld_test
+CMake Deprecation Warning at src/libdataxp/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at src/libdataxp_test/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at src/libai/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at src/libai_test/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at src/libserver/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at src/libserver_test/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+CMake Deprecation Warning at src/pluginxp/CMakeLists.txt:1 (cmake_minimum_required):
+  Compatibility with CMake < 3.10 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier.
+
+
+XPLM_LIBRARY=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/XPSDK/Libraries/Win/XPLM_64.lib
+XPWIDGETS_LIBRARY=C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/XPSDK/Libraries/Win/XPWidgets_64.lib
+-- Making X-Plane plugin called pluginxp
+-- Configuring done (0.6s)
+CMake Error at src/libworld/CMakeLists.txt:4 (add_library):
+  Cannot find source file:
+
+    actor.cpp
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .mpp .m .M .mm .ixx .cppm
+  .ccm .cxxm .c++m .h .hh .h++ .hm .hpp .hxx .in .txx .f .F .for .f77 .f90
+  .f95 .f03 .hip .ispc
+
+
+CMake Error at src/libworld_test/CMakeLists.txt:10 (add_executable):
+  Cannot find source file:
+
+    taxiEdgeTest.cpp
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .mpp .m .M .mm .ixx .cppm
+  .ccm .cxxm .c++m .h .hh .h++ .hm .hpp .hxx .in .txx .f .F .for .f77 .f90
+  .f95 .f03 .hip .ispc
+
+
+CMake Error at src/libdataxp_test/CMakeLists.txt:8 (add_executable):
+  Cannot find source file:
+
+    libdataxp_test.h
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .mpp .m .M .mm .ixx .cppm
+  .ccm .cxxm .c++m .h .hh .h++ .hm .hpp .hxx .in .txx .f .F .for .f77 .f90
+  .f95 .f03 .hip .ispc
+
+
+CMake Error at src/libai/CMakeLists.txt:4 (add_library):
+  Cannot find source file:
+
+    libai.hpp
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .mpp .m .M .mm .ixx .cppm
+  .ccm .cxxm .c++m .h .hh .h++ .hm .hpp .hxx .in .txx .f .F .for .f77 .f90
+  .f95 .f03 .hip .ispc
+
+
+CMake Error at src/libai_test/CMakeLists.txt:8 (add_executable):
+  Cannot find source file:
+
+    workflowTest.cpp
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .mpp .m .M .mm .ixx .cppm
+  .ccm .cxxm .c++m .h .hh .h++ .hm .hpp .hxx .in .txx .f .F .for .f77 .f90
+  .f95 .f03 .hip .ispc
+
+
+CMake Error at src/pluginxp/CMakeLists.txt:82 (ADD_LIBRARY):
+  Cannot find source file:
+
+    xplmSpeakStringTtsService.hpp
+
+  Tried extensions .c .C .c++ .cc .cpp .cxx .cu .mpp .m .M .mm .ixx .cppm
+  .ccm .cxxm .c++m .h .hh .h++ .hm .hpp .hxx .in .txx .f .F .for .f77 .f90
+  .f95 .f03 .hip .ispc
+Call Stack (most recent call first):
+  src/pluginxp/CMakeLists.txt:110 (add_xplane_plugin)
+
+
+CMake Error at src/libworld/CMakeLists.txt:4 (add_library):
+  No SOURCES given to target: libworld
+
+
+CMake Error at src/libworld_test/CMakeLists.txt:10 (add_executable):
+  No SOURCES given to target: libworld_test
+
+
+CMake Error at src/libdataxp_test/CMakeLists.txt:8 (add_executable):
+  No SOURCES given to target: libdataxp_test
+
+
+CMake Error at src/libai/CMakeLists.txt:4 (add_library):
+  No SOURCES given to target: libai
+
+
+CMake Error at src/libai_test/CMakeLists.txt:8 (add_executable):
+  No SOURCES given to target: libai_test
+
+
+CMake Error at src/pluginxp/CMakeLists.txt:82 (ADD_LIBRARY):
+  No SOURCES given to target: pluginxp
+Call Stack (most recent call first):
+  src/pluginxp/CMakeLists.txt:110 (add_xplane_plugin)
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
+ninja: error: rebuilding 'build.ninja': subcommand failed
+FAILED: [code=1] build.ninja C:/Users/marti/source/repos/Plane14/MGGXPATC/build/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libworld/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libworld_test/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libdataxp/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libdataxp_test/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libai/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libai_test/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libserver/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libserver_test/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/pluginxp/cmake_install.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libworld/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libworld_test/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libdataxp/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libdataxp_test/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libai/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libai_test/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libserver/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/libserver_test/CTestTestfile.cmake C:/Users/marti/source/repos/Plane14/MGGXPATC/build/src/pluginxp/CTestTestfile.cmake 
+C:\msys64\mingw64\bin\cmake.exe --regenerate-during-build -SC:\Users\marti\source\repos\Plane14\MGGXPATC -BC:\Users\marti\source\repos\Plane14\MGGXPATC\build
