@@ -365,4 +365,16 @@ namespace world
         }
         return nullptr;
     }
+
+    shared_ptr<TrafficFlow> Airport::getActiveFlow(const WeatherSnapshot& weather, float airportElevationFeet) const
+    {
+        for (const auto& flow : m_trafficFlows)
+        {
+            if (flow->matchesWeather(weather, airportElevationFeet))
+            {
+                return flow;
+            }
+        }
+        return nullptr;
+    }
 }

@@ -200,6 +200,32 @@ static bool equalsIgnoreCase(const string& left, const string& right)
     return toUpperCopy(left) == toUpperCopy(right);
 }
 
+static bool tokenListContains(const string& listText, const string& token)
+{
+    const string expected = toUpperCopy(token);
+    bool found = false;
+    parseSeparatedList(listText, ",;:| \t", [&found, &expected](const string& item) {
+        if (toUpperCopy(trimCopy(item)) == expected)
+        {
+            found = true;
+        }
+    });
+    return found;
+}
+
+static vector<string> splitTokens(const string& lineText)
+{
+    vector<string> tokens;
+    parseSeparatedList(lineText, " \t", [&tokens](const string& item) {
+        const string trimmed = trimCopy(item);
+        if (!trimmed.empty())
+        {
+            tokens.push_back(trimmed);
+        }
+    });
+    return tokens;
+}
+
 static void appendUniqueText(vector<string>& items, const string& value)
 {
     if (!value.empty() && find(items.begin(), items.end(), value) == items.end())
@@ -1978,8 +2004,15 @@ bool XPAirportReader::rootContextParser(int lineCode, istream& input)
     case 1302:
         parseMetadata1302(input);
         break;
-    case 1100:
-        parseTrafficFlow1100(input);
+    case 1000:
+        if (m_headerWasRead)
+        {
+            parseTrafficFlow1000(input);
+        }
+        else
+        {
+            skipToNextLine(input);
+        }
         break;
     default:
         if (isControlFrequencyLine(lineCode))
@@ -2534,71 +2567,119 @@ void XPAptDatReader::readAptDat(
     m_host->writeLog("APTDAT|done loading airports, %d loaded, %d skipped.", loadedCount, skippedCount);
 }
 
-void XPAirportReader::parseTrafficFlow1100(istream& input)
+void XPAirportReader::parseTrafficFlow1000(istream& input)
 {
-    // Line 1100: <flow_name> <icao_code>
-    string flowName;
-    string icaoCode;
-    input >> flowName >> icaoCode;
-    skipToNextLine(input);
-    
-    // Create new flow with default values (will be updated by 1101)
-    auto flow = make_shared<TrafficFlow>(flowName, icaoCode, 0, 360, -1, -1);
+    string flowName = readToEndOfLine(input);
+    if (flowName.empty())
+    {
+        flowName = "unnamed flow";
+    }
+
+    auto flow = make_shared<TrafficFlow>(flowName, m_icao, 0.0f, 359.0f, -1.0f, -1.0f);
     m_currentFlow = flow;
     m_trafficFlows.push_back(flow);
-    
-    // Read flow rules (1101) and runway uses (1102) in context
+
     readAptDatInContext(input, [this, &input, flow](int lineCode) {
-        if (lineCode == 1101)
+        switch (lineCode)
         {
-            parseTrafficFlowRules1101(input, flow);
+        case 1001:
+            parseTrafficFlowWindRule1001(input, flow);
             return true;
-        }
-        else if (lineCode == 1102)
-        {
-            parseRunwayFlow1102(input, flow);
+        case 1002:
+            parseTrafficFlowCeilingRule1002(input, flow);
             return true;
+        case 1003:
+            parseTrafficFlowVisibilityRule1003(input, flow);
+            return true;
+        case 1004:
+            skipToNextLine(input);
+            return true;
+        case 1100:
+        case 1110:
+            parseRunwayInUseRule(input, flow);
+            return true;
+        case 1101:
+            skipToNextLine(input);
+            return true;
+        default:
+            return false;
         }
-        return false;
     });
 }
 
-void XPAirportReader::parseTrafficFlowRules1101(istream& input, shared_ptr<TrafficFlow> flow)
+void XPAirportReader::parseTrafficFlowWindRule1001(istream& input, shared_ptr<TrafficFlow> flow)
 {
-    // Line 1101: <ceiling> <visibility> <wind_from> <wind_to> <time_from> <time_to>
-    // All values are optional, -1 means "any"
-    float ceiling = -1;
-    float visibility = -1;
-    float windFrom = 0;
-    float windTo = 360;
-    float timeFrom = -1;
-    float timeTo = -1;
-    
-    input >> ceiling >> visibility >> windFrom >> windTo >> timeFrom >> timeTo;
-    skipToNextLine(input);
-    
-    // Update flow with wind rules (we ignore ceiling/visibility/time for now)
-    // Valid wind range is 0-360, -1 means "any"
-    if (windFrom >= 0 && windTo >= 0)
+    const auto tokens = splitTokens(readToEndOfLine(input));
+    if (tokens.size() < 4)
     {
-        flow->setWindRange(windFrom, windTo);
+        return;
+    }
+
+    const string reportingStationIcao = tokens.at(0);
+    const float windFrom = stof(tokens.at(1));
+    const float windTo = stof(tokens.at(2));
+    const float maximumWindSpeedKt = stof(tokens.at(3));
+
+    if (flow && windFrom >= 0.0f && windTo >= 0.0f)
+    {
+        flow->addWindRule(reportingStationIcao, windFrom, windTo, maximumWindSpeedKt);
+        if (flow->windRules().size() == 1)
+        {
+            flow->setWindRange(windFrom, windTo);
+        }
     }
 }
 
-void XPAirportReader::parseRunwayFlow1102(istream& input, shared_ptr<TrafficFlow> flow)
+void XPAirportReader::parseTrafficFlowCeilingRule1002(istream& input, shared_ptr<TrafficFlow> flow)
 {
-    // Line 1102: <runway_name> <operations> [aircraft_types] [category] ...
-    // operations: arrival, departure, both, neither
-    string runwayName;
-    string operations;
-    
-    input >> runwayName >> operations;
-    skipToNextLine(input);
-    
-    bool arrival = (operations == "arrival" || operations == "both");
-    bool departure = (operations == "departure" || operations == "both");
-    
-    if (arrival || departure)
+    const auto tokens = splitTokens(readToEndOfLine(input));
+    if (tokens.size() < 2)
+    {
+        return;
+    }
+
+    const float minimumCeilingFeetAgl = stof(tokens.at(1));
+
+    if (flow)
+    {
+        flow->setMinimumCeilingFeetAgl(minimumCeilingFeetAgl);
+    }
+}
+
+void XPAirportReader::parseTrafficFlowVisibilityRule1003(istream& input, shared_ptr<TrafficFlow> flow)
+{
+    const auto tokens = splitTokens(readToEndOfLine(input));
+    if (tokens.size() < 2)
+    {
+        return;
+    }
+
+    const float minimumVisibilityStatuteMiles = stof(tokens.at(1));
+
+    if (flow)
+    {
+        flow->setMinimumVisibilityStatuteMiles(minimumVisibilityStatuteMiles);
+    }
+}
+
+void XPAirportReader::parseRunwayInUseRule(istream& input, shared_ptr<TrafficFlow> flow)
+{
+    const auto tokens = splitTokens(readToEndOfLine(input));
+    if (tokens.size() < 3)
+    {
+        return;
+    }
+
+    const string runwayName = tokens.at(0);
+    const string operations = tokens.at(2);
+    const bool arrival = tokenListContains(operations, "arrivals") ||
+        tokenListContains(operations, "arrival") ||
+        tokenListContains(operations, "both");
+    const bool departure = tokenListContains(operations, "departures") ||
+        tokenListContains(operations, "departure") ||
+        tokenListContains(operations, "both");
+
+    if (flow && (arrival || departure))
     {
         flow->addRunwayUse(runwayName, arrival, departure);
     }
