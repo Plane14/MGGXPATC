@@ -947,10 +947,15 @@ private:
         XPLMNavRef navRef = XPLMFindFirstNavAidOfType(xplm_Nav_Airport);
         while (navRef != XPLM_NAV_NOT_FOUND)
         {
+            XPLMNavType navType = xplm_Nav_Unknown;
             float lat = 0.0f, lon = 0.0f;
             char icaoId[64] = { 0 };
 
-            XPLMGetNavAidInfo(navRef, nullptr, &lat, &lon, nullptr, nullptr, nullptr, icaoId, nullptr, nullptr);
+            XPLMGetNavAidInfo(navRef, &navType, &lat, &lon, nullptr, nullptr, nullptr, icaoId, nullptr, nullptr);
+            if (navType != xplm_Nav_Airport)
+            {
+                break;
+            }
 
             if (icaoId[0] != '\0')
             {
