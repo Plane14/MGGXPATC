@@ -1096,13 +1096,16 @@ namespace ai
 
             const double turnDegrees = GeoMath::getTurnDegrees(static_cast<float>(m_track), static_cast<float>(m_targetTrack));
             const bool helicopter = category() == Aircraft::Category::Helicopter;
+            const bool fighter = category() == Aircraft::Category::Fighter;
             const double turnRateDegreesPerSecond = helicopter
                 ? (onGround
                     ? 20.0
                     : max(6.0, min(18.0, 6.0 + m_groundSpeedKt / 18.0)))
                 : (onGround
                     ? 12.0
-                    : max(2.0, min(8.0, 2.0 + abs(m_attitude.roll()) * 0.18 + m_groundSpeedKt / 120.0)));
+                    : (fighter
+                        ? max(4.0, min(14.0, 4.0 + abs(m_attitude.roll()) * 0.24 + m_groundSpeedKt / 95.0))
+                        : max(2.0, min(8.0, 2.0 + abs(m_attitude.roll()) * 0.18 + m_groundSpeedKt / 120.0))));
             const double maxTurnDelta = turnRateDegreesPerSecond * elapsedSeconds;
             if (abs(turnDegrees) <= maxTurnDelta)
             {
@@ -1169,7 +1172,7 @@ namespace ai
                 return;
             }
 
-            const float leaderHeading = static_cast<float>(leader->attitude().heading());
+            const float leaderHeading = static_cast<float>(leader->track());
             GeoPoint desiredPoint = GeoMath::getPointAtDistance(
                 leader->location(),
                 GeoMath::flipHeading(leaderHeading),

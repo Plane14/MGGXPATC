@@ -1105,6 +1105,40 @@ namespace ai
             return m_flightPlan->arrivalAirportIcao() == m_flightPlan->departureAirportIcao();
         }
 
+        void resetFlightCycleState()
+        {
+            m_lastReceivedIntentId = 0;
+            m_lastReceivedControl.reset();
+            m_lastDeclineReason = DeclineReason::None;
+            m_wasTakeoffClearanceReadBack = false;
+            m_continueApproach = false;
+            m_departureNumberInLine = 0;
+            m_prepareForImmediateTakeoff = false;
+            m_holdShortForDeparture = false;
+            m_linedUpTimestamp = chrono::microseconds(0);
+            m_finalReportedTimestamp = chrono::microseconds(0);
+            m_arrivalTowerCheckInDone = false;
+            m_departureRadarCheckInDone = false;
+            m_arrivalRadarCheckInDone = false;
+            m_stoppedBeforeTakeoff = false;
+            m_doUnrestrictedClimbout = false;
+            m_departureTowerKhz = 0;
+            m_departureKhz = 0;
+            m_arrivalGroundKhz = 0;
+
+            if (auto cursor = flight()->planCursor())
+            {
+                cursor->reset();
+            }
+
+            for (int clearanceType = static_cast<int>(Clearance::Type::IfrClearance);
+                clearanceType <= static_cast<int>(Clearance::Type::GoAroundRequest);
+                ++clearanceType)
+            {
+                flight()->removeClearance(static_cast<Clearance::Type>(clearanceType));
+            }
+        }
+
         shared_ptr<Maneuver> maneuverPatrolRoute()
         {
             if (!m_departureAirport || !m_flightPlan)
@@ -1296,6 +1330,9 @@ namespace ai
             const bool doPatrolRoute = shouldDoPatrolRoute();
             m_doUnrestrictedClimbout = shouldDoUnrestrictedClimbout();
 
+            steps.push_back(M.instantAction([this]() {
+                resetFlightCycleState();
+            }, "reset_cycle_state"));
             steps.push_back(M.delay(chrono::seconds(secondsBeforeStart)));
             // Formation wingmen do not request their own IFR clearance — the leader handles it
             if (flight()->rules() == Flight::RulesType::IFR && !isWingman)
@@ -1343,13 +1380,16 @@ namespace ai
                     // Formation wingman waits for the leader to be airborne before starting takeoff roll
                     if (isWingman)
                     {
+                        const int wingmanGapSeconds = isFighter()
+                            ? (m_aircraft->missionProfile() == AIAircraft::MissionProfile::Patrol ? 2 : 4)
+                            : 10;
                         steps.push_back(M.await(Maneuver::Type::Unspecified, "wait_for_formation_leader_airborne",
                             [this]() {
                                 auto leader = m_aircraft->formationLeaderAircraft();
                                 // Proceed if leader is now airborne (not ground-based) or leader is gone
                                 return !leader || !leader->altitude().isGroundBased();
                             }));
-                        steps.push_back(M.delay(chrono::seconds(10))); // Brief gap behind leader
+                        steps.push_back(M.delay(chrono::seconds(wingmanGapSeconds))); // Brief gap behind leader
                     }
 
                     steps.push_back(maneuverTakeoff());
@@ -3842,9 +3882,23 @@ namespace ai
                 }
 
                 const GeoPoint location = flight()->aircraft()->location();
+                const auto altitude = flight()->aircraft()->altitude();
+                float altitudeMslFeet = -1.0f;
+                if (altitude.type() == Altitude::Type::MSL)
+                {
+                    altitudeMslFeet = altitude.feet();
+                }
+                else if (altitude.type() == Altitude::Type::AGL)
+                {
+                    altitudeMslFeet = altitude.feet() + host()->queryTerrainElevationAt(location);
+                }
+                else if (altitude.type() == Altitude::Type::Ground)
+                {
+                    altitudeMslFeet = host()->queryTerrainElevationAt(location);
+                }
                 try
                 {
-                    return airport->localAt(location);
+                    return airport->localAt(location, altitudeMslFeet);
                 }
                 catch (const exception&)
                 {
@@ -3868,7 +3922,7 @@ namespace ai
                 {
                     try
                     {
-                        auto candidate = tower->tryFindPosition(fallbackType, location);
+                        auto candidate = tower->tryFindPosition(fallbackType, location, altitudeMslFeet);
                         if (candidate)
                         {
                             return candidate;

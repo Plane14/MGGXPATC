@@ -353,138 +353,131 @@ namespace ai
             }
         }
 
-        double distanceToAirportNm(shared_ptr<Airport> airport, shared_ptr<Flight> flight)
-        {
-            if (!airport || !flight || !flight->aircraft())
-            {
-                return 999999.0;
-            }
-
-            return GeoMath::getDistanceMeters(
-                flight->aircraft()->location(),
-                airport->header().datum()) / METERS_IN_1_NAUTICAL_MILE;
-        }
-
-        double altitudeAglFeet(shared_ptr<Flight> flight)
+        float altitudeMslFeet(shared_ptr<Flight> flight)
         {
             if (!flight || !flight->aircraft())
             {
-                return 0.0;
+                return -1.0f;
             }
 
             const auto altitude = flight->aircraft()->altitude();
             switch (altitude.type())
             {
-            case Altitude::Type::Ground:
-                return 0.0;
-            case Altitude::Type::AGL:
-                return altitude.feet();
             case Altitude::Type::MSL:
+                return altitude.feet();
+            case Altitude::Type::Ground:
+                return host()->queryTerrainElevationAt(flight->aircraft()->location());
+            case Altitude::Type::AGL:
+                return altitude.feet() + host()->queryTerrainElevationAt(flight->aircraft()->location());
             default:
-                return altitude.feet() - host()->queryTerrainElevationAt(flight->aircraft()->location());
+                return -1.0f;
             }
         }
 
-        double distanceToLandingPointNm(shared_ptr<Flight> flight)
+        bool isWithinFrequencyCoverage(shared_ptr<Flight> flight, shared_ptr<ControllerPosition> controller)
         {
-            if (!flight || !flight->aircraft())
+            if (!flight || !flight->aircraft() || !controller || !controller->frequency())
             {
-                return 999999.0;
+                return false;
             }
 
-            try
+            const auto frequency = controller->frequency();
+            if (frequency->radiusNm() <= 0.0f || frequency->antennaLocation() == GeoPoint::empty)
             {
-                return GeoMath::getDistanceMeters(
-                    flight->aircraft()->location(),
-                    m_helper.getLandingPoint(flight)) / METERS_IN_1_NAUTICAL_MILE;
+                return true;
             }
-            catch (const exception&)
+
+            const double maxDistanceMeters = frequency->radiusNm() * METERS_IN_1_NAUTICAL_MILE;
+            const double actualDistanceMeters = GeoMath::getDistanceMeters(
+                flight->aircraft()->location(),
+                frequency->antennaLocation());
+            return actualDistanceMeters <= maxDistanceMeters;
+        }
+
+        bool isFlightOwnedByControllerSector(shared_ptr<Flight> flight, shared_ptr<ControllerPosition> controller)
+        {
+            if (!flight || !controller || !controller->facility())
             {
-                return 999999.0;
+                return false;
             }
+
+            const auto sectorOwner = controller->facility()->tryFindPosition(
+                controller->type(),
+                flight->aircraft()->location(),
+                altitudeMslFeet(flight));
+            return sectorOwner == controller;
         }
 
-        bool shouldHandoffDepartureToArea(shared_ptr<Flight> flight)
-        {
-            return flight && (
-                flight->phase() == Flight::Phase::EnRoute ||
-                distanceToAirportNm(m_helper.getDepartureAirport(flight), flight) >= 25.0 ||
-                altitudeAglFeet(flight) >= 8000.0);
-        }
-
-        bool shouldHandoffAreaToApproach(shared_ptr<Flight> flight)
-        {
-            return flight && (
-                flight->phase() == Flight::Phase::Arrival ||
-                distanceToAirportNm(m_helper.getArrivalAirport(flight), flight) <= 55.0);
-        }
-
-        bool shouldHandoffApproachToTower(shared_ptr<Flight> flight)
-        {
-            const double distanceNm = distanceToLandingPointNm(flight);
-            const double aglFeet = altitudeAglFeet(flight);
-            return flight && (
-                distanceNm <= 12.0 ||
-                (distanceNm <= 18.0 && aglFeet <= 3500.0));
-        }
-
-        shared_ptr<ControllerPosition> resolveNextController(shared_ptr<Flight> flight)
+        shared_ptr<ControllerPosition> resolveNextControllerBySectorOwnership(shared_ptr<Flight> flight)
         {
             if (!flight || !position())
             {
                 return nullptr;
             }
 
+            if (isFlightOwnedByControllerSector(flight, position()))
+            {
+                return nullptr;
+            }
+
+            const GeoPoint location = flight->aircraft()->location();
+            const float altitude = altitudeMslFeet(flight);
+
             switch (position()->type())
             {
             case ControllerPosition::Type::Departure:
                 {
-                    if (shouldHandoffDepartureToArea(flight))
+                    auto area = m_helper.tryGetEnRouteArea(flight, altitude);
+                    if (area && area != position() &&
+                        isFlightOwnedByControllerSector(flight, area))
                     {
-                        auto area = m_helper.tryGetEnRouteArea(flight);
-                        if (area && area != position())
-                        {
-                            return area;
-                        }
+                        return area;
                     }
 
-                    if (shouldHandoffAreaToApproach(flight))
+                    auto approach = m_helper.tryGetArrivalApproach(flight, location, altitude);
+                    if (approach && approach != position() &&
+                        isFlightOwnedByControllerSector(flight, approach))
                     {
-                        auto approach = m_helper.tryGetArrivalApproach(flight, flight->aircraft()->location());
-                        if (approach && approach != position())
-                        {
-                            return approach;
-                        }
+                        return approach;
                     }
                 }
                 break;
             case ControllerPosition::Type::Area:
-                if (shouldHandoffAreaToApproach(flight))
                 {
+                    auto approach = m_helper.tryGetArrivalApproach(flight, location, altitude);
+                    if (approach && approach != position() &&
+                        isFlightOwnedByControllerSector(flight, approach))
                     {
-                        auto approach = m_helper.tryGetArrivalApproach(flight, flight->aircraft()->location());
-                        if (approach && approach != position())
-                        {
-                            return approach;
-                        }
+                        return approach;
                     }
 
+                    try
                     {
                         auto tower = m_helper.tryGetArrivalTower(flight, m_helper.getLandingPoint(flight));
-                        if (tower && tower != position())
+                        if (tower && tower != position() &&
+                            isFlightOwnedByControllerSector(flight, tower))
                         {
                             return tower;
                         }
                     }
+                    catch (const exception&)
+                    {
+                    }
                 }
                 break;
             case ControllerPosition::Type::Approach:
-                if (shouldHandoffApproachToTower(flight))
                 {
-                    auto tower = m_helper.tryGetArrivalTower(flight, m_helper.getLandingPoint(flight));
-                    if (tower && tower != position())
+                    try
                     {
-                        return tower;
+                        auto tower = m_helper.tryGetArrivalTower(flight, m_helper.getLandingPoint(flight));
+                        if (tower && tower != position() &&
+                            isFlightOwnedByControllerSector(flight, tower))
+                        {
+                            return tower;
+                        }
+                    }
+                    catch (const exception&)
+                    {
                     }
                 }
                 break;
@@ -519,8 +512,13 @@ namespace ai
                     continue;
                 }
 
-                auto nextController = resolveNextController(flight);
+                auto nextController = resolveNextControllerBySectorOwnership(flight);
                 if (!nextController || nextController == position())
+                {
+                    continue;
+                }
+
+                if (!isWithinFrequencyCoverage(flight, nextController))
                 {
                     continue;
                 }
@@ -649,6 +647,12 @@ namespace ai
 
                 const Runway::End* departureEnd = nullptr;
                 auto plannedRunwayName = flight->plan()->departureRunway();
+                if (plannedRunwayName.empty())
+                {
+                    // Prefer explicit runway-state handoff via holding-short reports when runway is not assigned.
+                    continue;
+                }
+
                 if (!plannedRunwayName.empty())
                 {
                     try
@@ -661,10 +665,9 @@ namespace ai
                     }
                 }
 
-                if (!departureEnd)
+                if (!departureEnd || !airport()->isRunwayActive(plannedRunwayName))
                 {
-                    const auto fallbackRunwayName = airport()->activeDepartureRunways().at(0);
-                    departureEnd = &airport()->getRunwayEndOrThrow(fallbackRunwayName);
+                    continue;
                 }
 
                 //host()->writeLog("AICONT|handoffDeparturesToTower:1");
@@ -672,12 +675,19 @@ namespace ai
                 GeoPoint location = flight->aircraft()->location();
                 float distanceMeters = GeoMath::getDistanceMeters(location, departureEnd->centerlinePoint().geo());
 
-                if (distanceMeters <= 200)
+                const auto speedKt = static_cast<float>(flight->aircraft()->groundSpeedKt());
+                const bool nearHoldShort = distanceMeters <= 180.0f;
+                const bool taxiingIntoLineup = speedKt >= 2.0f && speedKt <= 35.0f;
+
+                if (nearHoldShort && taxiingIntoLineup)
                 {
                     //host()->writeLog("AICONT|handoffDeparturesToTower:2");
                     host()->writeLog(
-                        "AICONT|GND handing departure [%s] off to TWR",
-                        flight->callSign().c_str());
+                        "AICONT|GND handing departure [%s] to TWR runway[%s] dist[%.0fm] speed[%.1fkt]",
+                        flight->callSign().c_str(),
+                        plannedRunwayName.c_str(),
+                        distanceMeters,
+                        speedKt);
 
                     shared_ptr<Flight> copyOfFlightPtr = flight;
                     m_departureTaxiPendingHandoffToTower.insert(copyOfFlightPtr);

@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 #include "libworld.h"
 #include "stlhelpers.h"
 #include "simplePhraseologyService.hpp"
@@ -29,20 +30,20 @@ namespace world
             switch (type)
             {
             case ControllerPosition::Type::ClearanceDelivery:
-                radiusNm = 4.0f;
+                radiusNm = 3.0f;
                 break;
             case ControllerPosition::Type::Ground:
-                radiusNm = 4.0f;
+                radiusNm = 3.0f;
                 break;
             case ControllerPosition::Type::Local:
-                radiusNm = 12.0f;
+                radiusNm = 10.0f;
                 break;
             case ControllerPosition::Type::Departure:
             case ControllerPosition::Type::Approach:
-                radiusNm = 35.0f;
+                radiusNm = 45.0f;
                 break;
             case ControllerPosition::Type::Area:
-                radiusNm = 120.0f;
+                radiusNm = 180.0f;
                 break;
             case ControllerPosition::Type::Oceanic:
                 radiusNm = 250.0f;
@@ -54,6 +55,66 @@ namespace world
             return GeoPolygon({
                 GeoPolygon::circleEdge(datum, radiusNm)
             });
+        }
+
+        ControlledAirspace::Type defaultAirspaceTypeForControllerType(ControllerPosition::Type type)
+        {
+            switch (type)
+            {
+            case ControllerPosition::Type::Area:
+            case ControllerPosition::Type::Oceanic:
+                return ControlledAirspace::Type::AreaFIR;
+            case ControllerPosition::Type::Approach:
+            case ControllerPosition::Type::Departure:
+                return ControlledAirspace::Type::TerminalControlArea;
+            case ControllerPosition::Type::Ground:
+            case ControllerPosition::Type::Local:
+            case ControllerPosition::Type::ClearanceDelivery:
+            default:
+                return ControlledAirspace::Type::ControlZone;
+            }
+        }
+
+        pair<float, float> defaultVerticalBoundsForControllerType(ControllerPosition::Type type)
+        {
+            switch (type)
+            {
+            case ControllerPosition::Type::ClearanceDelivery:
+            case ControllerPosition::Type::Ground:
+                return { ALTITUDE_GROUND, 2000.0f };
+            case ControllerPosition::Type::Local:
+                return { ALTITUDE_GROUND, 5000.0f };
+            case ControllerPosition::Type::Departure:
+                return { 1200.0f, 24000.0f };
+            case ControllerPosition::Type::Approach:
+                return { 500.0f, 16000.0f };
+            case ControllerPosition::Type::Area:
+                return { 10000.0f, 45000.0f };
+            case ControllerPosition::Type::Oceanic:
+                return { 5000.0f, 45000.0f };
+            default:
+                return { ALTITUDE_GROUND, 45000.0f };
+            }
+        }
+
+        float defaultFrequencyRadiusForControllerType(ControllerPosition::Type type)
+        {
+            switch (type)
+            {
+            case ControllerPosition::Type::ClearanceDelivery:
+            case ControllerPosition::Type::Ground:
+                return 8.0f;
+            case ControllerPosition::Type::Local:
+                return 20.0f;
+            case ControllerPosition::Type::Departure:
+            case ControllerPosition::Type::Approach:
+                return 60.0f;
+            case ControllerPosition::Type::Area:
+            case ControllerPosition::Type::Oceanic:
+                return 180.0f;
+            default:
+                return 20.0f;
+            }
         }
     }
 
@@ -144,13 +205,38 @@ namespace world
                 host,
                 init.frequencyKhz,
                 header.datum(), //TODO: use tower location
-                10.0  //TODO: real-life antenna radius?
+                defaultFrequencyRadiusForControllerType(init.type)
             ));
             const GeoPolygon scopeLimit = init.scopeLimit.isEmpty()
                 ? defaultScopeLimitForControllerType(init.type, header.datum())
                 : init.scopeLimit;
+
+            shared_ptr<ControlledAirspace> positionAirspace = airspace;
+            if (airspace)
+            {
+                const auto verticalBounds = defaultVerticalBoundsForControllerType(init.type);
+                auto geometry = make_shared<AirspaceGeometry>(
+                    (scopeLimit.isEmpty() && airspace->geometry())
+                        ? airspace->geometry()->lateralBounds()
+                        : scopeLimit,
+                    verticalBounds.first != ALTITUDE_GROUND,
+                    verticalBounds.first,
+                    true,
+                    verticalBounds.second);
+
+                positionAirspace = make_shared<ControlledAirspace>(
+                    airspace->id(),
+                    airspace->areaCode(),
+                    airspace->icaoCode(),
+                    airspace->centerName(),
+                    airspace->name(),
+                    defaultAirspaceTypeForControllerType(init.type),
+                    airspace->classification(),
+                    geometry);
+            }
+
             auto radarScope = shared_ptr<RadarScope>(new RadarScope(
-                airspace,
+                positionAirspace,
                 scopeLimit
             ));
             auto position = shared_ptr<ControllerPosition>(new ControllerPosition(
@@ -194,12 +280,12 @@ namespace world
     {
         //TODO: use airspace actual data
         auto airspace = WorldBuilder::assembleSimpleAirspace(
-            AirspaceClass::ClassB,
+            AirspaceClass::ClassD,
             ControlledAirspace::Type::ControlZone,
             header.datum(),
-            10,
+            6,
             ALTITUDE_GROUND,
-            18000,
+            5000,
             header.icao(),
             header.icao(),
             header.name(),
