@@ -1151,7 +1151,10 @@ private:
                 ? 0.0f
                 : clampValue(crosswindMetersPerSecond * 0.45f, -4.0f, 4.0f);
 
-            float targetHeading = static_cast<float>(attitude.heading()) + crabCorrection + headingTurbulence;
+            const float trackHeading = static_cast<float>(source->track());
+            const float commandedHeading = static_cast<float>(attitude.heading());
+            const float headingLead = shortestTurnDegrees(commandedHeading, trackHeading);
+            float targetHeading = trackHeading + clampValue(headingLead * 0.25f, -6.0f, 6.0f) + crabCorrection + headingTurbulence;
             float targetPitch = static_cast<float>(attitude.pitch()) + pitchTurbulence;
             float targetRoll = static_cast<float>(attitude.roll()) + crosswindBank + rollTurbulence;
 

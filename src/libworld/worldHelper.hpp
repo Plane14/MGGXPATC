@@ -20,7 +20,31 @@ namespace world
     private:
         shared_ptr<HostServices> m_host;
     private:
-        shared_ptr<ControllerPosition> tryGetLocalTowerPosition(shared_ptr<Airport> airport, const GeoPoint& location)
+        float altitudeFeetMsl(shared_ptr<Flight> flight) const
+        {
+            if (!flight || !flight->aircraft())
+            {
+                return -1.0f;
+            }
+
+            const auto altitude = flight->aircraft()->altitude();
+            switch (altitude.type())
+            {
+            case Altitude::Type::MSL:
+                return altitude.feet();
+            case Altitude::Type::AGL:
+                return altitude.feet() + m_host->queryTerrainElevationAt(flight->aircraft()->location());
+            case Altitude::Type::Ground:
+                return m_host->queryTerrainElevationAt(flight->aircraft()->location());
+            default:
+                return -1.0f;
+            }
+        }
+
+        shared_ptr<ControllerPosition> tryGetLocalTowerPosition(
+            shared_ptr<Airport> airport,
+            const GeoPoint& location,
+            float altitudeMslFeet = -1.0f)
         {
             if (!airport)
             {
@@ -29,7 +53,7 @@ namespace world
 
             try
             {
-                return airport->localAt(location);
+                return airport->localAt(location, altitudeMslFeet);
             }
             catch(const exception&)
             {
@@ -41,7 +65,7 @@ namespace world
                 return nullptr;
             }
 
-            return tower->tryFindPosition(ControllerPosition::Type::Local, location);
+            return tower->tryFindPosition(ControllerPosition::Type::Local, location, altitudeMslFeet);
         }
     public:
         WorldHelper(shared_ptr<HostServices> _host) : 
@@ -66,7 +90,7 @@ namespace world
             {
                 return nullptr;
             }
-            return airport->clearanceDeliveryAt(flight->aircraft()->location());
+            return airport->clearanceDeliveryAt(flight->aircraft()->location(), altitudeFeetMsl(flight));
         }
         
         shared_ptr<ControllerPosition> getDepartureGround(shared_ptr<Flight> flight)
@@ -76,7 +100,7 @@ namespace world
             {
                 return nullptr;
             }
-            return airport->groundAt(flight->aircraft()->location());
+            return airport->groundAt(flight->aircraft()->location(), altitudeFeetMsl(flight));
         }
 
         shared_ptr<ControllerPosition> getDepartureTower(shared_ptr<Flight> flight)
@@ -87,7 +111,8 @@ namespace world
                 throw runtime_error("WorldHelper::getDepartureTower: departure airport not loaded");
             }
             const GeoPoint location = flight->aircraft()->location();
-            if (auto local = tryGetLocalTowerPosition(airport, location))
+            const float altitudeMslFeet = altitudeFeetMsl(flight);
+            if (auto local = tryGetLocalTowerPosition(airport, location, altitudeMslFeet))
             {
                 return local;
             }
@@ -106,7 +131,7 @@ namespace world
 
             for (const auto fallbackType : fallbackTypes)
             {
-                if (auto fallback = tower->tryFindPosition(fallbackType, location))
+                if (auto fallback = tower->tryFindPosition(fallbackType, location, altitudeMslFeet))
                 {
                     return fallback;
                 }
@@ -135,7 +160,7 @@ namespace world
         shared_ptr<ControllerPosition> getArrivalTower(shared_ptr<Flight> flight, const GeoPoint& landingPoint)
         { 
             auto airport = getArrivalAirport(flight);
-            if (auto local = tryGetLocalTowerPosition(airport, landingPoint))
+            if (auto local = tryGetLocalTowerPosition(airport, landingPoint, altitudeFeetMsl(flight)))
             {
                 return local;
             }
@@ -158,7 +183,7 @@ namespace world
         shared_ptr<ControllerPosition> getArrivalGround(shared_ptr<Flight> flight, const GeoPoint& landingPoint)
         { 
             auto airport = getArrivalAirport(flight);
-            auto ground = airport->groundAt(landingPoint);
+            auto ground = airport->groundAt(landingPoint, altitudeFeetMsl(flight));
             return ground;
         }
 
@@ -195,7 +220,8 @@ namespace world
             }
             return airport->tower()->tryFindPosition(
                 ControllerPosition::Type::Departure,
-                flight->aircraft()->location());
+                flight->aircraft()->location(),
+                altitudeFeetMsl(flight));
         }
 
         shared_ptr<ControllerPosition> tryGetDepartureOrArea(shared_ptr<Flight> flight)
@@ -209,7 +235,7 @@ namespace world
             return tryGetEnRouteArea(flight);
         }
 
-        shared_ptr<ControllerPosition> tryGetEnRouteArea(shared_ptr<Flight> flight)
+        shared_ptr<ControllerPosition> tryGetEnRouteArea(shared_ptr<Flight> flight, float altitudeMslFeet = -1.0f)
         {
             if (!flight)
             {
@@ -217,7 +243,12 @@ namespace world
             }
 
             const GeoPoint location = flight->aircraft()->location();
-            const auto tryAirportArea = [location](shared_ptr<Airport> airport) {
+            if (altitudeMslFeet < 0.0f)
+            {
+                altitudeMslFeet = altitudeFeetMsl(flight);
+            }
+
+            const auto tryAirportArea = [location, altitudeMslFeet](shared_ptr<Airport> airport) {
                 if (!airport || !airport->tower())
                 {
                     return shared_ptr<ControllerPosition>();
@@ -230,7 +261,7 @@ namespace world
 
                 for (const auto type : types)
                 {
-                    if (auto candidate = airport->tower()->tryFindPosition(type, location))
+                    if (auto candidate = airport->tower()->tryFindPosition(type, location, altitudeMslFeet))
                     {
                         return candidate;
                     }
@@ -247,12 +278,20 @@ namespace world
             return tryAirportArea(getArrivalAirport(flight));
         }
 
-        shared_ptr<ControllerPosition> tryGetArrivalApproach(shared_ptr<Flight> flight, const GeoPoint& location)
+        shared_ptr<ControllerPosition> tryGetArrivalApproach(
+            shared_ptr<Flight> flight,
+            const GeoPoint& location,
+            float altitudeMslFeet = -1.0f)
         {
             auto airport = getArrivalAirport(flight);
             if (!airport || !airport->tower())
             {
                 return nullptr;
+            }
+
+            if (altitudeMslFeet < 0.0f)
+            {
+                altitudeMslFeet = altitudeFeetMsl(flight);
             }
 
             const vector<ControllerPosition::Type> fallbackTypes = {
@@ -265,7 +304,7 @@ namespace world
 
             for (const auto fallbackType : fallbackTypes)
             {
-                if (auto fallback = airport->tower()->tryFindPosition(fallbackType, location))
+                if (auto fallback = airport->tower()->tryFindPosition(fallbackType, location, altitudeMslFeet))
                 {
                     return fallback;
                 }
