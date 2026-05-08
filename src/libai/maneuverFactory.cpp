@@ -698,7 +698,7 @@ namespace ai
         auto rollDuration = chrono::milliseconds(max(1500, static_cast<int>(absBank * 120.0f)));
 
         m_host->writeLog(
-            "MANEUVER airborneTurn: from %f to %f = %f deg, bank %d, rate %d, Tturn=%lld ms, Tbank=%lld ms",
+            "MANEUVER airborneTurn: from %f to %f = %f deg, bank %d, rate %f, Tturn=%lld ms, Tbank=%lld ms",
             fromHeading, toHeading, turnDegrees, bankAngle, turnRate, turnDuration.count(), rollDuration.count());
 
         auto rollIn = shared_ptr<Maneuver>(new AnimationManeuver<double>(
