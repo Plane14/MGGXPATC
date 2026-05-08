@@ -722,13 +722,26 @@ namespace ai
 
                                     const double altitudeDeltaFeet = static_cast<double>(legTargetAltitude) - currentAltitudeMslFeet;
                                     const double distanceMeters = max(1.0, static_cast<double>(GeoMath::getDistanceMeters(m_aircraft->location(), targetPoint)));
+                                    const double distanceNm = distanceMeters / 1852.0;
                                     const double groundSpeedKt = max(80.0, m_aircraft->groundSpeedKt());
                                     const double groundSpeedMps = groundSpeedKt * 1852.0 / 3600.0;
                                     const double timeToGoSeconds = max(20.0, distanceMeters / groundSpeedMps);
-                                    const double requiredVsFpm = (altitudeDeltaFeet / timeToGoSeconds) * 60.0;
+
+                                    // On approach/landing legs, clamp descent to a realistic
+                                    // glidepath angle (max ~4.5 deg ≈ 475 ft/NM) to prevent
+                                    // dive-bombing on short legs of complex RNP procedures.
+                                    double requiredVsFpm = (altitudeDeltaFeet / timeToGoSeconds) * 60.0;
+                                    if (altitudeDeltaFeet < 0.0 && distanceNm > 0.3)
+                                    {
+                                        const double maxDescentPerNm = 475.0; // ~4.5 deg
+                                        const double maxAltLoss = maxDescentPerNm * distanceNm;
+                                        if (fabs(altitudeDeltaFeet) > maxAltLoss)
+                                        {
+                                            requiredVsFpm = (-maxAltLoss / timeToGoSeconds) * 60.0;
+                                        }
+                                    }
 
                                     const auto performance = m_aircraft->performanceProfile();
-                                    // Use initialClimbRocFpm for the climb cap (more accurate than deriving from descentRateFpm)
                                     const double maxClimbFpm = max(900.0, static_cast<double>(performance.initialClimbRocFpm));
                                     const double maxDescentFpm = -max(700.0, static_cast<double>(performance.descentRateFpm) * 2.3);
                                     const double constrainedVsFpm = min(maxClimbFpm, max(maxDescentFpm, requiredVsFpm));

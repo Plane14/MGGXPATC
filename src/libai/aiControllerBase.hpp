@@ -675,9 +675,18 @@ namespace ai
                 GeoPoint location = flight->aircraft()->location();
                 float distanceMeters = GeoMath::getDistanceMeters(location, departureEnd->centerlinePoint().geo());
 
-                const auto speedKt = static_cast<float>(flight->aircraft()->groundSpeedKt());
-                const bool nearHoldShort = distanceMeters <= 180.0f;
-                const bool taxiingIntoLineup = speedKt >= 2.0f && speedKt <= 35.0f;
+                    const auto speedKt = static_cast<float>(flight->aircraft()->groundSpeedKt());
+                    // Scale hold-short detection radius by runway length so large airports
+                    // trigger the handoff earlier, while small GA strips keep a tight threshold.
+                    float holdShortRadius = 180.0f;
+                    try
+                    {
+                        auto runway = airport()->getRunwayOrThrow(plannedRunwayName);
+                        holdShortRadius = min(350.0f, max(150.0f, runway->lengthMeters() * 0.08f));
+                    }
+                    catch (const exception&) {}
+                    const bool nearHoldShort = distanceMeters <= holdShortRadius;
+                    const bool taxiingIntoLineup = speedKt >= 2.0f && speedKt <= 35.0f;
 
                 if (nearHoldShort && taxiingIntoLineup)
                 {

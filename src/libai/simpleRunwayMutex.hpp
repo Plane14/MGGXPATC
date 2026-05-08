@@ -329,13 +329,16 @@ namespace ai
             }
 
             const string modelIcao = uppercaseCopy(flight->aircraft()->modelIcao());
-            if (modelIcao.rfind("A388", 0) == 0)
+            if (modelIcao.rfind("A388", 0) == 0 || modelIcao.rfind("A225", 0) == 0)
             {
                 return WakeClass::Super;
             }
 
             static const vector<string> heavyPrefixes = {
-                "A30", "A33", "A34", "A35", "A38", "B74", "B76", "B77", "B78", "C5", "DC1", "IL9", "MD1"
+                "A30", "A33", "A34", "A35", "A38",
+                "B74", "B76", "B77", "B78",
+                "C17", "C5", "C130", "DC1", "IL7", "IL9", "MD1",
+                "A400", "KC13", "KC10", "KC46"
             };
 
             for (const auto& prefix : heavyPrefixes)
@@ -435,17 +438,23 @@ namespace ai
 
         float wakeSeparationNm(WakeClass leader, WakeClass follower) const
         {
+            // ICAO Doc 4444 Table 8-1 wake turbulence separation minima (NM)
             if (leader == WakeClass::Super)
             {
-                return follower >= WakeClass::Heavy ? 6.0f : 8.0f;
+                if (follower == WakeClass::Super)  return 6.0f;
+                if (follower == WakeClass::Heavy)   return 6.0f;
+                if (follower == WakeClass::Medium)  return 7.0f;
+                return 8.0f; // Light
             }
             if (leader == WakeClass::Heavy)
             {
-                return follower == WakeClass::Light ? 6.0f : 5.0f;
+                if (follower == WakeClass::Heavy)   return 4.0f;
+                if (follower == WakeClass::Medium)  return 5.0f;
+                return 6.0f; // Light
             }
-            if (leader == WakeClass::Medium && follower == WakeClass::Light)
+            if (leader == WakeClass::Medium)
             {
-                return 5.0f;
+                if (follower == WakeClass::Light) return 5.0f;
             }
 
             return 3.0f;
