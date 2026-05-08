@@ -560,7 +560,20 @@ namespace ai
                 event.immediate
             );
             transmit(I.towerClearedForTakeoff(clearance, event.traffic, replyToId));
-            m_departureInitialTurn = (m_departureInitialTurn < 60 ? m_departureInitialTurn + 15 : 15);
+            // Alternate departure headings left/right of runway heading for
+            // noise abatement and traffic separation: 10, 20, 30, -10, -20, -30.
+            if (m_departureInitialTurn >= 30.0f)
+            {
+                m_departureInitialTurn = -10.0f;
+            }
+            else if (m_departureInitialTurn <= -30.0f)
+            {
+                m_departureInitialTurn = 10.0f;
+            }
+            else
+            {
+                m_departureInitialTurn += (m_departureInitialTurn >= 0.0f ? 10.0f : -10.0f);
+            }
         }
 
         void authorizeLineUpAndWait(const MutexEvent& event, const string& runwayName, uint64_t replyToId)
