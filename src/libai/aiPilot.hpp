@@ -304,24 +304,27 @@ namespace ai
 
         int procedureLegDurationSeconds(FlightPlan::LegType legType) const
         {
+            // Scale fallback durations by approach speed (proxy for aircraft speed class).
+            const float approachKt = max(80.0f, m_aircraft->performanceProfile().approachSpeedKt);
+            const float speedScale = 145.0f / approachKt;
             switch (legType)
             {
             case FlightPlan::LegType::TakeOff:
-                return 30;
+                return max(15, static_cast<int>(30.0f * speedScale));
             case FlightPlan::LegType::Sid:
-                return 75;
+                return max(40, static_cast<int>(75.0f * speedScale));
             case FlightPlan::LegType::EnRoute:
-                return 120;
+                return max(60, static_cast<int>(120.0f * speedScale));
             case FlightPlan::LegType::Star:
-                return 90;
+                return max(45, static_cast<int>(90.0f * speedScale));
             case FlightPlan::LegType::Approach:
-                return 60;
+                return max(30, static_cast<int>(60.0f * speedScale));
             case FlightPlan::LegType::Landing:
-                return 30;
+                return max(15, static_cast<int>(30.0f * speedScale));
             case FlightPlan::LegType::GoAround:
-                return 45;
+                return max(20, static_cast<int>(45.0f * speedScale));
             default:
-                return 20;
+                return max(10, static_cast<int>(20.0f * speedScale));
             }
         }
 
@@ -658,13 +661,26 @@ namespace ai
                                         turnDegrees);
                                 }
 
-                                // Only update if off by more than 3 degrees (avoid jitter).
-                                if (headingDiff > 3.0f)
+                                // Only update if off by more than 1.5 degrees (tighter dead-band reduces oscillation).
+                                if (headingDiff > 1.5f)
                                 {
-                                    // Banked turn model: smaller per-tick heading change and visible bank.
-                                    float limitedTurn = std::max(-4.0f, std::min(4.0f, turnDegrees));
+                                    // Speed-dependent banked turn model.
+                                    // Standard-rate turn: bank = atan(V / (g * R)), approx bank = V_kt / 10 + 7.
+                                    // Limit per-tick heading delta by speed-appropriate turn rate.
+                                    const float speedKt = static_cast<float>(std::max(80.0, m_aircraft->groundSpeedKt()));
+                                    const float maxBank = isFighter()
+                                        ? std::min(45.0f, speedKt / 8.0f + 10.0f)
+                                        : (isHelicopter()
+                                            ? std::min(20.0f, speedKt / 12.0f + 5.0f)
+                                            : std::min(30.0f, speedKt / 10.0f + 7.0f));
+                                    // Turn rate (deg/s) from bank: rate = g*tan(bank)/V, approx 1091*tan(bank)/V_kt.
+                                    const float bankRad = maxBank * 3.14159265f / 180.0f;
+                                    const float turnRateDegPerSec = std::max(1.5f, 1091.0f * std::tan(bankRad) / speedKt);
+                                    // Proportional control: reduce commanded turn rate near rollout.
+                                    const float proportionalRate = std::min(turnRateDegPerSec, headingDiff * 0.4f);
+                                    const float limitedTurn = std::max(-proportionalRate, std::min(proportionalRate, turnDegrees));
                                     float newHeading = GeoMath::addTurnToHeading(currentHeading, limitedTurn);
-                                    const float targetBank = std::max(6.0f, std::min(25.0f, std::abs(limitedTurn) * 4.5f));
+                                    const float targetBank = std::max(5.0f, std::min(maxBank, std::abs(limitedTurn) / turnRateDegPerSec * maxBank));
                                     const float bankSign = (limitedTurn >= 0.0f ? 1.0f : -1.0f);
                                     const float roll = targetBank * bankSign;
                                     m_aircraft->setAttitude(
@@ -672,9 +688,10 @@ namespace ai
                                 }
                                 else if (std::abs(m_aircraft->attitude().roll()) > 0.5)
                                 {
-                                    // Smoothly unwind residual bank near rollout.
+                                    // Smoothly unwind residual bank with speed-scaled recovery rate.
                                     const float currentRoll = static_cast<float>(m_aircraft->attitude().roll());
-                                    const float unwindStep = (currentRoll > 0.0f ? -3.0f : 3.0f);
+                                    const float rollRate = std::max(2.0f, std::min(5.0f, static_cast<float>(m_aircraft->groundSpeedKt()) / 60.0f + 2.0f));
+                                    const float unwindStep = (currentRoll > 0.0f ? -rollRate : rollRate);
                                     float nextRoll = currentRoll + unwindStep;
                                     if ((currentRoll > 0.0f && nextRoll < 0.0f) || (currentRoll < 0.0f && nextRoll > 0.0f))
                                     {
@@ -1207,10 +1224,12 @@ namespace ai
             {
                 const float outHdg = (orbit % 2 == 0) ? capturedPatrolHeading : returnHeading;
                 const float backHdg = (orbit % 2 == 0) ? returnHeading : capturedPatrolHeading;
+                // Orbit leg duration from desired ~8 NM leg length at patrol speed.
+                const int orbitLegSeconds = max(60, min(600, static_cast<int>(8.0f * 3600.0f / capturedPatrolSpeedKt)));
                 steps.push_back(M.airborneTurn(flight(), curHeading, outHdg));
-                steps.push_back(M.delay(chrono::seconds(300))); // 5 min outbound leg
+                steps.push_back(M.delay(chrono::seconds(orbitLegSeconds)));
                 steps.push_back(M.airborneTurn(flight(), outHdg, backHdg));
-                steps.push_back(M.delay(chrono::seconds(300))); // 5 min inbound leg
+                steps.push_back(M.delay(chrono::seconds(orbitLegSeconds)));
                 curHeading = backHdg;
             }
 
@@ -1278,9 +1297,11 @@ namespace ai
                     ))
                 }),
                 M.airborneTurn(flight(), runwayHeading, crosswindHeading),
-                M.delay(chrono::seconds(40)),
+                // Crosswind leg: ~0.5 NM at pattern speed (distance-based, not fixed time).
+                M.delay(chrono::seconds(max(15, min(60, static_cast<int>(0.5f * 3600.0f / patternSpeedKt))))),
                 M.airborneTurn(flight(), crosswindHeading, downwindHeading),
-                M.delay(chrono::seconds(75)),
+                // Downwind leg: ~1.5 NM at pattern speed (distance-based, not fixed time).
+                M.delay(chrono::seconds(max(30, min(120, static_cast<int>(1.5f * 3600.0f / patternSpeedKt))))),
                 M.parallel(Maneuver::Type::Flight, "vfr_pattern_final_setup", {
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "pattern_final_speed",
@@ -1308,7 +1329,8 @@ namespace ai
                     ))
                 }),
                 M.airborneTurn(flight(), downwindHeading, baseHeading),
-                M.delay(chrono::seconds(30)),
+                // Base leg: ~0.5 NM at recovery speed (distance-based, not fixed time).
+                M.delay(chrono::seconds(max(10, min(45, static_cast<int>(0.5f * 3600.0f / recoverySpeedKt))))),
                 M.airborneTurn(flight(), baseHeading, runwayHeading),
                 M.instantAction([this, recoverySpeedKt, climbFpm]() {
                     m_aircraft->setGroundSpeedKt(recoverySpeedKt);
@@ -1806,7 +1828,7 @@ namespace ai
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "go_around_climb",
                         max(0.0, m_aircraft->verticalSpeedFpm()),
-                        max(1200.0f, performance.descentRateFpm * 1.5f),
+                        max(1200.0f, performance.initialClimbRocFpm * 0.6f),
                         chrono::seconds(6),
                         [](const double& from, const double& to, double progress, double& value) {
                             value = from + (to - from) * progress;
@@ -1917,11 +1939,12 @@ namespace ai
             auto preFlare = M.deferred([=]() {
                 const double startVs = m_aircraft->verticalSpeedFpm();
                 const double endVs = -performance.descentRateFpm * 0.5;
+                const double currentPitch = m_aircraft->attitude().pitch();
                 return M.parallel(Maneuver::Type::ArrivalLanding, "pre_flare", {
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "", 
-                        1.5,
-                        3.0,
+                        currentPitch,
+                        max(2.0, currentPitch + 1.5),
                         chrono::milliseconds(3500),
                         [](const double& from, const double& to, double progress, double& value) {
                             value = from + (to - from) * progress; 
@@ -1944,11 +1967,12 @@ namespace ai
                     )),
                 });
             });
+            const float preFlarePitchEnd = static_cast<float>(max(2.0, m_aircraft->attitude().pitch() + 1.5));
             auto flare = M.parallel(Maneuver::Type::ArrivalLanding, "flare", {
                 shared_ptr<Maneuver>(new AnimationManeuver<double>(
                     "pitch",
-                    3.0,
-                    5.5,
+                    preFlarePitchEnd,
+                    preFlarePitchEnd + 2.5,
                     chrono::seconds(3),
                     [](const double& from, const double& to, double progress, double& value) {
                         value = from + (to - from) * progress; 
@@ -1984,8 +2008,8 @@ namespace ai
                     )),
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "verspd_2",
-                        -50,
-                        -100,
+                        isHelicopter() ? -30.0 : -80.0,
+                        isHelicopter() ? -60.0 : (m_aircraft->category() == Aircraft::Category::Heavy ? -250.0 : (m_aircraft->category() == Aircraft::Category::LightProp ? -120.0 : -180.0)),
                         chrono::seconds(1),
                         [](const double &from, const double &to, double progress, double &value) {
                             value = from + (to - from) * progress;
@@ -3046,7 +3070,13 @@ namespace ai
                         });
                     }
 
-                    const float baseSpacingMeters = isHelicopter() ? 22.0f : (isFighter() ? 32.0f : 40.0f);
+                    // Queue spacing scaled by aircraft category (wingspan proxy).
+                    const float baseSpacingMeters = isHelicopter() ? 22.0f
+                        : (isFighter() ? 32.0f
+                        : (m_aircraft->category() == Aircraft::Category::Heavy ? 65.0f
+                        : (m_aircraft->category() == Aircraft::Category::LightProp ? 25.0f
+                        : (m_aircraft->category() == Aircraft::Category::Turboprop ? 35.0f
+                        : 45.0f))));
                     const float queueOffsetMeters = baseSpacingMeters * static_cast<float>(numberInLine - 1);
                     const GeoPoint queuePoint = GeoMath::getPointAtDistance(
                         holdShortEdge->node1()->location().geo(),
@@ -4025,7 +4055,10 @@ namespace ai
             const auto& runwayEnd = m_helper.getLandingRunwayEnd(flight());
             const GeoPoint threshold = runwayEnd.centerlinePoint().geo();
             const float distanceMeters = GeoMath::getDistanceMeters(m_aircraft->location(), threshold);
-            if (distanceMeters > 8000.0f)
+            // Scale detection range by approach speed so faster aircraft trigger earlier.
+            const float speedKt = static_cast<float>(max(80.0, m_aircraft->groundSpeedKt()));
+            const float detectionRangeMeters = max(4000.0f, min(12000.0f, speedKt * 40.0f));
+            if (distanceMeters > detectionRangeMeters)
             {
                 return false;
             }
@@ -4034,7 +4067,9 @@ namespace ai
             const float turnToThreshold = fabs(GeoMath::getTurnDegrees(m_aircraft->attitude().heading(), headingToThreshold));
 
             // Runway is significantly behind the aircraft while still near the threshold area.
-            return turnToThreshold > 130.0f;
+            // Tighter angle at high speed avoids late detection.
+            const float overshootAngle = speedKt > 200.0f ? 110.0f : 130.0f;
+            return turnToThreshold > overshootAngle;
         }
     };
 }
