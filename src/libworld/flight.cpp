@@ -940,6 +940,22 @@ namespace world
             appendBridgeLeg(LegType::EnRoute, sidTrack.back(), starTrack.front(), m_cruiseAltitudeFeet, 450.0f);
         }
 
+        // Resolve runway elevation once so STAR, approach, and missed-approach
+        // altitude profiles are all referenced to the actual airport elevation.
+        float landingRunwayElevationFeet = 0.0f;
+        if (host && !m_arrivalAirportIcao.empty() && !m_arrivalRunway.empty())
+        {
+            try
+            {
+                const auto& runwayEnd = host->getWorld()->getRunwayEnd(m_arrivalAirportIcao, m_arrivalRunway);
+                landingRunwayElevationFeet = runwayEnd.elevationFeet();
+            }
+            catch (const exception&)
+            {
+                landingRunwayElevationFeet = 0.0f;
+            }
+        }
+
         // Calculate STAR altitude profile first so it's available for approach transition
         vector<float> starTargetAltitudes;
         if (!starTrack.empty())
@@ -953,30 +969,23 @@ namespace world
                 appendBridgeLeg(LegType::EnRoute, sidTrack.back(), starTrack.front(), m_cruiseAltitudeFeet, 450.0f);
             }
 
-            starTargetAltitudes = buildAltitudeProfile(starTrack, m_arrivalAirportIcao, m_cruiseAltitudeFeet, 6000.0f, false);
+            // STAR final altitude relative to airport elevation.  At high-elevation
+            // airports (e.g. LECO elev ~1329 ft) a flat 6000 ft gives barely 4700 ft
+            // AGL; at sea-level airports it is unnecessarily high.
+            const float starFinalAltitudeFeet = max(3000.0f, landingRunwayElevationFeet + 3000.0f);
+            starTargetAltitudes = buildAltitudeProfile(starTrack, m_arrivalAirportIcao, m_cruiseAltitudeFeet, starFinalAltitudeFeet, false);
             appendProcedure(LegType::Star, starTrack, starTargetAltitudes, 250.0f);
         }
 
         if (!approachTrack.empty())
         {
-            float landingRunwayElevationFeet = 0.0f;
-            if (host && !m_arrivalAirportIcao.empty() && !m_arrivalRunway.empty())
-            {
-                try
-                {
-                    const auto& runwayEnd = host->getWorld()->getRunwayEnd(m_arrivalAirportIcao, m_arrivalRunway);
-                    landingRunwayElevationFeet = runwayEnd.elevationFeet();
-                }
-                catch (const exception&)
-                {
-                    landingRunwayElevationFeet = 0.0f;
-                }
-            }
 
             // Determine the starting altitude for approach: use STAR final altitude if available, otherwise default
-            const float approachStartAltitude = starTargetAltitudes.empty() ? 6000.0f : starTargetAltitudes.back();
-            // Use a lower final-approach target relative to runway elevation to avoid staying too high.
-            const float approachFinalAltitude = max(landingRunwayElevationFeet + 1000.0f, 500.0f);
+            const float defaultApproachStart = max(3000.0f, landingRunwayElevationFeet + 3000.0f);
+            const float approachStartAltitude = starTargetAltitudes.empty() ? defaultApproachStart : starTargetAltitudes.back();
+            // Final approach intercept altitude: aim for ~1500 ft AGL which is
+            // typical for FAF altitude on precision and RNP approaches.
+            const float approachFinalAltitude = landingRunwayElevationFeet + 1500.0f;
 
             if (!starTrack.empty())
             {
@@ -1020,7 +1029,7 @@ namespace world
                     LegType::Landing,
                     approachTrack.back(),
                     m_arrivalRunway.empty() ? approachTrack.back() : m_arrivalRunway,
-                    max(landingRunwayElevationFeet + 300.0f, 300.0f),
+                    landingRunwayElevationFeet + 300.0f,
                     0.0f);
             }
 
@@ -1047,11 +1056,14 @@ namespace world
 
                 if (goAroundTrack.size() >= 2)
                 {
+                    // Missed approach altitude should reference airport elevation.
+                    // Most published missed approaches climb to 3000-4000 ft AGL.
+                    const float missedApproachAltitude = max(3000.0f, landingRunwayElevationFeet + 3000.0f);
                     const vector<float> goAroundTargetAltitudes = buildAltitudeProfile(
                         goAroundTrack,
                         m_arrivalAirportIcao,
-                        6000.0f,  // Start at missed approach altitude
-                        6000.0f,  // Climb to holding altitude
+                        missedApproachAltitude,
+                        missedApproachAltitude,
                         true);
                     appendProcedure(LegType::GoAround, goAroundTrack, goAroundTargetAltitudes, 180.0f);
                 }

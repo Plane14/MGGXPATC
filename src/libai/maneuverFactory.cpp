@@ -245,7 +245,18 @@ namespace ai
             auto world = m_host->getWorld();
             auto aircraft = getAIAircraft(flight);
             const float startSpeedKnots = static_cast<float>(aircraft->groundSpeedKt());
-            float speedFactor = (typeOfTaxi == TaxiType::HighSpeed ? 18.0f : (typeOfTaxi == TaxiType::Pushback ? 2.5f : 6.0f));
+            // Category-aware taxi speed (m/s): heavies taxi slower, light props faster relative to size.
+            float speedFactor;
+            if (typeOfTaxi == TaxiType::Pushback) {
+                speedFactor = 2.5f;
+            } else if (typeOfTaxi == TaxiType::HighSpeed) {
+                speedFactor = (aircraft->category() == Aircraft::Category::Heavy ? 20.0f
+                    : (aircraft->category() == Aircraft::Category::LightProp ? 14.0f : 18.0f));
+            } else {
+                speedFactor = (aircraft->category() == Aircraft::Category::Heavy ? 5.0f
+                    : (aircraft->category() == Aircraft::Category::LightProp ? 7.0f
+                    : (aircraft->category() == Aircraft::Category::Turboprop ? 6.5f : 6.0f)));
+            }
             const float targetSpeedKnots = speedFactor * 1.94384f;
 
             // Shared state for smooth speed transitions
@@ -674,14 +685,20 @@ namespace ai
 
         auto aircraft = getAIAircraft(flight);
         float turnDegrees = GeoMath::getTurnDegrees(fromHeading, toHeading);
-        // 25° bank → ~3°/s standard rate; 15° bank → ~2°/s for small corrections
-        int bankAngle = (abs(turnDegrees) > 10 ? 25 : 15) * (turnDegrees < 0 ? -1 : 1);
-        int turnRate = abs(bankAngle) == 25 ? 3 : 2;
-        auto turnDuration = chrono::milliseconds((int)(1000 * abs(turnDegrees) / turnRate));
-        auto rollDuration = chrono::milliseconds(abs(bankAngle) == 25 ? 3000 : 2000);
+        // Speed-dependent bank angle: standard-rate turn bank ≈ V_kt / 10 + 7.
+        const float speedKt = static_cast<float>(max(80.0, aircraft->groundSpeedKt()));
+        const float maxBank = min(30.0f, speedKt / 10.0f + 7.0f);
+        const float absBank = (abs(turnDegrees) > 10) ? maxBank : min(15.0f, maxBank * 0.6f);
+        int bankAngle = static_cast<int>(absBank) * (turnDegrees < 0 ? -1 : 1);
+        // Turn rate (deg/s) from bank: rate = g·tan(bank)/V ≈ 1091·tan(bank)/V_kt.
+        const float bankRad = absBank * 3.14159265f / 180.0f;
+        const float turnRate = max(1.5f, 1091.0f * tanf(bankRad) / speedKt);
+        auto turnDuration = chrono::milliseconds(max(500, static_cast<int>(1000.0f * abs(turnDegrees) / turnRate)));
+        // Roll duration proportional to bank magnitude; heavier bank takes longer to establish.
+        auto rollDuration = chrono::milliseconds(max(1500, static_cast<int>(absBank * 120.0f)));
 
         m_host->writeLog(
-            "MANEUVER airborneTurn: from %f to %f = %f deg, bank %d, rate %d, Tturn=%lld ms, Tbank=%lld ms",
+            "MANEUVER airborneTurn: from %f to %f = %f deg, bank %d, rate %f, Tturn=%lld ms, Tbank=%lld ms",
             fromHeading, toHeading, turnDegrees, bankAngle, turnRate, turnDuration.count(), rollDuration.count());
 
         auto rollIn = shared_ptr<Maneuver>(new AnimationManeuver<double>(
@@ -754,41 +771,46 @@ namespace ai
         float radiusMeters)
     {
         float radius = 0.00001 * radiusMeters;
+        // Apply cosine(latitude) correction so longitude offset matches true meters.
+        const float latRad = static_cast<float>(location.latitude * M_PI / 180.0);
+        const float cosLat = max(0.01f, cosf(latRad));
+        float radiusLon = radius / cosLat;
         float halfRadius = radius / 2;
+        float halfRadiusLon = radiusLon / 2;
         int sectorIndex = getScanSectorIndex(heading);
 
         switch (sectorIndex)
         {
         case 0: // -22.5..+22.5
-            topLeft = {location.latitude + radius, location.longitude - halfRadius };
-            bottomRight = { location.latitude, location.longitude + halfRadius };
+            topLeft = {location.latitude + radius, location.longitude - halfRadiusLon };
+            bottomRight = { location.latitude, location.longitude + halfRadiusLon };
             break;
         case 1: // +22.5..+67.5
             topLeft = {location.latitude + radius, location.longitude };
-            bottomRight = { location.latitude, location.longitude + radius };
+            bottomRight = { location.latitude, location.longitude + radiusLon };
             break;
         case 2:
             topLeft = {location.latitude + halfRadius, location.longitude };
-            bottomRight = {location.latitude - halfRadius, location.longitude + radius };
+            bottomRight = {location.latitude - halfRadius, location.longitude + radiusLon };
             break;
         case 3:
             topLeft = { location.latitude, location.longitude };
-            bottomRight = { location.latitude - radius, location.longitude + radius };
+            bottomRight = { location.latitude - radius, location.longitude + radiusLon };
             break;
         case 4:
-            topLeft = {location.latitude, location.longitude - halfRadius };
-            bottomRight = { location.latitude - radius, location.longitude + halfRadius };
+            topLeft = {location.latitude, location.longitude - halfRadiusLon };
+            bottomRight = { location.latitude - radius, location.longitude + halfRadiusLon };
             break;
         case 5:
-            topLeft = { location.latitude, location.longitude - radius };
+            topLeft = { location.latitude, location.longitude - radiusLon };
             bottomRight = { location.latitude - radius, location.longitude };
             break;
         case 6:
-            topLeft = {location.latitude + halfRadius, location.longitude - radius };
+            topLeft = {location.latitude + halfRadius, location.longitude - radiusLon };
             bottomRight = { location.latitude - halfRadius, location.longitude };
             break;
         case 7:
-            topLeft = {location.latitude + radius, location.longitude - radius };
+            topLeft = {location.latitude + radius, location.longitude - radiusLon };
             bottomRight = { location.latitude, location.longitude };
             break;
         }

@@ -294,12 +294,15 @@ namespace world
                 altitudeMslFeet = altitudeFeetMsl(flight);
             }
 
+            // Fallback order for airborne arrivals: Approach is primary, then
+            // Area (center), Departure (which often covers approach sectors at
+            // smaller airports), and only then Local/Ground as last resorts.
             const vector<ControllerPosition::Type> fallbackTypes = {
                 ControllerPosition::Type::Approach,
                 ControllerPosition::Type::Area,
+                ControllerPosition::Type::Departure,
                 ControllerPosition::Type::Local,
-                ControllerPosition::Type::Ground,
-                ControllerPosition::Type::Departure
+                ControllerPosition::Type::Ground
             };
 
             for (const auto fallbackType : fallbackTypes)

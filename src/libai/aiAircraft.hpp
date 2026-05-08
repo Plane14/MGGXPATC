@@ -103,9 +103,15 @@ namespace ai
                 }
 
                 const auto category = aircraft->category();
+                // Super wake class for very large aircraft (A380, AN225).
                 if (category == Aircraft::Category::Heavy)
                 {
-                    return 2;
+                    const string& icao = aircraft->modelIcao();
+                    if (icao == "A388" || icao == "A380" || icao == "AN25" || icao == "A225")
+                    {
+                        return 3; // Super
+                    }
+                    return 2; // Heavy
                 }
                 if (category == Aircraft::Category::LightProp ||
                     category == Aircraft::Category::Prop ||
@@ -118,17 +124,18 @@ namespace ai
             };
 
             const auto finalApproachSpacingNm = [](int leaderWakeClass, int followerWakeClass) {
-                // Rough ICAO-like wake spacing model for final approach.
-                if (leaderWakeClass >= 2)
-                {
-                    return followerWakeClass == 0 ? 6.0f : 5.0f;
-                }
-                if (leaderWakeClass == 1 && followerWakeClass == 0)
-                {
-                    return 5.0f;
-                }
-
-                return 4.0f;
+                // ICAO Doc 4444 wake turbulence separation matrix (NM on final approach).
+                // Leader classes: 0=Light, 1=Medium, 2=Heavy, 3=Super (A380/AN225).
+                // Rows = leader, Cols = follower [Light, Medium, Heavy, Super].
+                static const float spacingMatrix[4][4] = {
+                    /*Light  behind:*/ { 3.0f, 3.0f, 3.0f, 3.0f },  // Light leader
+                    /*Medium behind:*/ { 5.0f, 3.0f, 3.0f, 3.0f },  // Medium leader
+                    /*Heavy  behind:*/ { 6.0f, 5.0f, 4.0f, 4.0f },  // Heavy leader
+                    /*Super  behind:*/ { 8.0f, 7.0f, 6.0f, 6.0f },  // Super leader
+                };
+                const int lr = max(0, min(3, leaderWakeClass));
+                const int fr = max(0, min(3, followerWakeClass));
+                return spacingMatrix[lr][fr];
             };
 
             const int followerWakeClass = inferWakeClass(flightPtr->aircraft());
@@ -715,15 +722,19 @@ namespace ai
             const GeoPoint touchdownPoint = parkingStand->location().geo();
             const float approachHeading = normalizeHeading(parkingStand->heading());
             const float terrainElevationFeet = host()->getWorld()->queryTerrainElevationAt(touchdownPoint);
-            const float finalDistanceMeters = 0.55f * METERS_IN_NAUTICAL_MILE;
+            // Scale approach distance and altitude by approach speed (lighter helis need less room).
+            const float approachSpeedKt = max(35.0f, min(80.0f, m_performanceProfile.approachSpeedKt));
+            const float finalDistanceNm = max(0.3f, min(0.8f, approachSpeedKt / 120.0f));
+            const float finalDistanceMeters = finalDistanceNm * METERS_IN_NAUTICAL_MILE;
+            const float approachAltitudeFt = max(150.0f, min(400.0f, finalDistanceNm * 500.0f));
             GeoPoint finalStartLocation = GeoMath::getPointAtDistance(
                 touchdownPoint,
                 GeoMath::flipHeading(approachHeading),
                 finalDistanceMeters);
 
             setLocation(finalStartLocation);
-            setAltitude(Altitude::msl(terrainElevationFeet + 250.0f));
-            setGroundSpeedKt(max(35.0f, min(80.0f, m_performanceProfile.approachSpeedKt)));
+            setAltitude(Altitude::msl(terrainElevationFeet + approachAltitudeFt));
+            setGroundSpeedKt(approachSpeedKt);
             setVerticalSpeedFpm(-max(180.0f, m_performanceProfile.descentRateFpm * 0.45f));
             setFlapState(0.0f);
             setGearState(1.0f);
@@ -1097,15 +1108,23 @@ namespace ai
             const double turnDegrees = GeoMath::getTurnDegrees(static_cast<float>(m_track), static_cast<float>(m_targetTrack));
             const bool helicopter = category() == Aircraft::Category::Helicopter;
             const bool fighter = category() == Aircraft::Category::Fighter;
-            const double turnRateDegreesPerSecond = helicopter
-                ? (onGround
-                    ? 20.0
-                    : max(6.0, min(18.0, 6.0 + m_groundSpeedKt / 18.0)))
-                : (onGround
-                    ? 12.0
-                    : (fighter
-                        ? max(4.0, min(14.0, 4.0 + abs(m_attitude.roll()) * 0.24 + m_groundSpeedKt / 95.0))
-                        : max(2.0, min(8.0, 2.0 + abs(m_attitude.roll()) * 0.18 + m_groundSpeedKt / 120.0))));
+            // Physics-based turn rate: rate = g·tan(bank)/V ≈ 1091·tan(bank)/V_kt (deg/s).
+            double turnRateDegreesPerSecond;
+            if (onGround) {
+                turnRateDegreesPerSecond = helicopter ? 20.0 : 12.0;
+            } else {
+                const double absRoll = max(1.0, abs(m_attitude.roll()));
+                const double speedKt = max(80.0, abs(m_groundSpeedKt));
+                const double bankRad = absRoll * 3.14159265 / 180.0;
+                const double physicsRate = 1091.0 * tan(bankRad) / speedKt;
+                if (helicopter) {
+                    turnRateDegreesPerSecond = max(6.0, min(18.0, physicsRate));
+                } else if (fighter) {
+                    turnRateDegreesPerSecond = max(3.0, min(14.0, physicsRate));
+                } else {
+                    turnRateDegreesPerSecond = max(1.5, min(8.0, physicsRate));
+                }
+            }
             const double maxTurnDelta = turnRateDegreesPerSecond * elapsedSeconds;
             if (abs(turnDegrees) <= maxTurnDelta)
             {
@@ -1197,7 +1216,11 @@ namespace ai
 
             const double leaderSpeedKt = max(120.0, abs(leader->groundSpeedKt()));
             const double spacingErrorNm = distanceMeters / METERS_IN_NAUTICAL_MILE;
-            const double closureAdjustmentKt = min(45.0, max(-20.0, spacingErrorNm * 120.0));
+            // PD controller: proportional + derivative damping to reduce oscillation.
+            const double closureRateKt = m_groundSpeedKt - leaderSpeedKt;
+            const double proportionalGain = 80.0;
+            const double dampingGain = 1.8;
+            const double closureAdjustmentKt = min(45.0, max(-20.0, spacingErrorNm * proportionalGain - closureRateKt * dampingGain));
             m_targetGroundSpeedKt = clampTargetGroundSpeedKt(leaderSpeedKt + closureAdjustmentKt);
 
             const double currentAltitudeFeet = altitudeMslFeet(m_altitude, m_location);
@@ -1205,7 +1228,9 @@ namespace ai
             const double altitudeErrorFeet = desiredAltitudeFeet - currentAltitudeFeet;
             if (abs(altitudeErrorFeet) > 40.0)
             {
-                m_targetVerticalSpeedFpm = clampTargetVerticalSpeedFpm(altitudeErrorFeet * 4.0);
+                // Damped altitude correction to prevent vertical oscillation.
+                const double vsErrorFpm = m_verticalSpeedFpm - leader->verticalSpeedFpm();
+                m_targetVerticalSpeedFpm = clampTargetVerticalSpeedFpm(altitudeErrorFeet * 3.5 - vsErrorFpm * 1.2);
             }
         }
 

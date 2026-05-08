@@ -401,7 +401,30 @@ namespace ai
                 return nullptr;
             }
 
-            return tower->tryFindPosition(ControllerPosition::Type::Local, location);
+            // At many airports the Local position may not cover the aircraft's
+            // current location (e.g. it is still on approach).  Fall through
+            // Approach and Departure positions before giving up, mirroring the
+            // departure-side fallback logic.
+            const vector<ControllerPosition::Type> arrivalFallbacks = {
+                ControllerPosition::Type::Local,
+                ControllerPosition::Type::Approach,
+                ControllerPosition::Type::Departure
+            };
+
+            for (const auto fallbackType : arrivalFallbacks)
+            {
+                if (auto fallback = tower->tryFindPosition(fallbackType, location))
+                {
+                    return fallback;
+                }
+            }
+
+            if (!tower->positions().empty())
+            {
+                return tower->positions().front();
+            }
+
+            return nullptr;
         }
 
         void initClearanceHeader(
