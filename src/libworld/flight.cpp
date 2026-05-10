@@ -263,6 +263,43 @@ namespace world
             }
         }
 
+        // RVSM semi-circular cruising levels (ICAO Doc 7030, EUR region).
+        // Eastbound (000-179°): odd thousands  — FL290, 310, 330, 350, 370, 390, 410…
+        // Westbound (180-359°): even thousands — FL300, 320, 340, 360, 380, 400, 420…
+        // Below FL290 the classic 1000-ft IFR rule still uses odd/even thousands.
+        float applyRvsmSemiCircular(float desiredAltFeet, float routeHeading)
+        {
+            const bool eastbound = routeHeading >= 0.0f && routeHeading < 180.0f;
+            const int desiredFL = static_cast<int>(desiredAltFeet / 100.0f);
+
+            if (desiredAltFeet >= 29000.0f)
+            {
+                // RVSM band FL290-FL410: 1000-ft separation, semi-circular
+                // Eastbound: FL290, 310, 330, 350, 370, 390, 410
+                // Westbound: FL300, 320, 340, 360, 380, 400
+                const int baseFL = eastbound ? 290 : 300;
+                int fl = baseFL;
+                while (fl + 20 <= desiredFL)
+                {
+                    fl += 20;
+                }
+                return static_cast<float>(fl) * 100.0f;
+            }
+
+            // Below FL290: standard IFR semi-circular (1000-ft)
+            // Eastbound: odd thousands (FL190, 210, 230, 250, 270)
+            // Westbound: even thousands (FL180, 200, 220, 240, 260, 280)
+            const int thousands = static_cast<int>(desiredAltFeet / 1000.0f);
+            if (eastbound)
+            {
+                return (thousands % 2 == 1) ? thousands * 1000.0f : (thousands - 1) * 1000.0f;
+            }
+            else
+            {
+                return (thousands % 2 == 0) ? thousands * 1000.0f : (thousands - 1) * 1000.0f;
+            }
+        }
+
         float selectCruiseAltitudeFeet(
             shared_ptr<HostServices> host,
             const vector<FlightPlan::RouteWaypoint>& routeWaypoints,
@@ -288,30 +325,35 @@ namespace world
 
             const float routeDistanceNm = GeoMath::getDistanceMeters(fromPoint, toPoint) / METERS_IN_1_NAUTICAL_MILE;
             const float routeHeading = GeoMath::getHeadingFromPoints(fromPoint, toPoint);
-            const bool eastbound = routeHeading >= 0.0f && routeHeading < 180.0f;
 
+            // Select desired altitude band based on route distance
+            float desiredAlt;
             if (routeDistanceNm < 120.0f)
             {
-                return eastbound ? 19000.0f : 20000.0f;
+                desiredAlt = 19000.0f;
             }
-            if (routeDistanceNm < 250.0f)
+            else if (routeDistanceNm < 250.0f)
             {
-                return eastbound ? 23000.0f : 24000.0f;
+                desiredAlt = 24000.0f;
             }
-            if (routeDistanceNm < 450.0f)
+            else if (routeDistanceNm < 450.0f)
             {
-                return eastbound ? 29000.0f : 30000.0f;
+                desiredAlt = 30000.0f;
             }
-            if (routeDistanceNm < 800.0f)
+            else if (routeDistanceNm < 800.0f)
             {
-                return eastbound ? 33000.0f : 34000.0f;
+                desiredAlt = 34000.0f;
             }
-            if (routeDistanceNm < 1400.0f)
+            else if (routeDistanceNm < 1400.0f)
             {
-                return eastbound ? 35000.0f : 36000.0f;
+                desiredAlt = 36000.0f;
+            }
+            else
+            {
+                desiredAlt = 40000.0f;
             }
 
-            return eastbound ? 39000.0f : 40000.0f;
+            return applyRvsmSemiCircular(desiredAlt, routeHeading);
         }
     }
 
