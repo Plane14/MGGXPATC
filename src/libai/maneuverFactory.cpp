@@ -165,7 +165,14 @@ namespace ai
 
             if (enterRoundTurn)
             {
-                float speedFactor = (typeOfTaxi == TaxiType::HighSpeed ? 18.0f : (typeOfTaxi == TaxiType::Pushback ? 2.5f : 6.0f));
+                float speedFactor;
+                if (typeOfTaxi == TaxiType::Pushback) {
+                    speedFactor = 2.5f;
+                } else if (typeOfTaxi == TaxiType::HighSpeed) {
+                    speedFactor = 16.0f;
+                } else {
+                    speedFactor = 5.0f;
+                }
                 auto turnDuration = chrono::milliseconds((int)(1000 * turnArc.arcLengthMeters / speedFactor));
                 steps.push_back(taxiTurn(flight, turnArc, turnDuration, typeOfTaxi));
             }
@@ -267,9 +274,9 @@ namespace ai
             auto speedState = make_shared<SpeedState>();
             speedState->currentSpeed = startSpeedKnots;
 
-            // Acceleration/deceleration rates (knots per second)
-            const float brakeRate = 8.0f;      // Deceleration when braking
-            const float accelRate = 4.0f;      // Acceleration when resuming
+            // Acceleration/deceleration rates (knots per second) scaled by performance profile.
+            const float brakeRate = max(4.0f, aircraft->performanceProfile().landingRolloutDecelerationKtPerSecond * 0.5f);
+            const float accelRate = max(2.0f, aircraft->performanceProfile().takeoffAccelerationKtPerSecond * 0.35f);
             const float dt = 0.1f;             // Assume 10Hz update rate
 
             return shared_ptr<Maneuver>(new AnimationManeuver<GeoPoint>(
@@ -381,9 +388,9 @@ namespace ai
             auto speedState = make_shared<SpeedState>();
             speedState->currentSpeed = startSpeedKnots;
 
-            // Acceleration/deceleration rates (knots per second) - reduced for turns
-            const float brakeRate = 6.0f;      // Deceleration when braking
-            const float accelRate = 3.0f;      // Acceleration when resuming
+            // Acceleration/deceleration rates scaled by performance — reduced for turns.
+            const float brakeRate = max(3.0f, aircraft->performanceProfile().landingRolloutDecelerationKtPerSecond * 0.4f);
+            const float accelRate = max(1.5f, aircraft->performanceProfile().takeoffAccelerationKtPerSecond * 0.25f);
             const float dt = 0.1f;             // Assume 10Hz update rate
 
             return shared_ptr<Maneuver>(new AnimationManeuver<double>(
@@ -456,7 +463,7 @@ namespace ai
                 return instantAction([]{});
             }
 
-            const float brakeRate = 8.0f;
+            const float brakeRate = max(4.0f, aircraft->performanceProfile().landingRolloutDecelerationKtPerSecond * 0.6f);
             const auto duration = chrono::milliseconds(max(500, static_cast<int>(1000.0f * startSpeedKnots / brakeRate)));
 
             return shared_ptr<Maneuver>(new AnimationManeuver<double>(
