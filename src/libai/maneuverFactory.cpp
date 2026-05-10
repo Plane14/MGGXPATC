@@ -834,9 +834,15 @@ namespace ai
         auto ourPhase = ourFlight->phase();
 
         const float ourSpeedKt = static_cast<float>(abs(ourAircraft->groundSpeedKt()));
-        const float baseScanRadius = previousState == Maneuver::SemaphoreState::Open ? 50.0f : 65.0f;
+        const auto ourCategory = ourAircraft->category();
+        const float categoryScanScale =
+            (ourCategory == Aircraft::Category::Heavy)     ? 1.45f :
+            (ourCategory == Aircraft::Category::Jet)       ? 1.15f :
+            (ourCategory == Aircraft::Category::Turboprop) ? 1.0f  :
+            (ourCategory == Aircraft::Category::Helicopter)? 0.75f : 0.85f;
+        const float baseScanRadius = (previousState == Maneuver::SemaphoreState::Open ? 50.0f : 65.0f) * categoryScanScale;
         const float speedLookahead = isPushback ? 6.0f : min(22.0f, ourSpeedKt * 0.9f);
-        float scanRadiusMeters = max(40.0f, min(90.0f, baseScanRadius + speedLookahead));
+        float scanRadiusMeters = max(35.0f, min(130.0f, baseScanRadius + speedLookahead));
         float ourHeading = isPushback
             ? GeoMath::flipHeading(ourAircraft->attitude().heading())
             : ourAircraft->attitude().heading();
@@ -877,7 +883,11 @@ namespace ai
             bool isInFront = abs(turnToOther) < 65;
             bool isHeadOn = abs(deltaHeading) > 165;
 
-            if (distanceMeters < 14.0f)
+            const float categoryMinSeparation =
+                (ourCategory == Aircraft::Category::Heavy)     ? 22.0f :
+                (ourCategory == Aircraft::Category::Jet)       ? 16.0f :
+                (ourCategory == Aircraft::Category::Turboprop) ? 13.0f : 10.0f;
+            if (distanceMeters < categoryMinSeparation)
             {
                 return true;
             }
@@ -886,7 +896,11 @@ namespace ai
                 return true;
             }
 
-            const float followConflictDistance = max(26.0f, min(65.0f, ourSpeedKt * 2.4f));
+            const float categoryFollowScale =
+                (ourCategory == Aircraft::Category::Heavy)     ? 3.2f :
+                (ourCategory == Aircraft::Category::Jet)       ? 2.6f :
+                (ourCategory == Aircraft::Category::Turboprop) ? 2.2f : 2.0f;
+            const float followConflictDistance = max(28.0f, min(85.0f, ourSpeedKt * categoryFollowScale));
             if (isInFront && isSameDirection && distanceMeters < followConflictDistance)
             {
                 return true;
@@ -895,12 +909,17 @@ namespace ai
             const bool crossingGeometry = abs(turnToOther) > 15 && abs(turnToOther) < 105 && abs(deltaHeading) > 40 && abs(deltaHeading) < 150;
             if (crossingGeometry)
             {
-                if (turnToOther > 0 && distanceMeters < 30.0f)
+                const float crossingPriorityDist =
+                    (ourCategory == Aircraft::Category::Heavy)     ? 45.0f :
+                    (ourCategory == Aircraft::Category::Jet)       ? 34.0f :
+                    (ourCategory == Aircraft::Category::Turboprop) ? 28.0f : 24.0f;
+                const float crossingMinDist = crossingPriorityDist * 0.55f;
+                if (turnToOther > 0 && distanceMeters < crossingPriorityDist)
                 {
-                    return true; // right-hand priority in crossing conflicts
+                    return true;
                 }
 
-                if (distanceMeters < 18.0f)
+                if (distanceMeters < crossingMinDist)
                 {
                     return true;
                 }
@@ -910,7 +929,11 @@ namespace ai
         };
 
         bool obstaclesDetected = world->detectAircraftInRect(scanTopLeft, scanBottomRight, isAircraftAnObstacle);
-        if (obstaclesDetected && isPushback && previousState == Maneuver::SemaphoreState::Closed && closedStateTotalDuration >= chrono::seconds(45))
+        const int pushbackTimeoutSeconds =
+            (ourCategory == Aircraft::Category::Heavy)     ? 70 :
+            (ourCategory == Aircraft::Category::Jet)       ? 55 :
+            (ourCategory == Aircraft::Category::Turboprop) ? 45 : 35;
+        if (obstaclesDetected && isPushback && previousState == Maneuver::SemaphoreState::Closed && closedStateTotalDuration >= chrono::seconds(pushbackTimeoutSeconds))
         {
             return Maneuver::SemaphoreState::Open;
         }

@@ -381,7 +381,15 @@ namespace ai
                 {
                     return -max(450.0f, performance.descentRateFpm * 1.2f);
                 }
-                return -max(700.0f, leg->targetAltitude() > 0 ? leg->targetAltitude() / 10.0f : 1200.0f);
+                {
+                    // Use performance-based descent rate capped to a comfortable
+                    // passenger descent (~1500-2000 fpm for jets, less for props).
+                    // The geometric tracker (lines 714+) will refine VS per-waypoint.
+                    const float nominalDescent = performance.descentRateFpm;
+                    const float maxStarDescent = (m_aircraft->category() == Aircraft::Category::Fighter)
+                        ? 4000.0f : 2000.0f;
+                    return -max(700.0f, min(maxStarDescent, nominalDescent * 0.85f));
+                }
             case FlightPlan::LegType::Approach:
                 {
                     // Use Eurocontrol performance-based descent rate for approach
@@ -3910,14 +3918,28 @@ namespace ai
                 }
 
                 auto targetControl = m_helper.tryGetArrivalApproach(flight(), m_aircraft->location());
-                if (!targetControl ||
-                    targetControl->type() == ControllerPosition::Type::Local ||
-                    targetControl->type() == ControllerPosition::Type::Ground)
+                if (!targetControl)
+                {
+                    host()->writeLog(
+                        "AIPILO|WARNING: no arrival controller found for radar check-in flight[%s]",
+                        flight()->callSign().c_str());
+                    return M.instantAction([]{});
+                }
+
+                // At airports without dedicated approach/radar, the Local (tower)
+                // controller handles arrivals. Only skip Ground — aircraft should
+                // always check in with at least tower on arrival.
+                if (targetControl->type() == ControllerPosition::Type::Ground)
                 {
                     return M.instantAction([]{});
                 }
 
                 m_arrivalRadarCheckInDone = true;
+                host()->writeLog(
+                    "AIPILO|ARR_CHECKIN flight[%s] contacting %s on %.3f",
+                    flight()->callSign().c_str(),
+                    targetControl->callSign().c_str(),
+                    targetControl->frequency()->khz() / 1000.0f);
                 return M.sequence(Maneuver::Type::ArrivalDescentFromTop, "arrival_radar_checkin", {
                     M.tuneComRadio(flight(), targetControl->frequency()),
                     M.transmitIntent(flight(), I.pilotCheckInWithRadar(flight(), targetControl), "arrival_radar_checkin_tx")
