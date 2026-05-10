@@ -1779,42 +1779,61 @@ private:
             return makeTrafficCallsignPrefix(model) + " " + to_string(flightId);
         };
 
+        // RVSM semi-circular cruising levels (ICAO Doc 7030).
+        // Eastbound (000-179): odd thousands; Westbound (180-359): even thousands.
+        const auto applyRvsmSemiCircular = [](float desiredAltFeet, float routeHeading) -> float {
+            const bool eastbound = routeHeading >= 0.0f && routeHeading < 180.0f;
+            const int desiredFL = static_cast<int>(desiredAltFeet / 100.0f);
+            if (desiredAltFeet >= 29000.0f)
+            {
+                const int baseFL = eastbound ? 290 : 300;
+                int fl = baseFL;
+                while (fl + 20 <= desiredFL) { fl += 20; }
+                return static_cast<float>(fl) * 100.0f;
+            }
+            const int thousands = static_cast<int>(desiredAltFeet / 1000.0f);
+            if (eastbound)
+                return (thousands % 2 == 1) ? thousands * 1000.0f : (thousands - 1) * 1000.0f;
+            else
+                return (thousands % 2 == 0) ? thousands * 1000.0f : (thousands - 1) * 1000.0f;
+        };
+
         // Helper to calculate appropriate cruise altitude (capped at aircraft ceiling)
-        const auto calculateCruiseAltitudeFeet = [this](int ceilingFl, Flight::RulesType rulesType) -> float {
-            // Convert ceiling FL to feet
+        const auto calculateCruiseAltitudeFeet = [this, &applyRvsmSemiCircular](int ceilingFl, Flight::RulesType rulesType, float routeHeading) -> float {
             float maxAltitudeFeet = ceilingFl * 100.0f;
 
-            // For VFR flights, apply hemispheric rule (odd+500 east, even+500 west)
             if (rulesType == Flight::RulesType::VFR)
             {
+                // VFR hemispheric rule: odd+500 eastbound, even+500 westbound
+                const bool eastbound = routeHeading >= 0.0f && routeHeading < 180.0f;
                 float baseAltitude = min(8500.0f, maxAltitudeFeet * 0.8f);
-                const int altitudeSteps[] = { 3500, 4500, 5500, 6500, 7500, 8500 };
-                const int stepCount = sizeof(altitudeSteps) / sizeof(altitudeSteps[0]);
+                const int eastSteps[] = { 3500, 5500, 7500 };
+                const int westSteps[] = { 4500, 6500, 8500 };
+                const int stepCount = 3;
                 int selectedIndex = m_host->getNextRandom(stepCount);
-                float selected = static_cast<float>(altitudeSteps[selectedIndex]);
+                float selected = eastbound
+                    ? static_cast<float>(eastSteps[selectedIndex])
+                    : static_cast<float>(westSteps[selectedIndex]);
                 return min(selected, baseAltitude);
             }
 
-            // For IFR, choose a reasonable cruise altitude but stay below ceiling
-            // Use typical cruise levels but cap at ceiling
-            float desiredAltitudeFeet = 24000.0f;  // Default IFR cruise
+            // IFR: choose cruise altitude based on aircraft ceiling, then apply RVSM
+            float desiredAltitudeFeet = 24000.0f;
             if (ceilingFl <= 150)
             {
-                // Low performance aircraft - cruise at FL 100-120 (below most airways)
                 desiredAltitudeFeet = min(10000.0f, maxAltitudeFeet * 0.9f);
             }
             else if (ceilingFl <= 250)
             {
-                // Medium performance - cruise at FL 180-200
                 desiredAltitudeFeet = min(18000.0f, maxAltitudeFeet * 0.9f);
             }
             else if (ceilingFl <= 350)
             {
-                // Regional aircraft - cruise at FL 240-280
                 desiredAltitudeFeet = min(26000.0f, maxAltitudeFeet * 0.9f);
             }
 
-            return min(desiredAltitudeFeet, maxAltitudeFeet * 0.95f);  // Stay 5% below ceiling for safety
+            float capped = min(desiredAltitudeFeet, maxAltitudeFeet * 0.95f);
+            return applyRvsmSemiCircular(capped, routeHeading);
         };
 
         // Helper to convert meters to nautical miles
@@ -2509,8 +2528,10 @@ private:
                 }
             }
 
-            // Set cruise altitude capped at aircraft ceiling
-            float cruiseAltitudeFeet = calculateCruiseAltitudeFeet(model.ceilingFl, rulesType);
+            // Compute route heading for RVSM semi-circular altitude assignment
+            const float outboundHeading = GeoMath::getHeadingFromPoints(
+                m_airport->header().datum(), destinationAirport->header().datum());
+            float cruiseAltitudeFeet = calculateCruiseAltitudeFeet(model.ceilingFl, rulesType, outboundHeading);
             cruiseAltitudeFeet = adjustCruiseAltitudeForMission(cruiseAltitudeFeet, m_airport, destinationAirport, model, missionProfile);
             flightPlan->setCruiseAltitudeFeet(cruiseAltitudeFeet);
 
@@ -2637,8 +2658,10 @@ private:
                 }
             }
 
-            // Set cruise altitude capped at aircraft ceiling
-            float cruiseAltitudeFeet = calculateCruiseAltitudeFeet(model.ceilingFl, rulesType);
+            // Compute route heading for RVSM semi-circular altitude assignment
+            const float inboundHeading = GeoMath::getHeadingFromPoints(
+                originAirport->header().datum(), m_airport->header().datum());
+            float cruiseAltitudeFeet = calculateCruiseAltitudeFeet(model.ceilingFl, rulesType, inboundHeading);
             cruiseAltitudeFeet = adjustCruiseAltitudeForMission(cruiseAltitudeFeet, originAirport, m_airport, model, missionProfile);
             flightPlan->setCruiseAltitudeFeet(cruiseAltitudeFeet);
 
