@@ -2130,7 +2130,12 @@ public:
 
     void clearAll() override
     {
+        const size_t count = m_simAircraft.size();
         m_simAircraft.clear();
+        if (m_host && count > 0)
+        {
+            m_host->writeLog("MP2SVC|clearAll: destroyed %d XPMP2 aircraft objects / TCAS targets", static_cast<int>(count));
+        }
     }
 
 private:

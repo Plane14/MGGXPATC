@@ -417,10 +417,26 @@ private:
             m_time1XItem(_menu, "Time X 1", [=](){ m_simSpeed = 1; }),
             m_time10XItem(_menu, "Time X 10", [=](){ m_simSpeed = 10; }),
             m_time20XItem(_menu, "Time X 20", [=](){ m_simSpeed = 20; }),
-            m_stopSchedulesItem(_menu, "Stop schedules", std::move(_onStopSchedules)),
-            m_restartSchedules100Item(_menu, "Restart schedules with 100% load", [=]{_onRestartSchedules(1.0f, m_offlineRandomTraffic);}),
-            m_restartSchedules70Item(_menu, "Restart schedules with 70% load", [=]{_onRestartSchedules(0.7f, m_offlineRandomTraffic);}),
-            m_restartSchedules50Item(_menu, "Restart schedules with 50% load", [=]{_onRestartSchedules(0.5f, m_offlineRandomTraffic);}),
+            m_stopSchedulesItem(_menu, "Stop schedules", [this, _onStopSchedules](){
+                if (m_world)
+                {
+                    m_host->writeLog("PLUGIN|Stop schedules: clearing all flights and TCAS/CSL objects");
+                    m_world->clearAllFlights();
+                }
+                _onStopSchedules();
+            }),
+            m_restartSchedules100Item(_menu, "Restart schedules with 100% load", [this, _onRestartSchedules]{
+                if (m_world) { m_host->writeLog("PLUGIN|Restart 100%%: clearing all flights and TCAS/CSL objects"); m_world->clearAllFlights(); }
+                _onRestartSchedules(1.0f, m_offlineRandomTraffic);
+            }),
+            m_restartSchedules70Item(_menu, "Restart schedules with 70% load", [this, _onRestartSchedules]{
+                if (m_world) { m_host->writeLog("PLUGIN|Restart 70%%: clearing all flights and TCAS/CSL objects"); m_world->clearAllFlights(); }
+                _onRestartSchedules(0.7f, m_offlineRandomTraffic);
+            }),
+            m_restartSchedules50Item(_menu, "Restart schedules with 50% load", [this, _onRestartSchedules]{
+                if (m_world) { m_host->writeLog("PLUGIN|Restart 50%%: clearing all flights and TCAS/CSL objects"); m_world->clearAllFlights(); }
+                _onRestartSchedules(0.5f, m_offlineRandomTraffic);
+            }),
             m_com1FrequencyKhz("sim/cockpit2/radios/actuators/com1_frequency_hz_833", PPL::ReadWrite),
             m_simSpeed("sim/time/sim_speed", PPL::ReadWrite)
         {

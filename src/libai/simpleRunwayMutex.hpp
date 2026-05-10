@@ -338,7 +338,8 @@ namespace ai
                 "A30", "A33", "A34", "A35", "A38",
                 "B74", "B76", "B77", "B78",
                 "C17", "C5", "C130", "DC1", "IL7", "IL9", "MD1",
-                "A400", "KC13", "KC10", "KC46"
+                "A400", "KC13", "KC10", "KC46", "KC30",
+                "E3", "E6", "E8", "B52", "B1", "P8", "P3", "C2"
             };
 
             for (const auto& prefix : heavyPrefixes)
