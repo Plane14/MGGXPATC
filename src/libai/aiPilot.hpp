@@ -1504,6 +1504,7 @@ namespace ai
         {
             flight()->setArrivalRunway(landingRunway.name());
             m_arrivalTowerCheckInDone = false;
+            m_arrivalRadarCheckInDone = false;
             m_finalReportedTimestamp = chrono::microseconds(0);
 
             // Reset flight plan cursor to ensure we start from the beginning of the flight plan
@@ -1515,6 +1516,11 @@ namespace ai
             }
 
             vector<shared_ptr<Maneuver>> steps;
+
+            // Spawned arrivals must check in with approach/radar before flying STAR/approach legs.
+            // Without this, aircraft appear on approach without ever contacting ATC.
+            steps.push_back(maneuverArrivalRadarCheckIn());
+
             const auto& legs = flight()->plan()->legs();
             const bool hasBridgeLegAfterStar = [&legs]() {
                 bool seenStarLeg = false;
@@ -2252,11 +2258,16 @@ namespace ai
                 return result;
             };
 
+            // Flap retraction time scales with aircraft category: heavies have larger,
+            // slower-acting flaps; light props retract quickly.
+            const int flapRetractSec = (m_aircraft->category() == Aircraft::Category::Heavy ? 45
+                : (m_aircraft->category() == Aircraft::Category::LightProp ? 12
+                : (m_aircraft->category() == Aircraft::Category::Turboprop ? 18 : 30)));
             auto flapsZero = shared_ptr<Maneuver>(new AnimationManeuver<double>(
                 "flaps_0",
                 0.4,
                 0,
-                chrono::seconds(30),
+                chrono::seconds(flapRetractSec),
                 [](const double& from, const double& to, double progress, double& value) {
                     value = from + (to - from) * progress;
                 },

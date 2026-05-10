@@ -1488,7 +1488,11 @@ private:
             const double distanceMeters = GeoMath::getDistanceMeters(
                 referenceAirport->header().datum(),
                 airport->header().datum());
-            const double score = distanceMeters + runwayLengthMeters * 10.0;
+            // Favour closer airports with good runways for realistic regional traffic.
+            // Previous formula (distance + runway*10) picked the farthest airport.
+            const double distanceNm = distanceMeters / 1852.0;
+            const double proximityScore = max(0.0, 500.0 - distanceNm);
+            const double score = proximityScore + runwayLengthMeters * 0.01;
 
             if (score > bestScore)
             {

@@ -283,6 +283,16 @@ namespace ai
                     {
                         arrivalGroundSpeedKt = min(arrivalGroundSpeedKt, arrivalStartLeg->targetSpeed());
                     }
+                    else if (arrivalStartLeg->type() == FlightPlan::LegType::Star)
+                    {
+                        // STAR entry is typically 30-80 NM from threshold — use a higher
+                        // descent speed instead of approach speed so aircraft don't crawl
+                        // through the entire arrival procedure unrealistically slowly.
+                        const float starSpeedKt = min(
+                            max(groundSpeedKt, m_performanceProfile.takeoffInitialClimbSpeedKt * 1.15f),
+                            static_cast<float>(m_performanceProfile.ceilingFl > 250 ? 280.0f : 220.0f));
+                        arrivalGroundSpeedKt = starSpeedKt;
+                    }
                 }
             }
 
@@ -322,7 +332,11 @@ namespace ai
             setFlapState(0);
             setGearState(0);
             setLights(LightBits::BeaconLandingNavStrobe);
-            setAttitude(AircraftAttitude(arrivalHeading, -2.0f, 0));
+            // Derive pitch from descent geometry: pitch ≈ -atan(VS_fpm / (GS_kt * 101.3))
+            const float effectiveGsKt = max(90.0f, arrivalGroundSpeedKt);
+            const float pitchRad = atan2(descentSpeedFpm, effectiveGsKt * 101.3f);
+            const float arrivalPitchDeg = max(-6.0f, min(-1.0f, -pitchRad * 57.2958f));
+            setAttitude(AircraftAttitude(arrivalHeading, arrivalPitchDeg, 0));
 
             flightPtr->setPhase(Flight::Phase::Arrival);
 
@@ -1085,12 +1099,14 @@ namespace ai
             const bool isLandingRoll = onGround && flightPtr && flightPtr->phase() == Flight::Phase::Arrival;
             const double accelKtPerSecond = isTakeoffRoll
                 ? max(3.0, static_cast<double>(m_performanceProfile.takeoffAccelerationKtPerSecond))
-                : (onGround ? 3.0 : 6.0);
+                : (onGround ? 3.0
+                    : max(1.5, static_cast<double>(m_performanceProfile.takeoffAccelerationKtPerSecond) * 0.55));
             const double decelKtPerSecond = isLandingRoll
                 ? max(4.5, static_cast<double>(m_performanceProfile.landingRolloutDecelerationKtPerSecond))
                 : (isTakeoffRoll
                     ? max(4.5, static_cast<double>(m_performanceProfile.takeoffAccelerationKtPerSecond) * 1.5)
-                    : (onGround ? 4.5 : 8.0));
+                    : (onGround ? 4.5
+                        : max(2.0, static_cast<double>(m_performanceProfile.landingRolloutDecelerationKtPerSecond) * 0.7)));
             const double maxSpeedDelta = (m_targetGroundSpeedKt >= m_groundSpeedKt ? accelKtPerSecond : decelKtPerSecond) * elapsedSeconds;
             m_groundSpeedKt = approachValue(m_groundSpeedKt, m_targetGroundSpeedKt, maxSpeedDelta);
 

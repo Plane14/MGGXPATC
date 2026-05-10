@@ -80,10 +80,15 @@ namespace ai
             auto runway = airport->getRunwayOrThrow(flight->plan()->departureRunway());
             auto runwayEnd = runway->getEndOrThrow(flight->plan()->departureRunway());
 
+            // Pushback distance scales with aircraft category — heavies need more room
+            // to clear the gate area; light props need less.
+            const float pushbackMeters = (flight->aircraft()->category() == Aircraft::Category::Heavy ? 55.0f
+                : (flight->aircraft()->category() == Aircraft::Category::LightProp ? 25.0f
+                : (flight->aircraft()->category() == Aircraft::Category::Turboprop ? 30.0f : 40.0f)));
             GeoPoint p0 = GeoMath::getPointAtDistance(
                 gate->location().geo(), 
                 GeoMath::flipHeading(gate->heading()),
-                40);
+                pushbackMeters);
 
             auto taxiPath = airport->taxiNet()->tryFindDepartureTaxiPathToRunway(p0, runwayEnd);
             if (!taxiPath) 
