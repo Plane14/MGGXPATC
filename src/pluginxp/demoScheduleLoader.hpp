@@ -244,10 +244,19 @@ private:
 
             const bool isMilitary = !isHelicopter && (
                 category == world::Aircraft::Category::Fighter ||
-                containsAnyToken(normalizedIcao, { "F16", "F18", "FA18", "F15", "F22", "F35", "A10", "C130", "C17", "C30J", "A400" }) ||
-                containsAnyToken(modelName, { "MIL", "MILI", "ARMY", "NAVY", "USAF", "USN", "RAF", "AIRFORCE", "FIGHTER" }) ||
-                containsAnyToken(airline, { "MIL", "MILI", "ARMY", "NAVY", "USAF", "USN", "RAF", "AIRFORCE", "FIGHTER" }) ||
-                containsAnyToken(livery, { "MIL", "MILI", "ARMY", "NAVY", "USAF", "USN", "RAF", "AIRFORCE", "FIGHTER" }));
+                containsAnyToken(normalizedIcao, {
+                    "F16", "F18", "FA18", "F15", "F22", "F35", "A10",
+                    "C130", "C17", "C30J", "A400", "C5", "C2",
+                    "B52", "B1", "B2", "E3", "E6", "E8",
+                    "KC10", "KC13", "KC46", "KC30",
+                    "P8", "P3", "V22",
+                    "EUFI", "RFAL", "TORNA", "GRIPE", "MIRAG", "SU27", "SU30", "SU35", "MIG29", "MIG31",
+                    "HAWK", "T38", "T45", "T6", "PC21", "PC9", "M346",
+                    "U2", "SR71", "RQ4", "MQ9", "MQ1"
+                }) ||
+                containsAnyToken(modelName, { "MIL", "MILI", "ARMY", "NAVY", "USAF", "USN", "RAF", "AIRFORCE", "FIGHTER", "TANKER", "RECON", "AWACS", "BOMBER" }) ||
+                containsAnyToken(airline, { "MIL", "MILI", "ARMY", "NAVY", "USAF", "USN", "RAF", "AIRFORCE", "FIGHTER", "TANKER", "RECON", "AWACS", "BOMBER" }) ||
+                containsAnyToken(livery, { "MIL", "MILI", "ARMY", "NAVY", "USAF", "USN", "RAF", "AIRFORCE", "FIGHTER", "TANKER", "RECON", "AWACS", "BOMBER" }));
 
             const bool isGa = !isHelicopter && !isMilitary && (
                 category == world::Aircraft::Category::LightProp ||
@@ -258,11 +267,11 @@ private:
             if (isMilitary)
             {
                 world::Aircraft::Category trafficCategory = category;
-                if (containsAnyToken(normalizedIcao, { "C130", "C17", "C30J" }))
+                if (containsAnyToken(normalizedIcao, { "C130", "C17", "C30J", "C5", "B52", "B1", "KC10", "KC13", "KC46", "KC30", "E3", "E6", "E8", "P8", "P3" }))
                 {
                     trafficCategory = world::Aircraft::Category::Heavy;
                 }
-                else if (containsAnyToken(normalizedIcao, { "A400" }))
+                else if (containsAnyToken(normalizedIcao, { "A400", "C2", "V22" }))
                 {
                     trafficCategory = world::Aircraft::Category::Turboprop;
                 }
@@ -2041,21 +2050,35 @@ private:
         };
 
         const auto chooseMilitaryMissionProfile = [this](const RandomTrafficModelPools::RandomTrafficModel& model) {
-            if (model.category != world::Aircraft::Category::Fighter)
-            {
-                return AIAircraft::MissionProfile::None;
-            }
+            const string& icao = model.icao;
+            const bool isFighter = model.category == world::Aircraft::Category::Fighter;
+            const bool isTransport = containsAnyToken(icao, { "C130", "C17", "C30J", "C5", "C2", "A400", "V22", "KC10", "KC13", "KC46", "KC30" });
+            const bool isBomber = containsAnyToken(icao, { "B52", "B1", "B2" });
+            const bool isIsr = containsAnyToken(icao, { "E3", "E6", "E8", "P8", "P3", "U2", "RQ4", "MQ9", "MQ1" });
 
-            const int missionRoll = m_host->getNextRandom(100);
-            if (missionRoll < 34)
+            if (isFighter)
             {
-                return AIAircraft::MissionProfile::Training;
+                const int missionRoll = m_host->getNextRandom(100);
+                if (missionRoll < 34)
+                {
+                    return AIAircraft::MissionProfile::Training;
+                }
+                if (missionRoll < 72)
+                {
+                    return AIAircraft::MissionProfile::Patrol;
+                }
+                return AIAircraft::MissionProfile::LowLevel;
             }
-            if (missionRoll < 72)
+            if (isTransport)
+            {
+                const int missionRoll = m_host->getNextRandom(100);
+                return missionRoll < 70 ? AIAircraft::MissionProfile::Patrol : AIAircraft::MissionProfile::Training;
+            }
+            if (isBomber || isIsr)
             {
                 return AIAircraft::MissionProfile::Patrol;
             }
-            return AIAircraft::MissionProfile::LowLevel;
+            return AIAircraft::MissionProfile::None;
         };
 
         const auto missionProfileName = [](AIAircraft::MissionProfile missionProfile) -> const char* {
@@ -2725,11 +2748,15 @@ private:
             {
                 const auto& stand = stands.at(index);
                 const auto& model = models.at(pickRandomIndex(models.size()));
+                const bool isTacticalFormationCandidate =
+                    model.category == world::Aircraft::Category::Fighter ||
+                    containsAnyToken(model.icao, { "C130", "C17", "C30J", "A400", "V22" });
+                const int formationChance = model.category == world::Aircraft::Category::Fighter ? 42 : 18;
                 const bool pairedMilitaryFormation =
                     trafficBias == TrafficBias::Military &&
-                    model.category == world::Aircraft::Category::Fighter &&
+                    isTacticalFormationCandidate &&
                     index + 1 < stands.size() &&
-                    m_host->getNextRandom(100) < 42;
+                    m_host->getNextRandom(100) < formationChance;
                 const AIAircraft::MissionProfile missionProfile =
                     trafficBias == TrafficBias::Military ? chooseMilitaryMissionProfile(model) : AIAircraft::MissionProfile::None;
 
@@ -2807,16 +2834,107 @@ private:
             }
         };
 
-        const int gaDepartureSpacingSeconds = max(90, static_cast<int>(210.0f * 0.7f / max(loadFactor, 0.1f)));
+        // --- Weather and time-of-day awareness for GA/helicopter traffic ---
+        float gaWeatherFactor = 1.0f;
+        float heliWeatherFactor = 1.0f;
+        float timeOfDayFactor = 1.0f;
+        {
+            auto weatherService = m_host->services().get<WeatherService>();
+            if (weatherService)
+            {
+                auto wx = weatherService->getWeatherAt(m_airport->header().datum(), 0.0f);
+                if (wx.available)
+                {
+                    const float visMeters = wx.visibilityMeters;
+                    const float windKt = wx.windSpeedMetersPerSecond * 1.94384f;
+                    const float precipRate = wx.precipitationRate;
+
+                    // VFR GA: suppress in IMC (vis < 5km), reduce in marginal VFR
+                    if (visMeters > 0.0f && visMeters < 5000.0f)
+                    {
+                        gaWeatherFactor = 0.0f;
+                        m_host->writeLog("SCHEDL|GA traffic suppressed: visibility %.0f m below VFR minimum", visMeters);
+                    }
+                    else if (visMeters > 0.0f && visMeters < 8000.0f)
+                    {
+                        gaWeatherFactor *= 0.35f;
+                    }
+                    if (windKt > 25.0f)
+                    {
+                        gaWeatherFactor *= max(0.1f, 1.0f - (windKt - 25.0f) / 20.0f);
+                    }
+                    if (precipRate > 0.3f)
+                    {
+                        gaWeatherFactor *= max(0.15f, 1.0f - precipRate * 0.6f);
+                    }
+
+                    // Helicopters: reduce in severe weather but less affected by visibility
+                    if (visMeters > 0.0f && visMeters < 1500.0f)
+                    {
+                        heliWeatherFactor *= 0.15f;
+                    }
+                    else if (visMeters > 0.0f && visMeters < 3000.0f)
+                    {
+                        heliWeatherFactor *= 0.5f;
+                    }
+                    if (windKt > 35.0f)
+                    {
+                        heliWeatherFactor *= max(0.1f, 1.0f - (windKt - 35.0f) / 15.0f);
+                    }
+                    if (precipRate > 0.5f)
+                    {
+                        heliWeatherFactor *= max(0.2f, 1.0f - precipRate * 0.45f);
+                    }
+
+                    m_host->writeLog(
+                        "SCHEDL|Weather factors: GA=%.2f Heli=%.2f (vis=%.0fm wind=%.0fkt precip=%.2f)",
+                        gaWeatherFactor, heliWeatherFactor, visMeters, windKt, precipRate);
+                }
+            }
+
+            // Time-of-day: GA/heli traffic peaks in daylight, drops at night
+            const time_t now = m_world->currentTime();
+            struct tm localTimeBuf;
+            memset(&localTimeBuf, 0, sizeof(localTimeBuf));
+#if IBM
+            const struct tm* ltPtr = localtime(&now);
+            if (ltPtr) { localTimeBuf = *ltPtr; }
+#else
+            localtime_r(&now, &localTimeBuf);
+#endif
+            const int hour = localTimeBuf.tm_hour;
+            if (hour >= 7 && hour <= 19)
+            {
+                timeOfDayFactor = 1.0f;
+            }
+            else if (hour >= 5 && hour < 7)
+            {
+                timeOfDayFactor = 0.3f + 0.7f * (hour - 5) / 2.0f;
+            }
+            else if (hour > 19 && hour <= 21)
+            {
+                timeOfDayFactor = 0.3f + 0.7f * (21 - hour) / 2.0f;
+            }
+            else
+            {
+                timeOfDayFactor = 0.1f;
+            }
+            m_host->writeLog("SCHEDL|Time-of-day factor: %.2f (hour=%d)", timeOfDayFactor, hour);
+        }
+
+        const float effectiveGaLoad = loadFactor * gaWeatherFactor * timeOfDayFactor;
+        const float effectiveHeliLoad = loadFactor * heliWeatherFactor * timeOfDayFactor;
+
+        const int gaDepartureSpacingSeconds = max(90, static_cast<int>(210.0f * 0.7f / max(effectiveGaLoad, 0.05f)));
         const int gaArrivalSpacingSeconds = gaDepartureSpacingSeconds;
-        const int helicopterDepartureSpacingSeconds = max(60, static_cast<int>(140.0f * 0.7f / max(loadFactor, 0.1f)));
+        const int helicopterDepartureSpacingSeconds = max(60, static_cast<int>(140.0f * 0.7f / max(effectiveHeliLoad, 0.05f)));
         const int helicopterArrivalSpacingSeconds = helicopterDepartureSpacingSeconds;
-        const int militaryDepartureSpacingSeconds = max(120, static_cast<int>(260.0f * 0.7f / max(loadFactor, 0.1f)));
-        const int militaryArrivalSpacingSeconds = militaryDepartureSpacingSeconds;
+        const int militaryBaseDepartureSpacing = max(120, static_cast<int>(260.0f * 0.7f / max(loadFactor, 0.1f)));
+        const int militaryArrivalSpacingSeconds = militaryBaseDepartureSpacing;
 
         addTrafficGroup("GA", randomTrafficModels.gaModels, generalAviationStands, TrafficBias::GeneralAviation, true, firstDepartureTime, firstArrivalTime, gaDepartureSpacingSeconds, gaArrivalSpacingSeconds, 0.45f, Flight::RulesType::VFR);
         addTrafficGroup("HLC", randomTrafficModels.helicopterModels, helicopterStands, TrafficBias::Helicopter, true, firstDepartureTime + 30, firstArrivalTime + 15, helicopterDepartureSpacingSeconds, helicopterArrivalSpacingSeconds, 0.55f, Flight::RulesType::VFR);
-        addTrafficGroup("MIL", randomTrafficModels.militaryModels, militaryStands, TrafficBias::Military, false, firstDepartureTime + 60, firstArrivalTime + 30, militaryDepartureSpacingSeconds, militaryArrivalSpacingSeconds, 0.35f, Flight::RulesType::IFR);
+        addTrafficGroup("MIL", randomTrafficModels.militaryModels, militaryStands, TrafficBias::Military, false, firstDepartureTime + 60, firstArrivalTime + 30, militaryBaseDepartureSpacing, militaryArrivalSpacingSeconds, 0.35f, Flight::RulesType::IFR);
 
         m_host->writeLog(
             "SCHEDL|Loaded random offline traffic at airport[%s]",
