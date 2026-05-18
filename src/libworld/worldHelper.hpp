@@ -6,6 +6,7 @@
 
 #include <string>
 #include <sstream>
+#include <cmath>
 #include "libworld.h"
 #include "clearanceTypes.hpp"
 #include "intentTypes.hpp"
@@ -20,6 +21,141 @@ namespace world
     private:
         shared_ptr<HostServices> m_host;
     private:
+        // Helper functions for airspace geometry checks
+        static bool polygonContainsLocation(const GeoPolygon& polygon, const GeoPoint& location)
+        {
+            if (polygon.isEmpty())
+            {
+                return true;
+            }
+
+            if (location == GeoPoint::empty)
+            {
+                return false;
+            }
+
+            if (polygon.edges.size() == 1 && polygon.edges.front().type == GeoPolygon::GeoEdgeType::Circle)
+            {
+                const auto& circle = polygon.edges.front();
+                const double radiusMeters = circle.arcDistance * 1852.0;
+                return GeoMath::getDistanceMeters(circle.arcOrigin, location) <= radiusMeters + 1.0;
+            }
+
+            // For non-circle polygons, use point-in-polygon test
+            vector<GeoPoint> vertices;
+            vertices.reserve(polygon.edges.size());
+
+            for (const auto& edge : polygon.edges)
+            {
+                if (edge.fromPoint == GeoPoint::empty)
+                {
+                    continue;
+                }
+
+                if (vertices.empty() || vertices.back() != edge.fromPoint)
+                {
+                    vertices.push_back(edge.fromPoint);
+                }
+            }
+
+            if (vertices.size() >= 2 && vertices.front() == vertices.back())
+            {
+                vertices.pop_back();
+            }
+
+            if (vertices.size() < 3)
+            {
+                return true;
+            }
+
+            // Point-in-polygon using ray casting algorithm
+            bool inside = false;
+            const GeoPoint origin = vertices.front();
+
+            auto projectToFlatPlane = [&](const GeoPoint& origin, const GeoPoint& point) {
+                const double originLatitudeRad = GeoMath::degreesToRadians(origin.latitude);
+                const double metersPerDegreeLatitude = 111320.0;
+                const double metersPerDegreeLongitude = cos(originLatitudeRad) * metersPerDegreeLatitude;
+                struct FlatPoint { double x = 0.0; double y = 0.0; };
+                return FlatPoint{
+                    (point.longitude - origin.longitude) * metersPerDegreeLongitude,
+                    (point.latitude - origin.latitude) * metersPerDegreeLatitude
+                };
+            };
+
+            const auto testPoint = projectToFlatPlane(origin, location);
+            const size_t vertexCount = vertices.size();
+
+            for (size_t i = 0, j = vertexCount - 1; i < vertexCount; j = i++)
+            {
+                const auto vertexI = projectToFlatPlane(origin, vertices[i]);
+                const auto vertexJ = projectToFlatPlane(origin, vertices[j]);
+                const bool crossesScanline =
+                    ((vertexI.y > testPoint.y) != (vertexJ.y > testPoint.y)) &&
+                    (testPoint.x < (vertexJ.x - vertexI.x) * (testPoint.y - vertexI.y) / ((vertexJ.y - vertexI.y) + 1e-9) + vertexI.x);
+
+                if (crossesScanline)
+                {
+                    inside = !inside;
+                }
+            }
+
+            return inside;
+        }
+
+        static bool isAltitudeInAirspace(const shared_ptr<ControlledAirspace>& airspace, float altitudeFeetMsl)
+        {
+            if (!airspace || altitudeFeetMsl < 0.0f)
+            {
+                return true;
+            }
+
+            const auto geometry = airspace->geometry();
+            if (!geometry)
+            {
+                return true;
+            }
+
+            if (geometry->hasLowerBound() && altitudeFeetMsl < geometry->lowerBoundFeet())
+            {
+                return false;
+            }
+
+            if (geometry->hasUpperBound() && altitudeFeetMsl > geometry->upperBoundFeet())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        shared_ptr<ControlledAirspace> findAirspaceContainingLocation(
+            const GeoPoint& location,
+            float altitudeMslFeet = -1.0f) const
+        {
+            for (const auto& airspace : m_host->getWorld()->airspaces())
+            {
+                if (!airspace || !airspace->geometry())
+                {
+                    continue;
+                }
+
+                const auto geometry = airspace->geometry();
+                if (!polygonContainsLocation(geometry->lateralBounds(), location))
+                {
+                    continue;
+                }
+
+                if (!isAltitudeInAirspace(airspace, altitudeMslFeet))
+                {
+                    continue;
+                }
+
+                return airspace;
+            }
+
+            return nullptr;
+        }
         float altitudeFeetMsl(shared_ptr<Flight> flight) const
         {
             if (!flight || !flight->aircraft())
@@ -160,12 +296,42 @@ namespace world
         shared_ptr<ControllerPosition> getArrivalTower(shared_ptr<Flight> flight, const GeoPoint& landingPoint)
         { 
             auto airport = getArrivalAirport(flight);
-            if (auto local = tryGetLocalTowerPosition(airport, landingPoint, altitudeFeetMsl(flight)))
+            if (!airport)
+            {
+                throw runtime_error("WorldHelper::getArrivalTower: arrival airport not loaded");
+            }
+            const float altMsl = altitudeFeetMsl(flight);
+            if (auto local = tryGetLocalTowerPosition(airport, landingPoint, altMsl))
             {
                 return local;
             }
 
-            throw runtime_error("WorldHelper::getArrivalTower: no local/tower controller position found");
+            auto tower = airport->tower();
+            if (!tower)
+            {
+                throw runtime_error("WorldHelper::getArrivalTower: airport has no tower/controller facility");
+            }
+
+            const vector<ControllerPosition::Type> fallbackTypes = {
+                ControllerPosition::Type::Local,
+                ControllerPosition::Type::Approach,
+                ControllerPosition::Type::Departure
+            };
+
+            for (const auto fallbackType : fallbackTypes)
+            {
+                if (auto fallback = tower->tryFindPosition(fallbackType, landingPoint, altMsl))
+                {
+                    return fallback;
+                }
+            }
+
+            if (!tower->positions().empty())
+            {
+                return tower->positions().front();
+            }
+
+            throw runtime_error("WorldHelper::getArrivalTower: no suitable controller position found");
         }
 
         shared_ptr<ControllerPosition> tryGetArrivalTower(shared_ptr<Flight> flight, const GeoPoint& landingPoint)
@@ -310,6 +476,22 @@ namespace world
                 if (auto fallback = airport->tower()->tryFindPosition(fallbackType, location, altitudeMslFeet))
                 {
                     return fallback;
+                }
+            }
+
+            // Fallback: Search airspaces to find which one contains the aircraft's location
+            // This handles cases where arrival airport falls under another airport's approach airspace
+            // (e.g., LECO under LEST approach control)
+            auto airspace = findAirspaceContainingLocation(location, altitudeMslFeet);
+            if (airspace && airspace->controllingFacility())
+            {
+                auto controllingFacility = airspace->controllingFacility();
+                for (const auto fallbackType : fallbackTypes)
+                {
+                    if (auto fallback = controllingFacility->tryFindPosition(fallbackType, location, altitudeMslFeet))
+                    {
+                        return fallback;
+                    }
                 }
             }
 
