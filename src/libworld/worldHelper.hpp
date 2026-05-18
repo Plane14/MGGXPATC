@@ -156,7 +156,6 @@ namespace world
 
             return nullptr;
         }
-
         float altitudeFeetMsl(shared_ptr<Flight> flight) const
         {
             if (!flight || !flight->aircraft())
