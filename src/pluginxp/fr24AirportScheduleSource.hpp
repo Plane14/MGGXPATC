@@ -128,8 +128,18 @@ public:
     };
 
 private:
-    inline static mutex s_mutex;
-    inline static shared_ptr<ZendriverBrowserPool> s_instance;
+    static mutex& instanceMutex()
+    {
+        static mutex m;
+        return m;
+    }
+
+    static shared_ptr<ZendriverBrowserPool>& instancePtr()
+    {
+        static shared_ptr<ZendriverBrowserPool> inst;
+        return inst;
+    }
+
     vector<Session> m_sessions;
     shared_ptr<HostServices> m_host;
     bool m_pythonChecked = false;
@@ -140,18 +150,18 @@ private:
 public:
     static shared_ptr<ZendriverBrowserPool> getInstance(shared_ptr<HostServices> host)
     {
-        lock_guard<mutex> lock(s_mutex);
-        if (!s_instance)
+        lock_guard<mutex> lock(instanceMutex());
+        if (!instancePtr())
         {
-            s_instance = shared_ptr<ZendriverBrowserPool>(new ZendriverBrowserPool(host));
+            instancePtr() = shared_ptr<ZendriverBrowserPool>(new ZendriverBrowserPool(host));
         }
-        return s_instance;
+        return instancePtr();
     }
 
     static void resetInstance()
     {
-        lock_guard<mutex> lock(s_mutex);
-        s_instance.reset();
+        lock_guard<mutex> lock(instanceMutex());
+        instancePtr().reset();
     }
 
     // Check which Python binary works with zendriver (cached after first check)

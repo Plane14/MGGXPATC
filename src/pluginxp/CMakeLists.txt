@@ -129,6 +129,14 @@ add_xplane_plugin(pluginxp 301
 
 set_property(TARGET pluginxp PROPERTY CXX_STANDARD 14)
 
+add_custom_command(TARGET pluginxp POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:pluginxp>/Resources"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets/Resources"
+        "$<TARGET_FILE_DIR:pluginxp>/Resources"
+    COMMENT "Copy runtime resources into the plugin output directory"
+)
+
 target_include_directories(pluginxp PUBLIC 
     ${ATC_LIBS_PATH}/PPL/src
     ${ATC_LIBS_PATH}/XPMP2/inc

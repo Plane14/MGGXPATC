@@ -292,7 +292,7 @@ namespace ai
                 [flight, heading, targetSpeedKnots, speedState, brakeRate, accelRate, dt](const GeoPoint& value, double progress) {
                     auto aircraft = getAIAircraft(flight);
                     aircraft->setLocation(value);
-                    aircraft->setAttitude(aircraft->attitude().withHeading(heading));
+                    aircraft->setAttitude(aircraft->attitude().withHeading(heading).withPitch(0.0f));
 
                     // Smooth speed transition
                     float target = speedState->isBraking ? 0.0f : targetSpeedKnots;
@@ -414,7 +414,7 @@ namespace ai
                         newHeading = GeoMath::flipHeading(newHeading);
                     }
                     aircraft->setLocation(newLocation);
-                    aircraft->setAttitude(aircraft->attitude().withHeading(newHeading));
+                    aircraft->setAttitude(aircraft->attitude().withHeading(newHeading).withPitch(0.0f));
 
                     // Smooth speed transition
                     float target = speedState->isBraking ? 0.0f : targetSpeedKnots;

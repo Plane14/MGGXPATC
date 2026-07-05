@@ -1201,8 +1201,10 @@ private:
                 }
             }
 
-            for (const auto& [transitionName, waypoints] : transitions)
+            for (const auto& transition : transitions)
             {
+                const auto& transitionName = transition.first;
+                const auto& waypoints = transition.second;
                 if (waypoints.empty()) continue;
                 const auto& entryWp = waypoints.front();
                 if (!entryWp.hasLocation) continue;

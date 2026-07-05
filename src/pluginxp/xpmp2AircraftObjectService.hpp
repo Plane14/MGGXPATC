@@ -649,7 +649,7 @@ public:
             _flight->aircraft()->modelIcao(),
             _flight->aircraft()->airlineIcao(),
             "",
-            4333 + _flight->id(), // mode-S id
+            0, // let XPMP2 auto-assign a valid mode-S id
             ""
         ),
         m_host(std::move(_host)),
@@ -690,7 +690,7 @@ public:
         colLabel[2] = 0.0f;
 
         // Radar
-        acRadar.code = 4333 + _flight->id();
+        acRadar.code = 0;
         acRadar.mode = xpmpTransponderMode_ModeC;
 
         // informational texts

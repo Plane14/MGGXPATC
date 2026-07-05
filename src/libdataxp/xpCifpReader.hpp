@@ -55,9 +55,23 @@ private:
         vector<string> procedures;
         chrono::steady_clock::time_point timestamp;
     };
-    inline static mutex s_procedureCacheMutex;
-    inline static unordered_map<string, ProcedureListCacheEntry> s_procedureCache;
-    inline static const chrono::seconds s_cacheTTL = chrono::seconds(300); // 5 minute TTL
+
+    static mutex& procedureCacheMutex()
+    {
+        static mutex m;
+        return m;
+    }
+
+    static unordered_map<string, ProcedureListCacheEntry>& procedureCache()
+    {
+        static unordered_map<string, ProcedureListCacheEntry> cache;
+        return cache;
+    }
+
+    static chrono::seconds cacheTTL()
+    {
+        return chrono::seconds(300);
+    }
 
     shared_ptr<HostServices> m_host;
 
@@ -68,18 +82,19 @@ public:
         float latitude = 0.0f;
         float longitude = 0.0f;
         bool hasLocation = false;
+        string pathTerminator;  // Waypoint type: FI (fix), TF (track to fix), VI (vectors), IF (initial fix), etc.
         // Altitude/speed constraints from the CIFP row layout
         float altitudeConstraint = 0.0f;
-        char altitudeConstraintType = 0;
+        char altitudeConstraintType = 0;  // '+' = at/above (minimum), '-' = at/below (maximum), ' ' = at (exact)
         float speedConstraint = 0.0f;
-        char speedConstraintType = 0;
+        char speedConstraintType = 0;  // '+' = min, '-' = max, ' ' = exact
 
         WaypointWithLocation() = default;
         WaypointWithLocation(const string& n, float lat, float lon, bool hasLoc)
             : name(n), latitude(lat), longitude(lon), hasLocation(hasLoc) {}
         WaypointWithLocation(const string& n, float lat, float lon, bool hasLoc,
-                             float altConstr, char altType, float spdConstr, char spdType)
-            : name(n), latitude(lat), longitude(lon), hasLocation(hasLoc),
+                             const string& pt, float altConstr, char altType, float spdConstr, char spdType)
+            : name(n), latitude(lat), longitude(lon), hasLocation(hasLoc), pathTerminator(pt),
               altitudeConstraint(altConstr), altitudeConstraintType(altType),
               speedConstraint(spdConstr), speedConstraintType(spdType) {}
     };
@@ -100,6 +115,21 @@ public:
     {
     }
 
+private:
+    shared_ptr<istream> openCifpFile(const string& airportIcao) const
+    {
+        if (!m_host)
+        {
+            return nullptr;
+        }
+        auto input = m_host->openFileForRead(m_host->getHostFilePath({ "Custom Data", "CIFP", airportIcao + ".dat" }));
+        if (!input)
+        {
+            input = m_host->openFileForRead(m_host->getHostFilePath({ "Resources", "default data", "CIFP", airportIcao + ".dat" }));
+        }
+        return input;
+    }
+
 public:
     vector<string> readProcedureTrack(
         const string& airportIcao,
@@ -115,8 +145,7 @@ public:
 
         try
         {
-            auto filePath = m_host->getHostFilePath({ "Custom Data", "CIFP", airportIcao + ".dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = openCifpFile(airportIcao);
             if (!input)
             {
                 return {};
@@ -143,8 +172,7 @@ public:
 
         try
         {
-            auto filePath = m_host->getHostFilePath({ "Custom Data", "CIFP", airportIcao + ".dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = openCifpFile(airportIcao);
             if (!input)
             {
                 return {};
@@ -198,8 +226,7 @@ public:
 
         try
         {
-            auto filePath = m_host->getHostFilePath({ "Custom Data", "CIFP", airportIcao + ".dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = openCifpFile(airportIcao);
             if (!input)
             {
                 return {};
@@ -257,8 +284,7 @@ public:
 
         try
         {
-            auto filePath = m_host->getHostFilePath({ "Custom Data", "CIFP", airportIcao + ".dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = openCifpFile(airportIcao);
             if (!input)
             {
                 return {};
@@ -282,24 +308,23 @@ public:
         // Check cache first
         const string cacheKey = airportIcao + "|" + recordType;
         {
-            lock_guard<mutex> lock(s_procedureCacheMutex);
-            auto it = s_procedureCache.find(cacheKey);
-            if (it != s_procedureCache.end())
+            lock_guard<mutex> lock(procedureCacheMutex());
+            auto it = procedureCache().find(cacheKey);
+            if (it != procedureCache().end())
             {
                 const auto& entry = it->second;
-                if (chrono::steady_clock::now() - entry.timestamp < s_cacheTTL)
+                if (chrono::steady_clock::now() - entry.timestamp < cacheTTL())
                 {
                     return entry.procedures;
                 }
                 // Cache expired, remove it
-                s_procedureCache.erase(it);
+                procedureCache().erase(it);
             }
         }
 
         try
         {
-            auto filePath = m_host->getHostFilePath({ "Custom Data", "CIFP", airportIcao + ".dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = openCifpFile(airportIcao);
             if (!input)
             {
                 return result;
@@ -309,11 +334,11 @@ public:
             // Store in cache
             if (!result.empty())
             {
-                lock_guard<mutex> lock(s_procedureCacheMutex);
+                lock_guard<mutex> lock(procedureCacheMutex());
                 ProcedureListCacheEntry entry;
                 entry.procedures = result;
                 entry.timestamp = chrono::steady_clock::now();
-                s_procedureCache[cacheKey] = std::move(entry);
+                procedureCache()[cacheKey] = std::move(entry);
             }
 
             return result;
@@ -690,6 +715,7 @@ private:
             if (uppercaseCopy(trimCopy(initialKey)).rfind("RW", 0) != 0)
             {
                 result.waypoints.emplace_back(initialKey, 0.0f, 0.0f, false,
+                    firstRecord.pathTerminator,
                     firstRecord.altitudeConstraint, firstRecord.altitudeConstraintType,
                     firstRecord.speedConstraint, firstRecord.speedConstraintType);
             }
@@ -700,6 +726,7 @@ private:
             if (!hasWaypoint(record.waypoint))
             {
                 result.waypoints.emplace_back(record.waypoint, record.latitude, record.longitude, record.hasLocation,
+                    record.pathTerminator,
                     record.altitudeConstraint, record.altitudeConstraintType,
                     record.speedConstraint, record.speedConstraintType);
             }

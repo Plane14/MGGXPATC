@@ -14,6 +14,12 @@
 #include "libworld.h"
 #include "xpCifpReader.hpp"
 #include "xpNavDataReader.hpp"
+#include "xpAltitudeReader.hpp"
+#include "holdingPattern.hpp"
+#include "holdingEntry.hpp"
+#include "missedApproach.hpp"
+#include "procedureValidator.hpp"
+#include "navdataManager.hpp"
 
 using namespace std;
 using namespace world;
@@ -97,6 +103,8 @@ private:
     void parseTrafficFlowWindRule1001(istream &input, shared_ptr<TrafficFlow> flow);
     void parseTrafficFlowCeilingRule1002(istream &input, shared_ptr<TrafficFlow> flow);
     void parseTrafficFlowVisibilityRule1003(istream &input, shared_ptr<TrafficFlow> flow);
+    void parseTrafficFlowTimeRule1004(istream &input, shared_ptr<TrafficFlow> flow);
+    void parseVfrPatternRule1101(istream &input, shared_ptr<TrafficFlow> flow);
     void parseRunwayInUseRule(istream &input, shared_ptr<TrafficFlow> flow);
     bool invokeFilterCallback();
     shared_ptr<Airport> assembleAirportOrThrow();

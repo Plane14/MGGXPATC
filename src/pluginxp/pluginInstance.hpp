@@ -20,6 +20,7 @@
 // SDK
 #include "XPLMPlugin.h"
 #include "XPLMNavigation.h"
+#include "XPLMDataAccess.h"
 #if !XPLM300
 #error This plugin requires version 300 of the SDK
 #endif
@@ -454,7 +455,7 @@ private:
         void ping() override
         {
             auto now = getNow();
-            auto microsecondsSinceLastTick = (now - m_lastTickTime) * m_simSpeed; // m_timeFactor;
+            auto microsecondsSinceLastTick = (now - m_lastTickTime);
             auto newWorldTimestamp = m_world->timestamp() + microsecondsSinceLastTick;
             m_lastTickTime = now;
 
@@ -821,6 +822,29 @@ public:
         }
     }
 
+    void notifySceneryLoaded()
+    {
+        // Scenery reload may invalidate cached airport data. Treat like airport loaded
+        // to re-assemble the world with fresh scenery information.
+        notifyAirportLoaded();
+    }
+
+    void notifyPlaneLoaded()
+    {
+        // User aircraft changed (new flight, livery, etc.). Re-initialize schedules
+        // so the user aircraft identity and flight plan are correct.
+        notifyAirportLoaded();
+    }
+
+    void notifyPlaneCrashed()
+    {
+        // Pause AI progression while user deals with crash / reload.
+        if (m_currentState && m_currentState->id() == PluginStateId::SchedulesStarted)
+        {
+            m_hostServices->writeLog("PLUGIN|Plane crashed, pausing AI schedules.");
+        }
+    }
+
 private:
 
     shared_ptr<PluginHostServices> createHostServices()
@@ -918,6 +942,13 @@ private:
             userLat, userLon, radiusNm);
 
         const float radiusMeters = radiusNm * static_cast<float>(METERS_IN_1_NAUTICAL_MILE);
+        const float radiusMetersWithMargin = radiusMeters * 1.05f;
+        // Accurate degree-to-meter conversion for the user's latitude.
+        const float metersPerLatDeg = 111195.0f;
+        const float cosUserLat = cosf(userLat * static_cast<float>(M_PI) / 180.0f);
+        const float metersPerLonDeg = 111320.0f * cosUserLat;
+        const float maxLatDeltaDeg = radiusMetersWithMargin / metersPerLatDeg;
+        const float maxLonDeltaDeg = (cosUserLat > 0.01f) ? (radiusMetersWithMargin / metersPerLonDeg) : 180.0f;
 
         XPLMNavRef navRef = XPLMFindFirstNavAidOfType(xplm_Nav_Airport);
         while (navRef != XPLM_NAV_NOT_FOUND)
@@ -934,11 +965,19 @@ private:
 
             if (icaoId[0] != '\0')
             {
-                const float dlat = lat - userLat;
-                const float dlon = (lon - userLon) * cosf(userLat * 3.14159265f / 180.0f);
-                const float approxDistMeters = sqrtf(dlat * dlat + dlon * dlon) * 111120.0f;
+                const float dlatDeg = lat - userLat;
+                const float dlonDeg = lon - userLon;
+                // Quick-reject using bounding box in degrees to avoid sqrt for distant airports.
+                if (fabs(dlatDeg) > maxLatDeltaDeg || fabs(dlonDeg) > maxLonDeltaDeg)
+                {
+                    navRef = XPLMGetNextNavAid(navRef);
+                    continue;
+                }
+                const float dlatMeters = dlatDeg * metersPerLatDeg;
+                const float dlonMeters = dlonDeg * metersPerLonDeg;
+                const float approxDistMeters = sqrtf(dlatMeters * dlatMeters + dlonMeters * dlonMeters);
 
-                if (approxDistMeters <= radiusMeters * 1.15f)
+                if (approxDistMeters <= radiusMetersWithMargin)
                 {
                     string icaoStr(icaoId);
                     transform(icaoStr.begin(), icaoStr.end(), icaoStr.begin(), [](unsigned char c) {
@@ -1072,7 +1111,18 @@ private:
 
     static chrono::time_point<chrono::high_resolution_clock, chrono::microseconds> getNow()
     {
-        return std::chrono::time_point_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now());
+        // Use X-Plane simulation time so AI pauses when the sim is paused and
+        // correctly follows time-dilation / replay without wall-clock drift.
+        // We use raw XPLM SDK instead of PPL's DataRef because PPL's type check
+        // is overly strict and fails on X-Plane 12 for this dataref.
+        static XPLMDataRef timeRef = XPLMFindDataRef("sim/time/total_flight_time_sec");
+        double simSeconds = 0.0;
+        if (timeRef)
+        {
+            simSeconds = XPLMGetDatad(timeRef);
+        }
+        const auto micros = chrono::microseconds(static_cast<long long>(simSeconds * 1000000.0));
+        return chrono::time_point<chrono::high_resolution_clock, chrono::microseconds>(micros);
     }
 
     static float pluginFlightLoopCallback(

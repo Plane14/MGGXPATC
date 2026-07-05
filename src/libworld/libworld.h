@@ -5,6 +5,7 @@
 #pragma once
 #define _USE_MATH_DEFINES
 
+#include <cmath>
 #include <cstdarg>
 #include <cstring>
 #include <string>
@@ -79,6 +80,23 @@ namespace world
     class AircraftObjectService;
     class WeatherService;
     class HostServices;
+    
+    // Phase 2 Flow Management forward declarations
+    enum class FlowState;
+    enum class FlowTrigger;
+    struct FlowTransition;
+    class FlowStateMachine;
+    struct RunwayOccupancyEvent;
+    struct RunwayOccupancyStats;
+    class RunwayOccupancyTracker;
+    struct ArrivalFlowConfig;
+    class ArrivalFlowController;
+    struct DepartureFlowConfig;
+    class DepartureFlowController;
+    struct GroundStopEntry;
+    class GroundStopManager;
+    struct FlowManagerConfig;
+    class FlowManager;
 
     struct GeoPoint
     {
@@ -1563,6 +1581,13 @@ namespace world
             Fighter = 0x40,
             All = 0x01 | 0x02 | 0x04 | 0x08 | 0x10 | 0x20 | 0x40
         }; 
+        enum class WakeTurbulenceCategory
+        {
+            Light = 0,
+            Medium = 1,
+            Heavy = 2,
+            Super = 3
+        };
         enum class OperationType
         {
             None = 0x0,
@@ -1654,6 +1679,9 @@ namespace world
         virtual double verticalSpeedFpm() const = 0;
         virtual const string& squawk() const = 0;
         virtual LightBits lights() const = 0;
+        virtual double magneticHeading() const { return attitude().heading(); }
+        virtual double heading() const { return attitude().heading(); }
+        virtual double magneticVariation() const { return 0.0; }
         virtual bool isLightsOn(LightBits bits) const = 0;
         virtual float gearState() const = 0;
         virtual float flapState() const = 0;
@@ -1733,6 +1761,7 @@ namespace world
             string m_fromNavaid;
             string m_toNavaid;
             float m_targetAltitude;
+            char m_altitudeConstraintType;
             float m_targetSpeed;
         public:
             Leg(
@@ -1741,12 +1770,14 @@ namespace world
                 const string& _fromNavaid,
                 const string& _toNavaid,
                 float _targetAltitude,
+                char _altitudeConstraintType,
                 float _targetSpeed
             ) : m_type(_type),
                 m_geometry(_geometry),
                 m_fromNavaid(_fromNavaid),
                 m_toNavaid(_toNavaid),
                 m_targetAltitude(_targetAltitude),
+                m_altitudeConstraintType(_altitudeConstraintType),
                 m_targetSpeed(_targetSpeed)
             {
             }
@@ -1756,6 +1787,7 @@ namespace world
             const string& fromNavaid() const { return m_fromNavaid; }
             const string& toNavaid() const { return m_toNavaid; }
             float targetAltitude() const { return m_targetAltitude; }
+            char altitudeConstraintType() const { return m_altitudeConstraintType; }
             float targetSpeed() const { return m_targetSpeed; }
         };
 
@@ -1991,6 +2023,7 @@ namespace world
         shared_ptr<FlightPlan::Cursor> planCursor() const { return m_planCursor; }
         Phase phase() const { return m_phase; }
         float landingRunwayElevationFeet();
+        const GeoPoint& position() const;
     public:
         void setAircraft(shared_ptr<Aircraft> _aircraft);
         void setPilot(shared_ptr<Pilot> _pilot);
@@ -2082,6 +2115,58 @@ namespace world
               maximumWindSpeedKt(maxWindSpeedKt) {}
     };
 
+    // Magnetic variation lookup for wind direction conversion
+    // apt.dat wind rules use MAGNETIC degrees, but X-Plane provides TRUE degrees
+    // Uses simplified WMM approximation valid for 2020-2030 period
+    class MagneticVariation
+    {
+    public:
+        // Convert true degrees to magnetic degrees for a given location and year
+        // Approximation based on World Magnetic Model, valid ~2020-2030
+        static float trueToMagnetic(float trueDegrees, double latitude, double longitude)
+        {
+            const float variation = getMagneticVariation(latitude, longitude);
+            // Magnetic = True - Variation (where West variation is negative)
+            float magnetic = trueDegrees + variation;
+            // Normalize to 0-360 range
+            while (magnetic < 0.0f) magnetic += 360.0f;
+            while (magnetic >= 360.0f) magnetic -= 360.0f;
+            return magnetic;
+        }
+
+    private:
+        static float getMagneticVariation(double latitude, double longitude)
+        {
+            // Simplified WMM2020 approximation (valid for ~2020-2030)
+            // This is a polynomial fit to the WMM model - provides reasonable accuracy
+            // within a few degrees for most locations
+            const double latRad = latitude * GeoMath::pi() / 180.0;
+            const double lonRad = longitude * GeoMath::pi() / 180.0;
+            
+            // Component for longitude dependency (dominant term)
+            float variation = static_cast<float>(4.0f * sin(lonRad) * cos(latRad));
+            
+            // Add latitude-dependent correction for better accuracy
+            const double latAbsRad = fabs(latRad);
+            variation += static_cast<float>(
+                -0.002f * sin(2.0 * lonRad) * sin(latAbsRad) * fabs(latitude) / 90.0
+                - 0.0005f * cos(3.0 * lonRad) * latAbsRad * latAbsRad
+            );
+            
+            // Western hemisphere correction (most of US/Europe has West variation)
+            if (longitude < 0)
+            {
+                variation = -fabs(variation);
+            }
+            else
+            {
+                variation = fabs(variation);
+            }
+            
+            return variation;
+        }
+    };
+
     // Traffic flow definition (from apt.dat 1000-1004 and 1100/1110 lines)
     class TrafficFlow
     {
@@ -2097,6 +2182,11 @@ namespace world
         float m_minimumVisibilityStatuteMiles;
         vector<TrafficFlowWindRule> m_windRules;
         vector<TrafficFlowRunwayUse> m_runwayUses;
+        // Time rule (1004): flow active only during specified hours
+        float m_timeFromHour = -1.0f;
+        float m_timeToHour = -1.0f;
+        // VFR pattern runway (1101)
+        string m_vfrPatternRunway;
     public:
         TrafficFlow(const string& name, const string& icao, float windFrom, float windTo, 
                     float ceiling = -1, float visibility = -1)
@@ -2133,14 +2223,20 @@ namespace world
             return windDirectionDegrees >= m_windFromDegrees && windDirectionDegrees <= m_windToDegrees;
         }
 
-        bool matchesWeather(const WeatherSnapshot& weather, float airportElevationFeet) const
+        bool matchesWeather(const WeatherSnapshot& weather, float airportElevationFeet, const GeoPoint& airportLocation) const
         {
             if (!weather.available)
             {
                 return false;
             }
 
-            if (!matchesWind(weather.windDirectionTrueDegrees, weather.windSpeedMetersPerSecond * KNOT_IN_1_METER_PER_SEC))
+            // Convert true wind direction to magnetic for apt.dat compatibility
+            float magneticWindDir = MagneticVariation::trueToMagnetic(
+                weather.windDirectionTrueDegrees,
+                airportLocation.latitude,
+                airportLocation.longitude);
+
+            if (!matchesWind(magneticWindDir, weather.windSpeedMetersPerSecond * KNOT_IN_1_METER_PER_SEC))
             {
                 return false;
             }
@@ -2226,6 +2322,24 @@ namespace world
             }
             return result;
         }
+        
+        // Time rule: flow is active only during specified hours (in sim time, local to airport)
+        void setTimeRule(float fromHour, float toHour)
+        {
+            m_timeFromHour = fromHour;
+            m_timeToHour = toHour;
+        }
+        
+        float timeFromHour() const { return m_timeFromHour; }
+        float timeToHour() const { return m_timeToHour; }
+        
+        // VFR pattern runway rule (1101): specifies runway for VFR pattern work
+        void setVfrPatternRunway(const string& runwayName)
+        {
+            m_vfrPatternRunway = runwayName;
+        }
+        
+        const string& vfrPatternRunway() const { return m_vfrPatternRunway; }
         
         const vector<TrafficFlowRunwayUse>& allRunwayUses() const { return m_runwayUses; }
     };

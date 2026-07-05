@@ -1995,11 +1995,14 @@ namespace ai
                 });
             });
             const float preFlarePitchEnd = static_cast<float>(max(2.0, m_aircraft->attitude().pitch() + 1.5));
+            const float flarePitchDelta = isHelicopter() ? 0.5f :
+                (m_aircraft->category() == Aircraft::Category::Heavy ? 3.0f :
+                (m_aircraft->category() == Aircraft::Category::LightProp ? 1.5f : 2.5f));
             auto flare = M.parallel(Maneuver::Type::ArrivalLanding, "flare", {
                 shared_ptr<Maneuver>(new AnimationManeuver<double>(
                     "pitch",
                     preFlarePitchEnd,
-                    preFlarePitchEnd + 2.5,
+                    preFlarePitchEnd + flarePitchDelta,
                     chrono::seconds(3),
                     [](const double& from, const double& to, double progress, double& value) {
                         value = from + (to - from) * progress; 
@@ -2036,7 +2039,7 @@ namespace ai
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "verspd_2",
                         isHelicopter() ? -30.0 : -80.0,
-                        isHelicopter() ? -60.0 : (m_aircraft->category() == Aircraft::Category::Heavy ? -250.0 : (m_aircraft->category() == Aircraft::Category::LightProp ? -120.0 : -180.0)),
+                        isHelicopter() ? -15.0 : (m_aircraft->category() == Aircraft::Category::Heavy ? -60.0 : (m_aircraft->category() == Aircraft::Category::LightProp ? -30.0 : -45.0)),
                         chrono::seconds(1),
                         [](const double &from, const double &to, double progress, double &value) {
                             value = from + (to - from) * progress;
@@ -2073,43 +2076,46 @@ namespace ai
                         m_aircraft->attitude().pitch());
                 }
             });
-            auto touchDownAndDeccelerate = M.parallel(Maneuver::Type::ArrivalLandingRoll, "touch_and_decel", {
-                shared_ptr<Maneuver>(new AnimationManeuver<double>(
-                    "spdbrk",
-                    0,
-                    1.0,
-                    chrono::seconds(1),
-                    [](const double& from, const double& to, double progress, double& value) {
-                        value = from + (to - from) * progress; 
-                    },
-                    [=](const double& value, double progress) {
-                        m_aircraft->setSpoilerState(value);
-                    }
-                )),
-                shared_ptr<Maneuver>(new AnimationManeuver<double>(
-                    "pitch",
-                    5.5,
-                    0.0,
-                    chrono::seconds(6),
-                    [](const double& from, const double& to, double progress, double& value) {
-                        value = from + (to - from) * progress; 
-                    },
-                    [=](const double& value, double progress) {
-                        m_aircraft->setAttitude(m_aircraft->attitude().withPitch(value));
-                    }
-                )),
-                shared_ptr<Maneuver>(new AnimationManeuver<double>(
-                    "gndspd",
-                    touchdownSpeedKt,
-                    exitSpeedKt,
-                    rolloutDuration,
-                    [](const double& from, const double& to, double progress, double& value) {
-                        value = from + (to - from) * progress; 
-                    },
-                    [=](const double& value, double progress) {
-                        m_aircraft->setGroundSpeedKt(value);
-                    }
-                )),
+            auto touchDownAndDeccelerate = M.deferred([=]() {
+                const double touchdownPitch = m_aircraft->attitude().pitch();
+                return M.parallel(Maneuver::Type::ArrivalLandingRoll, "touch_and_decel", {
+                    shared_ptr<Maneuver>(new AnimationManeuver<double>(
+                        "spdbrk",
+                        0,
+                        1.0,
+                        chrono::seconds(1),
+                        [](const double& from, const double& to, double progress, double& value) {
+                            value = from + (to - from) * progress;
+                        },
+                        [=](const double& value, double progress) {
+                            m_aircraft->setSpoilerState(value);
+                        }
+                    )),
+                    shared_ptr<Maneuver>(new AnimationManeuver<double>(
+                        "pitch",
+                        touchdownPitch,
+                        0.0,
+                        chrono::seconds(3),
+                        [](const double& from, const double& to, double progress, double& value) {
+                            value = from + (to - from) * progress;
+                        },
+                        [=](const double& value, double progress) {
+                            m_aircraft->setAttitude(m_aircraft->attitude().withPitch(value));
+                        }
+                    )),
+                    shared_ptr<Maneuver>(new AnimationManeuver<double>(
+                        "gndspd",
+                        touchdownSpeedKt,
+                        exitSpeedKt,
+                        rolloutDuration,
+                        [](const double& from, const double& to, double progress, double& value) {
+                            value = from + (to - from) * progress;
+                        },
+                        [=](const double& value, double progress) {
+                            m_aircraft->setGroundSpeedKt(value);
+                        }
+                    )),
+                });
             });
 
             return M.sequence(Maneuver::Type::ArrivalLanding, "landing", {
@@ -3364,7 +3370,7 @@ namespace ai
                     max(1.5f, takeoffAccelerationKtPerSecond * 0.45f),
                     8.0f);
                 const auto rotation1Duration = chrono::milliseconds(max(1500, min(3500, static_cast<int>(rotationDelay.count() / 3))));
-                const auto rotation2Duration = chrono::milliseconds(max(2500, min(6500, static_cast<int>(groundRollDuration.count() / 2))));
+                const auto rotation2Duration = chrono::milliseconds(max(2000, min(4500, static_cast<int>(groundRollDuration.count() / 3))));
                 const auto gearUpDelay = groundRollDuration + chrono::seconds(2);
                 const auto turnDelay = groundRollDuration + chrono::seconds(8);
                 const double initialClimbRocFpm = max(
@@ -3505,7 +3511,7 @@ namespace ai
                     M.instantAction([this, runway]() {
                         flight()->setPhase(Flight::Phase::Departure);
                         const auto& runwayEnd = runway->getEndOrThrow(m_flightPlan->departureRunway());
-                        m_aircraft->setAttitude(m_aircraft->attitude().withHeading(runwayEnd.heading()));
+                        m_aircraft->setAttitude(m_aircraft->attitude().withHeading(runwayEnd.heading()).withPitch(0.0f));
                     }),
                     beforeTakeoffChecklist,
                     logTakeoffRoll,

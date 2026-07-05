@@ -2592,14 +2592,14 @@ void XPAirportReader::parseTrafficFlow1000(istream& input)
             parseTrafficFlowVisibilityRule1003(input, flow);
             return true;
         case 1004:
-            skipToNextLine(input);
+            parseTrafficFlowTimeRule1004(input, flow);
             return true;
         case 1100:
         case 1110:
             parseRunwayInUseRule(input, flow);
             return true;
         case 1101:
-            skipToNextLine(input);
+            parseVfrPatternRule1101(input, flow);
             return true;
         default:
             return false;
@@ -2659,6 +2659,51 @@ void XPAirportReader::parseTrafficFlowVisibilityRule1003(istream& input, shared_
     if (flow)
     {
         flow->setMinimumVisibilityStatuteMiles(minimumVisibilityStatuteMiles);
+    }
+}
+
+void XPAirportReader::parseTrafficFlowTimeRule1004(istream& input, shared_ptr<TrafficFlow> flow)
+{
+    // apt.dat 1004 format: "time_from time_to" (in local time, 24-hour format)
+    // Example: "07:00 23:00" or "6.5 18.25" (decimal hours)
+    const auto tokens = splitTokens(readToEndOfLine(input));
+    if (tokens.size() < 2)
+    {
+        return;
+    }
+
+    try
+    {
+        const float fromHour = stof(tokens.at(0));
+        const float toHour = stof(tokens.at(1));
+
+        if (flow)
+        {
+            flow->setTimeRule(fromHour, toHour);
+        }
+    }
+    catch (const exception&)
+    {
+        // Invalid time format, skip
+    }
+}
+
+void XPAirportReader::parseVfrPatternRule1101(istream& input, shared_ptr<TrafficFlow> flow)
+{
+    // apt.dat 1101 format: "runway_name" (runway designated for VFR pattern work)
+    // Example: "09L" or "27R"
+    const auto tokens = splitTokens(readToEndOfLine(input));
+    if (tokens.empty())
+    {
+        return;
+    }
+
+    const string runwayName = tokens.at(0);
+    if (flow && !runwayName.empty())
+    {
+        flow->setVfrPatternRunway(runwayName);
+        // VFR patterns use the runway for both arrivals and departures
+        flow->addRunwayUse(runwayName, true, true);
     }
 }
 

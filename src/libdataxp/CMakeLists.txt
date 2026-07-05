@@ -5,6 +5,17 @@ add_library(libdataxp STATIC
     libdataxp.h
     xpCifpReader.hpp
     xpNavDataReader.hpp
+    xpAltitudeReader.hpp
+    holdingPattern.hpp
+    holdingPattern.cpp
+    holdingEntry.hpp
+    holdingEntry.cpp
+    missedApproach.hpp
+    missedApproach.cpp
+    procedureValidator.hpp
+    procedureValidator.cpp
+    navdataManager.hpp
+    navdataManager.cpp
     xpAirportReader.cpp
     xpFmsxReader.cpp
 )

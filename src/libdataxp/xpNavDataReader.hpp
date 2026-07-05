@@ -169,7 +169,9 @@ private:
         }
 
         return m_host->getHostFilePath({ "Custom Data", "earth_fix.dat" }) + "|" +
-            m_host->getHostFilePath({ "Custom Data", "earth_nav.dat" });
+            m_host->getHostFilePath({ "Custom Data", "earth_nav.dat" }) + "|" +
+            m_host->getHostFilePath({ "Resources", "default data", "earth_fix.dat" }) + "|" +
+            m_host->getHostFilePath({ "Resources", "default data", "earth_nav.dat" });
     }
 
     void ensureLoaded() const
@@ -219,8 +221,11 @@ private:
 
         try
         {
-            const string filePath = m_host->getHostFilePath({ "Custom Data", "earth_fix.dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = m_host->openFileForRead(m_host->getHostFilePath({ "Custom Data", "earth_fix.dat" }));
+            if (!input)
+            {
+                input = m_host->openFileForRead(m_host->getHostFilePath({ "Resources", "default data", "earth_fix.dat" }));
+            }
             if (!input)
             {
                 return;
@@ -259,8 +264,11 @@ private:
 
         try
         {
-            const string filePath = m_host->getHostFilePath({ "Custom Data", "earth_nav.dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = m_host->openFileForRead(m_host->getHostFilePath({ "Custom Data", "earth_nav.dat" }));
+            if (!input)
+            {
+                input = m_host->openFileForRead(m_host->getHostFilePath({ "Resources", "default data", "earth_nav.dat" }));
+            }
             if (!input)
             {
                 return;

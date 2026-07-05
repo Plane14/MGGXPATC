@@ -368,9 +368,10 @@ namespace world
 
     shared_ptr<TrafficFlow> Airport::getActiveFlow(const WeatherSnapshot& weather, float airportElevationFeet) const
     {
+        const GeoPoint& airportLocation = m_header.datum();
         for (const auto& flow : m_trafficFlows)
         {
-            if (flow->matchesWeather(weather, airportElevationFeet))
+            if (flow->matchesWeather(weather, airportElevationFeet, airportLocation))
             {
                 return flow;
             }

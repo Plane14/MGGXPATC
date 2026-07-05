@@ -10,6 +10,7 @@
 // SDK
 #include "XPLMPlugin.h"
 #include "XPLMNavigation.h"
+#include "XPLMUtilities.h"
 
 #if !XPLM300
 #error This plugin requires version 300 of the SDK
@@ -40,10 +41,22 @@ static PluginInstance* pInstance = nullptr;
 
 PLUGIN_API int XPluginStart(char* outName, char* outSig, char* outDesc)
 {
-    strcpy(outName, "Air Traffic & Control");
-    strcpy(outSig, "felix-b.atc");
-    strcpy(outDesc, "Offline virtual world of air traffic and ATC");
+    strncpy(outName, "Air Traffic & Control", 255);
+    outName[255] = '\0';
+    strncpy(outSig, "felix-b.atc", 255);
+    outSig[255] = '\0';
+    strncpy(outDesc, "Offline virtual world of air traffic and ATC", 255);
+    outDesc[255] = '\0';
     XPLMEnableFeature("XPLM_USE_NATIVE_PATHS", 1);
+
+    // Runtime SDK version check (we compile against 301+, but verify at runtime).
+    int xplmVersion = 0;
+    XPLMGetVersions(nullptr, &xplmVersion, nullptr);
+    if (xplmVersion < 301)
+    {
+        XPLMDebugString("ATC|ERROR: X-Plane SDK version is too old. ATC plugin requires SDK 301+.\n");
+        return 0;
+    }
 
     PluginPath::setPluginDirectoryName("airTrafficAndControl");
     LogWriter::getLogger().setLogFile(PluginPath::prependPluginPath("atc_log.txt"));
@@ -105,9 +118,29 @@ PLUGIN_API void XPluginReceiveMessage(XPLMPluginID fromId, long inMsg, void*)
     XPLMGetPluginInfo(fromId, name, filePath, signature, description);
 
     PrintDebugString("ENTRYP|XPluginReceiveMessage(fromId=[%d|%s], inMsg=[%ld])\n", fromId, name, inMsg);
+    if (!pInstance)
+    {
+        return;
+    }
+
     if (inMsg == XPLM_MSG_AIRPORT_LOADED)
     {
         pInstance->notifyAirportLoaded();
+    }
+    else if (inMsg == XPLM_MSG_SCENERY_LOADED)
+    {
+        PrintDebugString("ENTRYP|Scenery loaded, re-evaluating airport data.\n");
+        pInstance->notifySceneryLoaded();
+    }
+    else if (inMsg == XPLM_MSG_PLANE_LOADED && fromId == XPLM_PLUGIN_XPLANE)
+    {
+        PrintDebugString("ENTRYP|User plane loaded, re-initializing user aircraft.\n");
+        pInstance->notifyPlaneLoaded();
+    }
+    else if (inMsg == XPLM_MSG_PLANE_CRASHED)
+    {
+        PrintDebugString("ENTRYP|Plane crashed, suspending AI schedules.\n");
+        pInstance->notifyPlaneCrashed();
     }
 
 //    DataRef<double> userAircraftLatitude("sim/flightmodel/position/latitude", PPL::ReadOnly);

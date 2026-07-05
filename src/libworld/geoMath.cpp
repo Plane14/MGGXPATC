@@ -350,7 +350,7 @@ namespace world
         GeoPoint AD = vect2d(A, D);  float C2 = -1 * (AD.latitude*A.longitude + AD.longitude*A.latitude); float D2 = (AD.latitude*m.longitude + AD.longitude*m.latitude) + C2;
         GeoPoint BC = vect2d(B, C);  float C3 = -1 * (BC.latitude*B.longitude + BC.longitude*B.latitude); float D3 = (BC.latitude*m.longitude + BC.longitude*m.latitude) + C3;
         GeoPoint CD = vect2d(C, D);  float C4 = -1 * (CD.latitude*C.longitude + CD.longitude*C.latitude); float D4 = (CD.latitude*m.longitude + CD.longitude*m.latitude) + C4;
-        return (0 >= D1 && 0 >= D4 && 0 <= D2 && 0 >= D3);
+        return (0 >= D1 && 0 <= D2 && 0 >= D3 && 0 >= D4);
 
 //        GeoVector AB(A, B);
 //        GeoVector AM(A, m);

@@ -336,7 +336,9 @@ namespace ai
             const float effectiveGsKt = max(90.0f, arrivalGroundSpeedKt);
             const float pitchRad = atan2(descentSpeedFpm, effectiveGsKt * 101.3f);
             const float arrivalPitchDeg = max(-6.0f, min(-1.0f, -pitchRad * 57.2958f));
-            setAttitude(AircraftAttitude(arrivalHeading, arrivalPitchDeg, 0));
+            // Preserve current pitch and let the flight loop smoothly transition to target.
+            setAttitude(AircraftAttitude(arrivalHeading, m_attitude.pitch(), 0));
+            m_targetPitchDeg = arrivalPitchDeg;
 
             flightPtr->setPhase(Flight::Phase::Arrival);
 
@@ -497,6 +499,18 @@ namespace ai
                 return;
             }
 
+            // During departure, stop constraining once the aircraft has rotated.
+            // A pitch > 3 deg indicates the aircraft is airborne or lifting off.
+            if (departurePhase && m_attitude.pitch() > 3.0f)
+            {
+                return;
+            }
+
+            // During arrival, ease off centerline constraint during flare
+            // (below ~30 ft AGL) so the aircraft can drift naturally.
+            const bool inFlare = arrivalPhase && !m_altitude.isGroundBased() &&
+                m_altitude.type() == Altitude::Type::AGL && m_altitude.feet() < 30.0f;
+
             if (fabs(crossTrackMeters) <= 1.5)
             {
                 return;
@@ -517,7 +531,10 @@ namespace ai
             centerlinePoint.altitude = m_location.altitude;
 
             const double correctionDistanceMeters = GeoMath::getDistanceMeters(m_location, centerlinePoint);
-            const double maxCorrectionMeters = max(1.5, min(8.0, abs(m_groundSpeedKt) * 0.08));
+            // Reduce max correction in flare for natural touchdown drift.
+            const double maxCorrectionMeters = inFlare
+                ? max(0.3, min(1.5, abs(m_groundSpeedKt) * 0.03))
+                : max(1.0, min(4.0, abs(m_groundSpeedKt) * 0.05));
 
             GeoPoint correctedLocation = centerlinePoint;
             if (correctionDistanceMeters > maxCorrectionMeters)
@@ -531,7 +548,8 @@ namespace ai
 
             m_inKinematicMove = true;
             setLocation(correctedLocation);
-            if (fabs(crossTrackMeters) > 4.0)
+            // Only force heading alignment when significantly off centerline.
+            if (fabs(crossTrackMeters) > 6.0)
             {
                 setAttitude(m_attitude.withHeading(runwayEnd.heading()), TrackSyncMode::SyncToHeading);
             }
@@ -549,6 +567,7 @@ namespace ai
         double m_targetGroundSpeedKt;
         double m_verticalSpeedFpm;
         double m_targetVerticalSpeedFpm;
+        double m_targetPitchDeg;
         string m_squawk;
         LightBits m_lights;
         float m_gearState;
@@ -591,6 +610,7 @@ namespace ai
             m_targetGroundSpeedKt(0),
             m_verticalSpeedFpm(0),
             m_targetVerticalSpeedFpm(0),
+            m_targetPitchDeg(0.0),
             m_gearState(1.0f),
             m_flapState(0),
             m_spoilerState(0),
@@ -815,6 +835,7 @@ namespace ai
         {
             //m_host->writeLog("Aircraft[%d]::setAttitude(hdg=%f)", m_id, _attitude.heading());
             m_attitude = _attitude;
+            m_targetPitchDeg = _attitude.pitch();
 
             if (trackSync == TrackSyncMode::SyncToHeading)
             {
@@ -857,7 +878,8 @@ namespace ai
             m_targetGroundSpeedKt = 0.0;
             m_track = normalizeHeading(headingDegrees);
             m_targetTrack = m_track;
-            m_attitude = m_attitude.withHeading(headingDegrees).withRoll(0.0f);
+            m_attitude = m_attitude.withHeading(headingDegrees).withRoll(0.0f).withPitch(0.0f);
+            m_targetPitchDeg = 0.0;
             notifyChanges();
         }
 
@@ -1112,14 +1134,25 @@ namespace ai
 
             // Vertical speed response constrained by envelope.
             m_targetVerticalSpeedFpm = clampTargetVerticalSpeedFpm(m_targetVerticalSpeedFpm);
-            const double verticalResponseFpmPerSecond = m_performanceProfile.canPerformUnrestrictedClimbout()
-                ? max(1600.0, static_cast<double>(m_performanceProfile.initialClimbRocFpm) * 0.12)
-                : max(650.0, static_cast<double>(m_performanceProfile.descentRateFpm) * 0.55);
+            // Use climb-rate or descent-rate based response depending on direction of change,
+            // rather than unrestricted-climbout capability which is unrelated to descent.
+            const bool increasingVs = m_targetVerticalSpeedFpm > m_verticalSpeedFpm;
+            const double verticalResponseFpmPerSecond = increasingVs
+                ? max(700.0, static_cast<double>(m_performanceProfile.initialClimbRocFpm) * 0.45)
+                : max(500.0, static_cast<double>(m_performanceProfile.descentRateFpm) * 0.65);
             const double maxVerticalDelta = verticalResponseFpmPerSecond * elapsedSeconds;
             m_verticalSpeedFpm = approachValue(m_verticalSpeedFpm, m_targetVerticalSpeedFpm, maxVerticalDelta);
 
             m_targetTrack = normalizeHeading(m_targetTrack);
             m_track = normalizeHeading(m_track);
+
+            // Smooth pitch transition toward target (max ~3 deg/s).
+            const double maxPitchDelta = 3.0 * elapsedSeconds;
+            const double newPitch = approachValue(m_attitude.pitch(), m_targetPitchDeg, maxPitchDelta);
+            if (abs(newPitch - m_attitude.pitch()) > 0.001)
+            {
+                m_attitude = m_attitude.withPitch(newPitch);
+            }
 
             const double turnDegrees = GeoMath::getTurnDegrees(static_cast<float>(m_track), static_cast<float>(m_targetTrack));
             const bool helicopter = category() == Aircraft::Category::Helicopter;
@@ -1127,18 +1160,52 @@ namespace ai
             // Physics-based turn rate: rate = g·tan(bank)/V ≈ 1091·tan(bank)/V_kt (deg/s).
             double turnRateDegreesPerSecond;
             if (onGround) {
-                turnRateDegreesPerSecond = helicopter ? 20.0 : 12.0;
+                // Realistic taxi-turn rates: large aircraft turn slowly on the ground.
+                turnRateDegreesPerSecond = helicopter ? 8.0 : 5.0;
             } else {
-                const double absRoll = max(1.0, abs(m_attitude.roll()));
+                // Calculate required bank angle for desired turn rate
+                // Standard rate turn: 3 deg/s = bank angle of ~15-25 deg depending on speed
+                // Rate = g * tan(bank) / V, so bank = atan(rate * V / g)
                 const double speedKt = max(80.0, abs(m_groundSpeedKt));
-                const double bankRad = absRoll * 3.14159265 / 180.0;
-                const double physicsRate = 1091.0 * tan(bankRad) / speedKt;
+                const double speedMps = speedKt * 0.514444; // knots to m/s
+                
+                // Target turn rate based on aircraft category and speed
+                double targetTurnRateDegPerSec;
                 if (helicopter) {
-                    turnRateDegreesPerSecond = max(6.0, min(18.0, physicsRate));
+                    targetTurnRateDegPerSec = min(18.0, max(6.0, 1091.0 * tan(20.0 * M_PI / 180.0) / speedKt));
                 } else if (fighter) {
-                    turnRateDegreesPerSecond = max(3.0, min(14.0, physicsRate));
+                    // Fighters can sustain higher bank angles (up to 60-70 deg)
+                    targetTurnRateDegPerSec = min(20.0, max(4.0, 1091.0 * tan(45.0 * M_PI / 180.0) / speedKt));
                 } else {
-                    turnRateDegreesPerSecond = max(1.5, min(8.0, physicsRate));
+                    // Transport category: max 25-30 deg bank, standard rate ~3 deg/s at cruise
+                    // At low speed, rate is higher for same bank
+                    const double maxBankDeg = 30.0;
+                    targetTurnRateDegPerSec = min(8.0, max(1.5, 1091.0 * tan(maxBankDeg * M_PI / 180.0) / speedKt));
+                }
+                
+                // Current bank angle determines actual turn rate
+                const double absRoll = max(1.0, abs(m_attitude.roll()));
+                const double bankRad = absRoll * M_PI / 180.0;
+                const double physicsRate = 1091.0 * tan(bankRad) / speedKt;
+                
+                // Limit by both physics and target rate
+                turnRateDegreesPerSecond = min(physicsRate, targetTurnRateDegPerSec);
+                
+                // Auto-bank: if we need to turn, calculate required bank
+                if (abs(turnDegrees) > 0.5) {
+                    const double requiredRate = min(targetTurnRateDegPerSec, abs(turnDegrees) / elapsedSeconds);
+                    const double requiredBankRad = atan(requiredRate * speedMps / 9.81);
+                    const double requiredBankDeg = requiredBankRad * 180.0 / M_PI;
+                    const double maxBankDeg = helicopter ? 20.0 : (fighter ? 60.0 : 30.0);
+                    const double clampedBankDeg = min(maxBankDeg, max(5.0, requiredBankDeg));
+                    const double bankSign = turnDegrees > 0.0 ? 1.0 : -1.0;
+                    m_attitude = m_attitude.withRoll(clampedBankDeg * bankSign);
+                } else if (abs(m_attitude.roll()) > 1.0) {
+                    // Roll out smoothly when aligned
+                    const double rollRate = 10.0 * elapsedSeconds; // 10 deg/s roll rate
+                    const double currentRoll = m_attitude.roll();
+                    const double newRoll = approachValue(currentRoll, 0.0, rollRate);
+                    m_attitude = m_attitude.withRoll(newRoll);
                 }
             }
             const double maxTurnDelta = turnRateDegreesPerSecond * elapsedSeconds;

@@ -254,6 +254,44 @@ TEST(XPCifpReaderTest, parsesApproachAltitudeAndSpeedConstraints)
     EXPECT_EQ(co403->speedConstraintType, '-');
 }
 
+TEST(XPCifpReaderTest, parsesPathTerminatorField)
+{
+    auto host = make_shared<ProcedureTestHostServices>();
+    XPCifpReader reader(host);
+
+    istringstream input(ProcedureTestHostServices::sampleCifp());
+
+    // Test SID path terminators
+    auto sidTrack = reader.readProcedureTrackWithLocations(input, "SID", "BANNG3", "08B", "");
+    ASSERT_FALSE(sidTrack.waypoints.empty());
+
+    // First waypoint has VI (vectors to initial fix)
+    EXPECT_EQ(sidTrack.waypoints[0].pathTerminator, "VI");
+
+    // Test STAR path terminators
+    istringstream input2(ProcedureTestHostServices::sampleCifp());
+    auto starTrack = reader.readProcedureTrackWithLocations(input2, "STAR", "CHPPR1", "09L", "");
+    ASSERT_FALSE(starTrack.waypoints.empty());
+
+    // All STAR waypoints in this sample have TF (track to fix)
+    for (const auto& wp : starTrack.waypoints)
+    {
+        EXPECT_EQ(wp.pathTerminator, "TF");
+    }
+
+    // Test approach path terminators
+    istringstream input3(ProcedureTestHostServices::sampleCifp());
+    auto approachTrack = reader.readApproachProcedureTracksWithLocations(input3, "I09L", "09L");
+    ASSERT_FALSE(approachTrack.procedureTrack.waypoints.empty());
+
+    // First waypoint has IF (initial fix)
+    EXPECT_EQ(approachTrack.procedureTrack.waypoints[0].pathTerminator, "IF");
+    // Second waypoint has TF (track to fix)
+    EXPECT_EQ(approachTrack.procedureTrack.waypoints[1].pathTerminator, "TF");
+    // Third waypoint has CF (course to fix)
+    EXPECT_EQ(approachTrack.procedureTrack.waypoints[2].pathTerminator, "CF");
+}
+
 TEST(FlightPlanTest, rebuildsProcedureLegsUsingCifpWaypoints)
 {
     auto host = make_shared<ProcedureTestHostServices>();
@@ -383,4 +421,27 @@ TEST(FlightTest, setArrivalRunwayRebuildsApproachAndResetsCursor)
     EXPECT_TRUE(any_of(flight->plan()->legs().begin(), flight->plan()->legs().end(), [](const shared_ptr<FlightPlan::Leg>& leg) {
         return leg && leg->type() == FlightPlan::LegType::GoAround && leg->toNavaid() == "MISSED1";
     }));
+}
+
+TEST(FlightPlanTest, appliesAltitudeConstraintTypesCorrectly)
+{
+    // Test that altitude constraint types are properly handled in flight plan rebuilding
+    // The sampleLecoApproachCifp has waypoints with different constraint types
+    auto host = make_shared<ProcedureTestHostServices>();
+
+    // Verify the constraint types are parsed correctly from the CIFP data
+    XPCifpReader reader(host);
+    istringstream input(sampleLecoApproachCifp());
+    auto selection = reader.readApproachProcedureTracksWithLocations(input, "R03", "RW03");
+
+    // Find CO401 which has altitudeConstraintType = ' ' (at/exact), speedConstraintType = '-' (max)
+    const auto co401 = find_if(selection.procedureTrack.waypoints.begin(), selection.procedureTrack.waypoints.end(),
+        [](const XPCifpReader::WaypointWithLocation& wp) { return wp.name == "CO401"; });
+    ASSERT_NE(co401, selection.procedureTrack.waypoints.end());
+    
+    // CO401 has exact altitude (1500 ft) and max speed (160 knots)
+    EXPECT_FLOAT_EQ(co401->altitudeConstraint, 1500.0f);
+    EXPECT_EQ(co401->altitudeConstraintType, ' ');
+    EXPECT_FLOAT_EQ(co401->speedConstraint, 160.0f);
+    EXPECT_EQ(co401->speedConstraintType, '-');
 }

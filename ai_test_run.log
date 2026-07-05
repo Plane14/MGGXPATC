@@ -1,0 +1,20 @@
+Running main() from C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/googletest/src/gtest_main.cc
+Note: Google Test filter = AIPilotTest.lecoRnp03ApproachTouchdownStaysOnRunwayWithRealGeometry
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from AIPilotTest
+[ RUN      ] AIPilotTest.lecoRnp03ApproachTouchdownStaysOnRunwayWithRealGeometry
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:1143: Failure
+Value of: touchedDown
+  Actual: false
+Expected: true
+[  FAILED  ] AIPilotTest.lecoRnp03ApproachTouchdownStaysOnRunwayWithRealGeometry (3 ms)
+[----------] 1 test from AIPilotTest (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (3 ms total)
+[  PASSED  ] 0 tests.
+[  FAILED  ] 1 test, listed below:
+[  FAILED  ] AIPilotTest.lecoRnp03ApproachTouchdownStaysOnRunwayWithRealGeometry
+
+ 1 FAILED TEST

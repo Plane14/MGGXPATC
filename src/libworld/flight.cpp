@@ -113,6 +113,7 @@ namespace world
             const string& fromNavaid,
             const string& toNavaid,
             float targetAltitude,
+            char altitudeConstraintType,
             float targetSpeed)
         {
             legs.push_back(shared_ptr<FlightPlan::Leg>(new FlightPlan::Leg(
@@ -121,6 +122,7 @@ namespace world
                 fromNavaid,
                 toNavaid,
                 targetAltitude,
+                altitudeConstraintType,
                 targetSpeed)));
         }
 
@@ -199,6 +201,7 @@ namespace world
                     waypoints[i - 1],
                     waypoints[i],
                     targetAltitude,
+                    ' ',
                     targetSpeed);
             }
         }
@@ -394,6 +397,16 @@ namespace world
         return m_landingRunwayElevationFeet;
     }
 
+    const GeoPoint& Flight::position() const
+    {
+        static const GeoPoint empty;
+        if (!m_aircraft)
+        {
+            return empty;
+        }
+        return m_aircraft->location();
+    }
+
     void Flight::progressTo(chrono::microseconds timestamp)
     {
         m_aircraft->progressTo(timestamp);
@@ -538,8 +551,21 @@ namespace world
         vector<string> approachTrack;
         vector<string> missedApproachTrack;
         unordered_map<string, GeoPoint> cifpWaypointLocations;
-        unordered_map<string, float> cifpAltitudeConstraints;  // Waypoint -> altitude (feet)
-        unordered_map<string, float> cifpSpeedConstraints;     // Waypoint -> speed (knots)
+        
+        // Struct to hold altitude constraint info (value and type)
+        struct AltitudeConstraintInfo {
+            float value = 0.0f;
+            char type = 0;  // '+' = at/above (minimum), '-' = at/below (maximum), ' ' = at (exact)
+        };
+        unordered_map<string, AltitudeConstraintInfo> cifpAltitudeConstraints;
+        
+        // Struct to hold speed constraint info (value and type)
+        struct SpeedConstraintInfo {
+            float value = 0.0f;
+            char type = 0;  // '+' = min, '-' = max, ' ' = exact
+        };
+        unordered_map<string, SpeedConstraintInfo> cifpSpeedConstraints;
+        
         vector<RouteWaypoint> parsedRouteWaypoints = m_filedRouteWaypoints;
 
         if (host)
@@ -562,14 +588,20 @@ namespace world
                     {
                         cifpWaypointLocations[wp.name] = GeoPoint(wp.latitude, wp.longitude);
                     }
-                    // Store altitude/speed constraints from CIFP
+                    // Store altitude/speed constraints from CIFP with their types
                     if (wp.altitudeConstraint > 0)
                     {
-                        cifpAltitudeConstraints[wp.name] = wp.altitudeConstraint;
+                        AltitudeConstraintInfo info;
+                        info.value = wp.altitudeConstraint;
+                        info.type = wp.altitudeConstraintType;
+                        cifpAltitudeConstraints[wp.name] = info;
                     }
                     if (wp.speedConstraint > 0)
                     {
-                        cifpSpeedConstraints[wp.name] = wp.speedConstraint;
+                        SpeedConstraintInfo info;
+                        info.value = wp.speedConstraint;
+                        info.type = wp.speedConstraintType;
+                        cifpSpeedConstraints[wp.name] = info;
                     }
                 }
                 
@@ -587,14 +619,20 @@ namespace world
                     {
                         cifpWaypointLocations[wp.name] = GeoPoint(wp.latitude, wp.longitude);
                     }
-                    // Store altitude/speed constraints from CIFP
+                    // Store altitude/speed constraints from CIFP with their types
                     if (wp.altitudeConstraint > 0)
                     {
-                        cifpAltitudeConstraints[wp.name] = wp.altitudeConstraint;
+                        AltitudeConstraintInfo info;
+                        info.value = wp.altitudeConstraint;
+                        info.type = wp.altitudeConstraintType;
+                        cifpAltitudeConstraints[wp.name] = info;
                     }
                     if (wp.speedConstraint > 0)
                     {
-                        cifpSpeedConstraints[wp.name] = wp.speedConstraint;
+                        SpeedConstraintInfo info;
+                        info.value = wp.speedConstraint;
+                        info.type = wp.speedConstraintType;
+                        cifpSpeedConstraints[wp.name] = info;
                     }
                 }
                 
@@ -611,14 +649,20 @@ namespace world
                     {
                         cifpWaypointLocations[wp.name] = GeoPoint(wp.latitude, wp.longitude);
                     }
-                    // Store altitude/speed constraints from CIFP
+                    // Store altitude/speed constraints from CIFP with their types
                     if (wp.altitudeConstraint > 0)
                     {
-                        cifpAltitudeConstraints[wp.name] = wp.altitudeConstraint;
+                        AltitudeConstraintInfo info;
+                        info.value = wp.altitudeConstraint;
+                        info.type = wp.altitudeConstraintType;
+                        cifpAltitudeConstraints[wp.name] = info;
                     }
                     if (wp.speedConstraint > 0)
                     {
-                        cifpSpeedConstraints[wp.name] = wp.speedConstraint;
+                        SpeedConstraintInfo info;
+                        info.value = wp.speedConstraint;
+                        info.type = wp.speedConstraintType;
+                        cifpSpeedConstraints[wp.name] = info;
                     }
                 }
                 // Also store missed approach waypoints (with coordinates if available)
@@ -628,6 +672,21 @@ namespace world
                     if (wp.hasLocation)
                     {
                         cifpWaypointLocations[wp.name] = GeoPoint(wp.latitude, wp.longitude);
+                    }
+                    // Store altitude/speed constraints from CIFP for missed approach
+                    if (wp.altitudeConstraint > 0)
+                    {
+                        AltitudeConstraintInfo info;
+                        info.value = wp.altitudeConstraint;
+                        info.type = wp.altitudeConstraintType;
+                        cifpAltitudeConstraints[wp.name] = info;
+                    }
+                    if (wp.speedConstraint > 0)
+                    {
+                        SpeedConstraintInfo info;
+                        info.value = wp.speedConstraint;
+                        info.type = wp.speedConstraintType;
+                        cifpSpeedConstraints[wp.name] = info;
                     }
                 }
 
@@ -647,14 +706,20 @@ namespace world
                         {
                             cifpWaypointLocations[wp.name] = GeoPoint(wp.latitude, wp.longitude);
                         }
-                        // Store altitude/speed constraints from CIFP
+                        // Store altitude/speed constraints from CIFP with their types
                         if (wp.altitudeConstraint > 0)
                         {
-                            cifpAltitudeConstraints[wp.name] = wp.altitudeConstraint;
+                            AltitudeConstraintInfo info;
+                            info.value = wp.altitudeConstraint;
+                            info.type = wp.altitudeConstraintType;
+                            cifpAltitudeConstraints[wp.name] = info;
                         }
                         if (wp.speedConstraint > 0)
                         {
-                            cifpSpeedConstraints[wp.name] = wp.speedConstraint;
+                            SpeedConstraintInfo info;
+                            info.value = wp.speedConstraint;
+                            info.type = wp.speedConstraintType;
+                            cifpSpeedConstraints[wp.name] = info;
                         }
                     }
                     for (const auto& wp : runwayApproachWithLocations.missedTrack.waypoints)
@@ -663,6 +728,21 @@ namespace world
                         if (wp.hasLocation)
                         {
                             cifpWaypointLocations[wp.name] = GeoPoint(wp.latitude, wp.longitude);
+                        }
+                        // Store altitude/speed constraints for missed approach
+                        if (wp.altitudeConstraint > 0)
+                        {
+                            AltitudeConstraintInfo info;
+                            info.value = wp.altitudeConstraint;
+                            info.type = wp.altitudeConstraintType;
+                            cifpAltitudeConstraints[wp.name] = info;
+                        }
+                        if (wp.speedConstraint > 0)
+                        {
+                            SpeedConstraintInfo info;
+                            info.value = wp.speedConstraint;
+                            info.type = wp.speedConstraintType;
+                            cifpSpeedConstraints[wp.name] = info;
                         }
                     }
                 }
@@ -789,9 +869,15 @@ namespace world
                     float targetAlt = terrainFloors[i - 1];
                     // Check for CIFP constraint on this waypoint
                     auto altIt = cifpAltitudeConstraints.find(waypoints[i]);
-                    if (altIt != cifpAltitudeConstraints.end() && altIt->second > 0)
+                    if (altIt != cifpAltitudeConstraints.end() && altIt->second.value > 0)
                     {
-                        targetAlt = max(targetAlt, altIt->second); // CIFP constraint as minimum
+                        // '+' = at/above (minimum), ' ' = at (exact), '-' = at/below (maximum)
+                        char constraintType = altIt->second.type;
+                        if (constraintType == '+' || constraintType == ' ')
+                        {
+                            targetAlt = max(targetAlt, altIt->second.value); // Minimum altitude
+                        }
+                        // '-' constraints are maximums, don't apply as minimums during climb
                     }
                     // Cap at cruise altitude
                     targetAlt = min(targetAlt, cruiseAltitudeFeet);
@@ -851,12 +937,21 @@ namespace world
                     // Cap at cruise altitude (don't climb during descent)
                     float targetAlt = min(gradualAltitude, cruiseAltitudeFeet);
 
-                    // Check for CIFP constraint - if present, use it as target (not just minimum)
+                    // Check for CIFP constraint - apply based on type
                     auto altIt = cifpAltitudeConstraints.find(waypoints[i]);
-                    if (altIt != cifpAltitudeConstraints.end() && altIt->second > 0)
+                    if (altIt != cifpAltitudeConstraints.end() && altIt->second.value > 0)
                     {
-                        // CIFP constraint takes precedence as the target altitude
-                        targetAlt = altIt->second;
+                        char constraintType = altIt->second.type;
+                        if (constraintType == '+' || constraintType == ' ')
+                        {
+                            // At/above or exact: use as target altitude
+                            targetAlt = altIt->second.value;
+                        }
+                        else if (constraintType == '-')
+                        {
+                            // At/below: use minimum of current calculation and constraint
+                            targetAlt = min(targetAlt, altIt->second.value);
+                        }
                     }
 
                     // Enforce terrain safety floor (never go below this)
@@ -888,18 +983,34 @@ namespace world
 
                 // Use CIFP altitude constraint if available, otherwise use calculated
                 float legAltitude = targetAltitudes[i - 1];
+                char altitudeConstraintType = ' ';  // Default to exact
                 auto altIt = cifpAltitudeConstraints.find(toWp);
-                if (altIt != cifpAltitudeConstraints.end() && altIt->second > 0)
+                if (altIt != cifpAltitudeConstraints.end() && altIt->second.value > 0)
                 {
-                    legAltitude = altIt->second;
+                    altitudeConstraintType = altIt->second.type;
+                    if (altitudeConstraintType == '+' || altitudeConstraintType == ' ')
+                    {
+                        legAltitude = altIt->second.value;
+                    }
+                    // For '-' (at/below), we use the calculated altitude which is already capped below this value
                 }
 
                 // Use CIFP speed constraint if available, otherwise use default
                 float legSpeed = defaultTargetSpeed;
                 auto spdIt = cifpSpeedConstraints.find(toWp);
-                if (spdIt != cifpSpeedConstraints.end() && spdIt->second > 0)
+                if (spdIt != cifpSpeedConstraints.end() && spdIt->second.value > 0)
                 {
-                    legSpeed = spdIt->second;
+                    char constraintType = spdIt->second.type;
+                    if (constraintType == '+' || constraintType == ' ')
+                    {
+                        // For speed, '+' (min) and ' ' (exact) mean we should not exceed this
+                        legSpeed = spdIt->second.value;
+                    }
+                    else if (constraintType == '-')
+                    {
+                        // '-' means maximum speed, use as target
+                        legSpeed = spdIt->second.value;
+                    }
                 }
 
                 appendLegFromPoints(
@@ -908,6 +1019,7 @@ namespace world
                     fromWp,
                     toWp,
                     legAltitude,
+                    altitudeConstraintType,
                     legSpeed);
             }
         };
@@ -926,7 +1038,7 @@ namespace world
         m_legs.clear();
 
         const auto appendFallbackLeg = [this](LegType type, const string& fromNavaid, const string& toNavaid, float targetAltitude, float targetSpeed) {
-            appendLegFromPoints(m_legs, type, fromNavaid, toNavaid, targetAltitude, targetSpeed);
+            appendLegFromPoints(m_legs, type, fromNavaid, toNavaid, targetAltitude, ' ', targetSpeed);
         };
 
         const auto appendProcedure = [&](LegType type, const vector<string>& track, const vector<float>& targetAltitudes, float targetSpeed) {

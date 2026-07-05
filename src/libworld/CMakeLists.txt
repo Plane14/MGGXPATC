@@ -13,14 +13,34 @@ add_library(libworld STATIC
     airportFlow.hpp
     airspaceClass.cpp
     altitude.cpp
+    arrivalFlowController.cpp
+    arrivalFlowController.hpp
     basicManeuverTypes.hpp
     clearanceTypes.hpp
     controlFacility.cpp
     controllerPosition.cpp
+    controllerCoordinator.cpp
+    controllerCoordinator.hpp
+    conflictDetector.cpp
+    conflictDetector.hpp
+    conflictResolver.cpp
+    conflictResolver.hpp
+    coordinationMessage.cpp
+    coordinationMessage.hpp
+    departureFlowController.cpp
+    departureFlowController.hpp
     flight.cpp
+    flowManager.cpp
+    flowManager.hpp
+    flowStateMachine.cpp
+    flowStateMachine.hpp
     frequency.cpp
     geoMath.cpp
     geoPoint.cpp
+    groundStopManager.cpp
+    groundStopManager.hpp
+    handoffProtocol.cpp
+    handoffProtocol.hpp
     intent.cpp
     intentFactory.hpp
     intentTypes.cpp
@@ -28,7 +48,15 @@ add_library(libworld STATIC
     libworld.cpp
     libworld.h
     maneuver.cpp
+    radarSeparationMinima.cpp
+    radarSeparationMinima.hpp
     runway.cpp
+    runwayOccupancyTracker.cpp
+    runwayOccupancyTracker.hpp
+    separationManager.cpp
+    separationManager.hpp
+    sharedRadarScope.cpp
+    sharedRadarScope.hpp
     simplePhraseologyService.hpp
     state.h
     stlhelpers.cpp
@@ -39,6 +67,12 @@ add_library(libworld STATIC
     taxiPath.cpp
     uniPoint.cpp
     utteranceBuilder.cpp
+    verticalSeparationRules.cpp
+    verticalSeparationRules.hpp
+    wakeTurbulenceCalculator.cpp
+    wakeTurbulenceCalculator.hpp
+    workloadModel.cpp
+    workloadModel.hpp
     world.cpp
     worldBuilder.cpp
     worldHelper.hpp

@@ -201,7 +201,9 @@ private:
     {
         const string moraPath = cacheKeyForPath(m_host, { "Custom Data", "earth_mora.dat" });
         const string msaPath = cacheKeyForPath(m_host, { "Custom Data", "earth_msa.dat" });
-        return moraPath + "|" + msaPath;
+        const string moraDefaultPath = cacheKeyForPath(m_host, { "Resources", "default data", "earth_mora.dat" });
+        const string msaDefaultPath = cacheKeyForPath(m_host, { "Resources", "default data", "earth_msa.dat" });
+        return moraPath + "|" + msaPath + "|" + moraDefaultPath + "|" + msaDefaultPath;
     }
 
     void ensureLoaded() const
@@ -251,8 +253,11 @@ private:
 
         try
         {
-            const string filePath = m_host->getHostFilePath({ "Custom Data", "earth_mora.dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = m_host->openFileForRead(m_host->getHostFilePath({ "Custom Data", "earth_mora.dat" }));
+            if (!input)
+            {
+                input = m_host->openFileForRead(m_host->getHostFilePath({ "Resources", "default data", "earth_mora.dat" }));
+            }
             if (!input)
             {
                 return;
@@ -316,8 +321,11 @@ private:
 
         try
         {
-            const string filePath = m_host->getHostFilePath({ "Custom Data", "earth_msa.dat" });
-            auto input = m_host->openFileForRead(filePath);
+            auto input = m_host->openFileForRead(m_host->getHostFilePath({ "Custom Data", "earth_msa.dat" }));
+            if (!input)
+            {
+                input = m_host->openFileForRead(m_host->getHostFilePath({ "Resources", "default data", "earth_msa.dat" }));
+            }
             if (!input)
             {
                 return;

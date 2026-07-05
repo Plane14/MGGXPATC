@@ -643,8 +643,9 @@ namespace world
         {
             auto clearance = intent->clearance();
             const auto& runwayEnd = m_host->getWorld()->getRunwayEnd(
-                intent->subjectFlight()->plan()->departureAirportIcao(), 
+                intent->subjectFlight()->plan()->departureAirportIcao(),
                 clearance->departureRunway());
+            const float variationDeg = static_cast<float>(intent->subjectFlight()->aircraft()->magneticVariation());
 
             builder.addData(spellCallsign(intent->subjectFlight()->callSign()));
             builder.addPunctuation();
@@ -661,7 +662,7 @@ namespace world
                 else
                 {
                     builder.addText("wind");
-                    builder.addData(spellHeading(weather.windDirectionTrueDegrees));
+                    builder.addData(spellHeading(trueToMagnetic(weather.windDirectionTrueDegrees, variationDeg)));
                     builder.addText("at");
                     builder.addText(to_string((int)(windSpeedKt + 0.5f)));
                     builder.addText("knots");
@@ -677,7 +678,9 @@ namespace world
                 builder.addText("winds calm");
             }
 
-            float turnDegrees = GeoMath::getTurnDegrees(runwayEnd.heading(), clearance->initialHeading());
+            const float magneticInitialHeading = trueToMagnetic(clearance->initialHeading(), variationDeg);
+            float turnDegrees = GeoMath::getTurnDegrees(
+                trueToMagnetic(runwayEnd.heading(), variationDeg), magneticInitialHeading);
             if (abs(turnDegrees) < 1)
             {
                 builder.addText("fly runway heading");
@@ -686,7 +689,7 @@ namespace world
             {
                 builder.addText(turnDegrees > 0 ? "turn right" : "turn left");
                 builder.addText("heading");
-                builder.addData(spellHeading(clearance->initialHeading()));
+                builder.addData(spellHeading(magneticInitialHeading));
             }
 
             if (intent->departureKhz() > 0)
@@ -714,9 +717,10 @@ namespace world
         void verbalizeTakeoffClearanceReadback(UtteranceBuilder& builder, shared_ptr<PilotTakeoffClearanceReadbackIntent> intent)
         {
             auto clearance = intent->clearance();
+            const float variationDeg = static_cast<float>(intent->subjectFlight()->aircraft()->magneticVariation());
 
             builder.addText("heading");
-            builder.addData(spellHeading(clearance->initialHeading()));
+            builder.addData(spellHeading(trueToMagnetic(clearance->initialHeading(), variationDeg)));
 
             //if (intent->departureKhz() > 0)
             //{
@@ -749,6 +753,7 @@ namespace world
                 intent->subjectFlight()->plan()->arrivalAirportIcao(),
                 intent->clearance()->runway());
             auto weatherService = m_host->services().tryGet<WeatherService>();
+            const float variationDeg = static_cast<float>(intent->subjectFlight()->aircraft()->magneticVariation());
 
             builder.addData(spellCallsign(intent->subjectFlight()->callSign()));
             if (weatherService)
@@ -762,7 +767,7 @@ namespace world
                 else
                 {
                     builder.addText("wind");
-                    builder.addData(spellHeading(weather.windDirectionTrueDegrees));
+                    builder.addData(spellHeading(trueToMagnetic(weather.windDirectionTrueDegrees, variationDeg)));
                     builder.addText("at");
                     builder.addText(to_string((int)(windSpeedKt + 0.5f)));
                     builder.addText("knots");
@@ -1133,6 +1138,15 @@ namespace world
             }
 
             return text.str();
+        }
+
+        static float trueToMagnetic(float trueHeading, float variationDeg)
+        {
+            // Variation positive east: magnetic = true - variation.
+            float magnetic = trueHeading - variationDeg;
+            while (magnetic < 0) magnetic += 360;
+            while (magnetic >= 360) magnetic -= 360;
+            return magnetic;
         }
 
         static string spellCallsign(const string& callsign)

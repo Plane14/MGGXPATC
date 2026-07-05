@@ -5,6 +5,7 @@
 #pragma once
 
 // STL
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -34,10 +35,14 @@ private:
     DataRef<double> m_elevationDataRef;
     DataRef<float> m_aglDataRef;
     DataRef<float> m_headingDataRef;
+    DataRef<float> m_magneticHeadingDataRef;
+    std::unique_ptr<DataRef<float>> m_magneticVariationDataRef;
     DataRef<float> m_pitchDataRef;
     DataRef<float> m_rollDataRef;
     DataRef<float> m_groundspeedDataRef;
     DataRef<float> m_verticalSpeedDataRef;
+    DataRef<float> m_trackDataRef;
+    DataRef<int> m_onGroundDataRef;
     DataRef<int> m_beaconLightDataRef;
     DataRef<int> m_taxiLightDataRef;
     DataRef<int> m_navLightDataRef;
@@ -67,11 +72,14 @@ public:
         m_longitudeDataRef("sim/flightmodel/position/longitude"),
         m_elevationDataRef("sim/flightmodel/position/elevation"),
         m_headingDataRef("sim/flightmodel/position/psi"),
+        m_magneticHeadingDataRef("sim/flightmodel/position/magpsi"),
         m_pitchDataRef("sim/flightmodel/position/theta"),
         m_rollDataRef("sim/flightmodel/position/phi"),
         m_aglDataRef("sim/flightmodel/position/y_agl"),
         m_groundspeedDataRef("sim/flightmodel/position/groundspeed"),
         m_verticalSpeedDataRef("sim/flightmodel/position/vh_ind_fpm"),
+        m_trackDataRef("sim/flightmodel/position/hpath"),
+        m_onGroundDataRef("sim/flightmodel/failures/onground_any"),
         m_beaconLightDataRef("sim/cockpit2/switches/beacon_on"),
         m_taxiLightDataRef("sim/cockpit2/switches/taxi_light_on"),
         m_navLightDataRef("sim/cockpit2/switches/navigation_lights_on"),
@@ -85,6 +93,17 @@ public:
         m_wasOnGround(true)
     {
         updateFromDataRefs(true);
+
+        try
+        {
+            m_magneticVariationDataRef = std::unique_ptr<DataRef<float>>(
+                new DataRef<float>("sim/flightmodel/position/magvar_deg"));
+        }
+        catch (...)
+        {
+            host()->writeLog(
+                "UPILOT|WARNING: sim/flightmodel/position/magvar_deg not available");
+        }
     }
 public:
     void progressTo(chrono::microseconds timestamp) override
@@ -102,7 +121,15 @@ public:
     }
     double track() const override
     {
-        return m_attitude.heading();
+        return m_trackDataRef;
+    }
+    double magneticHeading() const override
+    {
+        return m_magneticHeadingDataRef;
+    }
+    double magneticVariation() const override
+    {
+        return m_magneticVariationDataRef ? static_cast<double>(*m_magneticVariationDataRef) : 0.0;
     }
     const Altitude& altitude() const override
     {
@@ -192,10 +219,18 @@ private:
         m_location = GeoPoint(m_latitudeDataRef, m_longitudeDataRef);
         m_attitude = AircraftAttitude(m_headingDataRef, m_pitchDataRef, m_rollDataRef);
 
-        float aglMeters = m_aglDataRef;
-        m_altitude = aglMeters < 0.1
-             ? Altitude::ground()
-             : Altitude::agl(aglMeters * FEET_IN_1_METER);
+        // Use X-Plane's native on-ground flag for robust ground detection.
+        const bool onGround = m_onGroundDataRef != 0;
+        if (onGround)
+        {
+            m_altitude = Altitude::ground();
+        }
+        else
+        {
+            // When airborne, report MSL from the elevation dataref for accurate altitude.
+            const float elevationMeters = m_elevationDataRef;
+            m_altitude = Altitude::msl(elevationMeters * FEET_IN_1_METER);
+        }
 
         m_squawk = to_string(m_transponderCodeDataRef);
 
