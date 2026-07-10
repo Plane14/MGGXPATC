@@ -1355,11 +1355,6 @@ namespace ai
 
                     if (nextFeet <= terrainElevationFeet)
                     {
-                        if (arrivalPhase && !canTouchDownAtCurrentArrivalLocation())
-                        {
-                            return Altitude::agl(max(1.0f, nextFeet - terrainElevationFeet));
-                        }
-
                         return Altitude::ground();
                     }
 

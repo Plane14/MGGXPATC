@@ -1386,8 +1386,14 @@ namespace ai
             // Helicopters don't need pushback - they start engines on stand and hover-taxi
             if (!isHelicopter())
             {
-                steps.push_back(maneuverDepartureAwaitPushback());
-                steps.push_back(maneuverDeparturePushbackAndStart());
+                steps.push_back(M.sequence(
+                    Maneuver::Type::DepartureTaxi,
+                    "pushback_and_start",
+                    {
+                        maneuverDepartureAwaitPushback(),
+                        maneuverDeparturePushbackAndStart()
+                    }
+                ));
             }
             else
             {
@@ -1525,10 +1531,6 @@ namespace ai
 
             vector<shared_ptr<Maneuver>> steps;
 
-            // Spawned arrivals must check in with approach/radar before flying STAR/approach legs.
-            // Without this, aircraft appear on approach without ever contacting ATC.
-            steps.push_back(maneuverArrivalRadarCheckIn());
-
             const auto& legs = flight()->plan()->legs();
             const bool hasBridgeLegAfterStar = [&legs]() {
                 bool seenStarLeg = false;
@@ -1570,14 +1572,9 @@ namespace ai
                 steps.push_back(maneuverProcedureLeg(FlightPlan::LegType::Approach, Flight::Phase::Arrival, "approach_leg"));
             }
 
-            // Fly the runway-alignment segment before final communications so aircraft
-            // keep navigating and descending instead of drifting while waiting for tower.
-            if (hasProcedureLeg(FlightPlan::LegType::Landing))
-            {
-                steps.push_back(maneuverProcedureLeg(FlightPlan::LegType::Landing, Flight::Phase::Arrival, "landing_align_leg"));
-            }
-
-            steps.push_back(maneuverFinal());
+            steps.push_back(M.deferred(Maneuver::Type::ArrivalApproach, "final", [this]() {
+                return maneuverFinal();
+            }));
             steps.push_back(M.deferred([this, landingRunway]() {
                 if (flight()->tryFindClearance<GoAroundRequest>(Clearance::Type::GoAroundRequest))
                 {
@@ -1619,7 +1616,9 @@ namespace ai
                 steps.push_back(maneuverProcedureLeg(FlightPlan::LegType::Landing, Flight::Phase::Arrival, "landing_retry_align_leg"));
             }
 
-            steps.push_back(maneuverFinal());
+            steps.push_back(M.deferred(Maneuver::Type::ArrivalApproach, "final", [this]() {
+                return maneuverFinal();
+            }));
             steps.push_back(M.deferred([this, landingRunway]() {
                 if (flight()->tryFindClearance<GoAroundRequest>(Clearance::Type::GoAroundRequest))
                 {

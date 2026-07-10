@@ -633,14 +633,10 @@ namespace ai
 
         void handoffDeparturesToTower()
         {
-            if (airport()->activeDepartureRunways().size() == 0)
-            {
-                return;
-            }
-
             for (const auto &flight : m_clearedForDepartureTaxi)
             {
-                if (hasKey(m_departureTaxiPendingHandoffToTower, flight))
+                if (hasKey(m_departureTaxiPendingHandoffToTower, flight) ||
+                    hasKey(m_departureTaxiHandedOffToTower, flight))
                 {
                     continue;
                 }
@@ -665,7 +661,7 @@ namespace ai
                     }
                 }
 
-                if (!departureEnd || !airport()->isRunwayActive(plannedRunwayName))
+                if (!departureEnd)
                 {
                     continue;
                 }
@@ -686,7 +682,7 @@ namespace ai
                     }
                     catch (const exception&) {}
                     const bool nearHoldShort = distanceMeters <= holdShortRadius;
-                    const bool taxiingIntoLineup = speedKt >= 2.0f && speedKt <= 35.0f;
+                    const bool taxiingIntoLineup = speedKt >= 0.0f && speedKt <= 35.0f;
 
                 if (nearHoldShort && taxiingIntoLineup)
                 {

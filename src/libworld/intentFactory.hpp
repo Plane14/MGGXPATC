@@ -490,7 +490,7 @@ namespace world
             auto landingPoint = m_helper.getLandingPoint(flight);
             auto tower = m_helper.tryGetArrivalTower(flight, landingPoint);
 
-            if (!tower)
+            if (!tower || tower->type() == ControllerPosition::Type::Approach)
             {
                 return nullptr;
             }
