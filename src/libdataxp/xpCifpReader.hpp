@@ -40,6 +40,7 @@ private:
         char altitudeConstraintType = 0;  // '+', '-', ' ' (at/above, at/below, at)
         float speedConstraint = 0.0f;       // Knots
         char speedConstraintType = 0;       // '+', '-', ' ' (min, max, exact)
+        string sectionCode;
     };
 
     struct RawTrack
@@ -266,9 +267,72 @@ public:
     {
         auto tracks = parseProcedureTracks(input, "APPCH", procedureName);
         const RawTrack* selectedTrack = selectProcedureTrack(tracks, procedureName, preferredRunway, preferredTransition);
-        return selectedTrack
-            ? splitApproachTrackWithLocations(*selectedTrack, preferredRunway)
-            : ProcedureTrackWithLocationsSelection{};
+        if (!selectedTrack)
+        {
+            return {};
+        }
+
+        RawTrack combinedTrack = *selectedTrack;
+        const bool hasCommonTrack = any_of(tracks.begin(), tracks.end(), [](const RawTrack& track) {
+            return !track.records.empty() &&
+                   track.records.front().sectionCode == "R";
+        });
+        if (hasCommonTrack)
+        {
+            const RawTrack* transitionTrack = nullptr;
+            for (const auto& track : tracks)
+            {
+                if (&track == selectedTrack ||
+                    track.records.empty() ||
+                    track.records.front().sectionCode != "A" ||
+                    !matchesToken(track.procedureName, selectedTrack->procedureName))
+                {
+                    continue;
+                }
+
+                if (!transitionTrack || track.records.size() < transitionTrack->records.size())
+                {
+                    transitionTrack = &track;
+                }
+            }
+
+            if (transitionTrack)
+            {
+                vector<ProcedureRecord> records = transitionTrack->records;
+                for (const auto& record : selectedTrack->records)
+                {
+                    if (none_of(records.begin(), records.end(), [&record](const ProcedureRecord& existing) {
+                        return matchesToken(existing.waypoint, record.waypoint);
+                    }))
+                    {
+                        records.push_back(record);
+                    }
+                }
+                combinedTrack.records = std::move(records);
+            }
+
+            for (const auto& track : tracks)
+            {
+                if (track.records.empty() ||
+                    track.records.front().sectionCode != "R" ||
+                    !matchesToken(track.procedureName, selectedTrack->procedureName))
+                {
+                    continue;
+                }
+
+                for (const auto& record : track.records)
+                {
+                    if (none_of(combinedTrack.records.begin(), combinedTrack.records.end(), [&record](const ProcedureRecord& existing) {
+                        return matchesToken(existing.waypoint, record.waypoint);
+                    }))
+                    {
+                        combinedTrack.records.push_back(record);
+                    }
+                }
+            }
+        }
+
+        return splitApproachTrackWithLocations(combinedTrack, preferredRunway);
     }
 
     ProcedureTrackWithLocationsSelection readApproachProcedureTracksWithLocations(
@@ -452,6 +516,7 @@ private:
             }
 
             const string parsedProcedureName = trimCopy(fields[2]);
+            const string sectionCode = fields.size() > 1 ? trimCopy(fields[1]) : "";
             const string branchKey = firstNonBlank(trimCopy(fields[3]), trimCopy(fields[4]));
             const string waypoint = firstNonBlank(trimCopy(fields[4]), trimCopy(fields[3]));
             const string waypointDescription = fields.size() > 8 ? trimCopy(fields[8]) : "";
@@ -571,7 +636,8 @@ private:
                 altitudeConstraint,
                 altitudeConstraintType,
                 speedConstraint,
-                speedConstraintType
+                speedConstraintType,
+                sectionCode
             });
             currentSequence = sequence;
         }
@@ -668,6 +734,11 @@ private:
                 {
                     score += 500;
                 }
+            }
+
+            if (!track.branchKey.empty() && extractRunwayToken(track.branchKey).empty())
+            {
+                score += 120;
             }
 
             if (!bestTrack || score > bestScore)
@@ -837,9 +908,8 @@ private:
             return true;
         }
 
-        if (!preferredRunway.empty() && (
-            matchesRunwayToken(record.branchKey, preferredRunway) ||
-            matchesRunwayToken(record.waypoint, preferredRunway)))
+        if (!preferredRunway.empty() &&
+            matchesRunwayToken(record.waypoint, preferredRunway))
         {
             return true;
         }

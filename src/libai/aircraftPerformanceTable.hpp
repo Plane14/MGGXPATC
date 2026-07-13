@@ -139,7 +139,7 @@ namespace ai
                     normalizedIcao == "A20N" || normalizedIcao == "A321" || normalizedIcao == "A21N" ||
                     normalizedIcao.rfind("B73", 0) == 0 || normalizedIcao.rfind("A32", 0) == 0)
                 {
-                    return apply(145.0f, 1100.0f, 5.0f, 40.0f, 420.0f, 138.0f, 35.0f, 5.0f, 145.0f, 156.0f, 178.0f, 3.0f, 13.0f, 2600.0f, 3200.0f, 410);
+                    return apply(188.0f, 1100.0f, 5.0f, 40.0f, 420.0f, 138.0f, 35.0f, 5.0f, 145.0f, 156.0f, 178.0f, 3.0f, 13.0f, 2600.0f, 3200.0f, 410);
                 }
 
                 if (normalizedIcao == "CRJ2" || normalizedIcao == "CRJ7" || normalizedIcao == "CRJ9" ||
@@ -1059,7 +1059,7 @@ namespace ai
                 profile.ceilingFl = 130;             // Light GA typically FL 100-150 (C172: FL 130)
                 break;
             case world::Aircraft::Category::Helicopter:
-                profile.approachSpeedKt = 65.0f;
+                profile.approachSpeedKt = 70.0f;
                 profile.descentRateFpm = 350.0f;
                 profile.minutesToThreshold = 5.0f;  // Helicopter approaches include hover/transition time.
                 profile.flareBufferFeet = 15.0f;

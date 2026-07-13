@@ -11,4 +11,5 @@ obj/
 Generated/
 .DS_Store
 assets/airports/apt.dat
+cmake_test_discovery_*.json
 
