@@ -9,6 +9,38 @@ using namespace std;
 
 namespace world
 {
+    namespace
+    {
+        double normalizeLongitude(double longitude)
+        {
+            while (longitude <= -180.0)
+            {
+                longitude += 360.0;
+            }
+
+            while (longitude > 180.0)
+            {
+                longitude -= 360.0;
+            }
+
+            return longitude;
+        }
+
+        bool longitudeInRange(double longitude, double west, double east)
+        {
+            longitude = normalizeLongitude(longitude);
+            west = normalizeLongitude(west);
+            east = normalizeLongitude(east);
+
+            if (west <= east)
+            {
+                return longitude >= west && longitude <= east;
+            }
+
+            return longitude >= west || longitude <= east;
+        }
+    }
+
     shared_ptr<Airport> World::addAirport(shared_ptr<Airport> airport)
     {
         if (!airport)
@@ -288,16 +320,22 @@ namespace world
             }
             const GeoPoint& location = flight->aircraft()->location();
 
-            //TODO: handle +/-180 lon and +/- 90 lat wrapping
-            if (location.latitude >= bottomRight.latitude &&
-                location.latitude <= topLeft.latitude &&
-                location.longitude >= topLeft.longitude &&
-                location.longitude <= bottomRight.longitude)
+            const double minLatitude = min(topLeft.latitude, bottomRight.latitude);
+            const double maxLatitude = max(topLeft.latitude, bottomRight.latitude);
+
+            if (location.latitude < minLatitude || location.latitude > maxLatitude)
             {
-                if (predicate(flight->aircraft()))
-                {
-                    return true;
-                }
+                continue;
+            }
+
+            if (!longitudeInRange(location.longitude, topLeft.longitude, bottomRight.longitude))
+            {
+                continue;
+            }
+
+            if (predicate(flight->aircraft()))
+            {
+                return true;
             }
         }
 

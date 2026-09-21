@@ -301,7 +301,8 @@ namespace world
                 throw runtime_error("WorldHelper::getArrivalTower: arrival airport not loaded");
             }
             const float altMsl = altitudeFeetMsl(flight);
-            if (auto local = tryGetLocalTowerPosition(airport, landingPoint, altMsl))
+            auto local = tryGetLocalTowerPosition(airport, landingPoint, altMsl);
+            if (local)
             {
                 return local;
             }
@@ -312,26 +313,7 @@ namespace world
                 throw runtime_error("WorldHelper::getArrivalTower: airport has no tower/controller facility");
             }
 
-            const vector<ControllerPosition::Type> fallbackTypes = {
-                ControllerPosition::Type::Local,
-                ControllerPosition::Type::Approach,
-                ControllerPosition::Type::Departure
-            };
-
-            for (const auto fallbackType : fallbackTypes)
-            {
-                if (auto fallback = tower->tryFindPosition(fallbackType, landingPoint, altMsl))
-                {
-                    return fallback;
-                }
-            }
-
-            if (!tower->positions().empty())
-            {
-                return tower->positions().front();
-            }
-
-            throw runtime_error("WorldHelper::getArrivalTower: no suitable controller position found");
+            throw runtime_error("WorldHelper::getArrivalTower: no suitable local controller position found");
         }
 
         shared_ptr<ControllerPosition> tryGetArrivalTower(shared_ptr<Flight> flight, const GeoPoint& landingPoint)

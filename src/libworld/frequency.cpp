@@ -10,6 +10,27 @@ namespace world
 {
     namespace
     {
+        void safeInvokeTransmissionCallback(
+            shared_ptr<HostServices> host,
+            int khz,
+            const char* context,
+            const Frequency::TransmissionCallback& callback,
+            shared_ptr<Transmission> transmission)
+        {
+            try
+            {
+                callback(transmission);
+            }
+            catch (const exception& e)
+            {
+                host->writeLog("%d|WARNING %s callback crashed: %s", khz, context, e.what());
+            }
+            catch (...)
+            {
+                host->writeLog("%d|WARNING %s callback crashed with an unknown exception", khz, context);
+            }
+        }
+
         chrono::microseconds getConversationExpiryDelay(const shared_ptr<Transmission>& transmission)
         {
             size_t wordCount = 0;
@@ -264,7 +285,7 @@ namespace world
             if (dequeued)
             {
                 auto transmission = enqueueTransmission(awaiter.intent);
-                awaiter.onTransmission(transmission); //TODO: try/catch
+                safeInvokeTransmissionCallback(m_host, m_khz, "push-to-talk", awaiter.onTransmission, transmission);
             }
         }
 
@@ -359,7 +380,7 @@ namespace world
         transmission->m_endTimestamp = m_host->getWorld()->timestamp();
         transmission->m_state = Transmission::State::Cancelled;
         logTransmission("CANCEL TRANSMISSION", transmission);
-        awaiter.onTransmission(transmission); //TODO: try/catch
+        safeInvokeTransmissionCallback(m_host, m_khz, "cancelled push-to-talk", awaiter.onTransmission, transmission);
     }
 
     bool Frequency::wasPushToTalkDequeued(int pushToTalkId)

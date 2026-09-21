@@ -137,3 +137,40 @@ TEST(FrequencyTest, replyCanMatchEarlierOpenConversationWhileAnotherConversation
     EXPECT_EQ(history[2]->intent()->id(), 3u);
     EXPECT_EQ(history[2]->intent()->replyToId(), 1u);
 }
+
+TEST(FrequencyTest, pushToTalkCallbackExceptionsDoNotCrashTransmissionProgress)
+{
+    auto host = TestHostServices::create();
+    host->services().use<PhraseologyService>(make_shared<NoopPhraseologyService>());
+    auto airport = createAirport(host, "KAAA", { 30.0, 40.0 }, 121900, 118300, "03", "21");
+    auto world = WorldBuilder::assembleSampleWorld(host, { airport });
+    host->useWorld(world);
+
+    auto flight = host->addIfrFlight(703, "KAAA", "KAAA", GeoPoint(30.0, 40.0), Altitude::agl(2000));
+    auto localPosition = airport->tower()->findPositionOrThrow(ControllerPosition::Type::Local, airport->header().datum());
+    ASSERT_TRUE(localPosition);
+
+    auto frequency = localPosition->frequency();
+    ASSERT_TRUE(frequency);
+
+    int callbackCount = 0;
+    auto intent = make_shared<TestControllerContinueIntent>(4, localPosition, flight.ptr);
+    frequency->enqueuePushToTalk(
+        chrono::milliseconds(0),
+        intent,
+        [&](shared_ptr<Transmission>) {
+            callbackCount++;
+            throw runtime_error("intent callback exploded");
+        },
+        []() {
+            return false;
+        });
+
+    EXPECT_NO_THROW(world->progressTo(chrono::microseconds(1)));
+    EXPECT_NO_THROW(world->progressTo(chrono::microseconds(2)));
+
+    EXPECT_EQ(callbackCount, 1);
+    const auto& history = host->textToSpeechService()->transmissionHistory();
+    ASSERT_EQ(history.size(), 1u);
+    EXPECT_EQ(history[0]->intent()->id(), 4u);
+}

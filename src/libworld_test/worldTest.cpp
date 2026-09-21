@@ -211,3 +211,23 @@ TEST(WorldTest, canClearAllWorkItems)
     ASSERT_EQ(workItemLog.size(), 1);
     EXPECT_EQ(workItemLog[0], "workItemA");
 }
+
+TEST(WorldTest, detectAircraftInRect_handlesDatelineWrapping)
+{
+    auto host = TestHostServices::create();
+    auto world = make_shared<World>(host, 0);
+    host->useWorld(world);
+
+    auto flight = host->addIfrFlight(103, "KJFK", "KMIA", GeoPoint(0.0, -179.95), Altitude::agl(2000));
+    flight.aircraft->setLocation(GeoPoint(0.0, -179.95));
+    world->addFlight(flight.ptr);
+
+    bool matched = world->detectAircraftInRect(
+        GeoPoint(1.0, 179.80),
+        GeoPoint(-1.0, -179.80),
+        [](shared_ptr<Aircraft> aircraft) {
+            return !!aircraft;
+        });
+
+    EXPECT_TRUE(matched);
+}
