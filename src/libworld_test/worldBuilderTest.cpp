@@ -171,16 +171,16 @@ TEST(WorldBuilderTest, assembleAirport_taxiNetAndRunways)
     EXPECT_FALSE(e23->activeZones().hasAny());
     EXPECT_FALSE(e13->activeZones().hasAny());
 
-    EXPECT_TRUE(e1r->activeZones().departue.has(rwy1836));
+    EXPECT_TRUE(e1r->activeZones().departure.has(rwy1836));
     EXPECT_FALSE(e1r->activeZones().arrival.has(rwy1836));
     EXPECT_FALSE(e1r->activeZones().ils.has(rwy1836));
     EXPECT_FALSE(!!e1r->runway());
 
-    EXPECT_TRUE(e1r->activeZones().departue.has(rwy1836));
+    EXPECT_TRUE(e1r->activeZones().departure.has(rwy1836));
     EXPECT_FALSE(e1r->activeZones().arrival.hasAny());
     EXPECT_FALSE(e1r->activeZones().ils.hasAny());
 
-    EXPECT_FALSE(e2r->activeZones().departue.hasAny());
+    EXPECT_FALSE(e2r->activeZones().departure.hasAny());
     EXPECT_TRUE(e2r->activeZones().arrival.has(rwy1836));
     EXPECT_TRUE(e2r->activeZones().ils.has(rwy1836));
     EXPECT_FALSE(!!e2r->runway());

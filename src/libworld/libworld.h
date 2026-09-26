@@ -2647,12 +2647,12 @@ namespace world
     private:
         friend class WorldBuilder;
     public:
-        ActiveZoneMask departue;
+        ActiveZoneMask departure;
         ActiveZoneMask arrival;
         ActiveZoneMask ils;
     public:
         bool hasAny() const {
-            return departue.hasAny() || arrival.hasAny() || ils.hasAny();
+            return departure.hasAny() || arrival.hasAny() || ils.hasAny();
         }
     };
 

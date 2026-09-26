@@ -655,12 +655,10 @@ private:
         url += mode;
 
         const time_t now = time(nullptr);
-        if (now > 0)
-        {
-            const long long dayNoonUtc = (static_cast<long long>(now) / 86400LL) * 86400LL + 43200LL;
-            url += "&plugin-setting%5Bschedule%5D%5Btimestamp%5D=";
-            url += to_string(dayNoonUtc);
-        }
+        // Use current UTC time as the timestamp rather than day-noon, which can
+        // return yesterday's schedule when called before local noon.
+        url += "&plugin-setting%5Bschedule%5D%5Btimestamp%5D=";
+        url += to_string(now);
 
         return url;
     }
@@ -1599,7 +1597,14 @@ private:
         // Explicitly non-flyable statuses should be ignored as well.
         // NOTE: do not skip diverted flights here; we want to keep them and
         // apply diversion destination handling in the loader.
-        return normalizedStatusText.find("CANCEL") != string::npos;
+        if (normalizedStatusText.find("CANCEL") != string::npos)
+        {
+            return true;
+        }
+
+        // Also skip "SCHEDULED" if it's the only info (no actual flight data),
+        // but keep EN ROUTE, AIRBORNE, DELAYED, BOARDING, etc.
+        return false;
     }
 
     static string extractDiversionDestinationIcao(const SimpleJson& node, const string& normalizedStatusText)
@@ -1628,7 +1633,7 @@ private:
         {
             // Examples seen in live feeds: "DIVERTED", "DIVERTED TO LEST"
             // Keep it strict to 4-letter ICAO tokens.
-            static const regex divertedToPattern(R"(DIVERT(?:ED)?(?:\s+TO)?\s+([A-Z]{4}))", regex_constants::icase);
+            static const regex divertedToPattern(R"(DIVERT(?:ED)?(?:\s+TO|\s+TO\s+|\s+)([A-Z0-9]{3,4}))", regex_constants::icase);
             smatch match;
             if (regex_search(normalizedStatusText, match, divertedToPattern) && match.size() > 1)
             {
@@ -1645,7 +1650,7 @@ private:
 
     void collectEntries(const SimpleJson& dataArray, const string& airportIcao, const string& mode, vector<Fr24ScheduleEntry>& entries)
     {
-        unordered_set<string> seen;
+        unordered_map<string, time_t> seen;
         const bool isDepartureMode = (mode == "departures");
         const string normalizedAirportIcao = normalizeCode(airportIcao);
 
@@ -1715,6 +1720,8 @@ private:
                 {
                     originIcao = normalizedAirportIcao;
                 }
+                // Symmetric defaulting: destination unknown from FR24 - leave empty
+                // demoScheduleLoader will apply fallback (nearest suitable airport)
             }
             else
             {
@@ -1722,6 +1729,8 @@ private:
                 {
                     destinationIcao = normalizedAirportIcao;
                 }
+                // Symmetric defaulting: origin unknown from FR24 - leave empty
+                // demoScheduleLoader will apply fallback (nearest suitable airport)
             }
 
             if (originIcao.empty() && destinationIcao.empty())
@@ -1734,13 +1743,40 @@ private:
             const string callsign = resolveCallsign(airlineIcao, flightNumber);
             const time_t scheduleTime = extractScheduleTime(item, mode);
 
+            // Dedup key identifies the same logical flight (same number/route/airline).
+            // Do NOT include scheduledTime in the key — a single flight can appear in
+            // the response with slightly different scheduled/estimated times, and we
+            // want to deduplicate by identity. Time proximity is checked separately below.
             const string dedupeKey =
                 mode + "|" + flightNumber + "|" + originIcao + "|" + destinationIcao + "|" +
-                airlineIcao + "|" + aircraftIcao + "|" + callsign + "|" + to_string(static_cast<long long>(scheduleTime));
-            if (!seen.insert(dedupeKey).second)
+                airlineIcao + "|" + aircraftIcao + "|" + callsign;
+            auto existingIt = seen.find(dedupeKey);
+            if (existingIt != seen.end())
             {
-                continue;
+                // Keep the entry with the earlier scheduled time; skip later duplicates
+                // within a 6-hour window (a single flight's scheduled vs estimated time
+                // should never differ by more than a few hours).
+                const time_t existingTime = existingIt->second;
+                if (scheduleTime != 0 && existingTime != 0 &&
+                    llabs(static_cast<long long>(existingTime) - static_cast<long long>(scheduleTime)) <= 21600LL)
+                {
+                    // Keep whichever is earlier
+                    if (scheduleTime < existingTime)
+                    {
+                        // Replace existing entry with this earlier one
+                        for (auto& e : entries)
+                        {
+                            if (e.callsign == callsign && e.flightNumber == flightNumber)
+                            {
+                                e.scheduledTime = scheduleTime;
+                                break;
+                            }
+                        }
+                    }
+                    continue;
+                }
             }
+            seen[dedupeKey] = scheduleTime;
 
             Fr24ScheduleEntry entry;
             entry.airlineIcao = airlineIcao;

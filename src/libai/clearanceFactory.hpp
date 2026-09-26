@@ -152,7 +152,7 @@ namespace ai
             ));
         }
 
-        shared_ptr<RunwayCrossClearance> runwayCrossCleaeance(shared_ptr<Flight> flight, const string& runwayName)
+        shared_ptr<RunwayCrossClearance> runwayCrossClearance(shared_ptr<Flight> flight, const string& runwayName)
         {
             auto airport = getDepartureAirport(flight);
 

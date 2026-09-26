@@ -485,7 +485,7 @@ namespace ai
                 switch (event.type)
                 {
                 case MutexEventType::ClearedToCross:
-                    clearance = C.runwayCrossCleaeance(intent->subjectFlight(), intent->runwayName());
+                    clearance = C.runwayCrossClearance(intent->subjectFlight(), intent->runwayName());
                     break;
                 case MutexEventType::HoldShort:
                     reason = event.reason;
@@ -525,7 +525,7 @@ namespace ai
                         position(),
                         intent->subjectControl(),
                         intent->runwayName(),
-                        C.runwayCrossCleaeance(intent->subjectFlight(), intent->runwayName()),
+                        C.runwayCrossClearance(intent->subjectFlight(), intent->runwayName()),
                         DeclineReason::None
                     ));
                 },

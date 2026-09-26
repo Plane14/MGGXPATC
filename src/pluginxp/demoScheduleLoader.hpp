@@ -15,6 +15,7 @@
 #include <limits>
 #include <random>
 #include <algorithm>
+#include <numeric>
 #include <cmath>
 #include <cctype>
 #include <future>
@@ -508,7 +509,47 @@ private:
         return false;
     }
 
-    int estimateArrivalLeadSeconds(const shared_ptr<FlightPlan>& flightPlan) const
+     // Estimate flight duration in seconds based on airport-to-airport distance.
+     // Uses a typical cruise speed of 450 kt (B738/A320 class). Falls back to
+     // 3 hours if airports can't be resolved.
+     int estimateFlightDurationSeconds(const string& originIcao, const string& destIcao) const
+     {
+         if (originIcao.empty() || destIcao.empty() || originIcao == destIcao)
+         {
+             return 60 * 60 * 3;
+         }
+
+         try
+         {
+             auto origin = m_world->getAirport(normalizeIcao(originIcao));
+             auto dest = m_world->getAirport(normalizeIcao(destIcao));
+             if (!origin || !dest)
+             {
+                 return 60 * 60 * 3;
+             }
+
+             const GeoPoint originLoc = origin->header().datum();
+             const GeoPoint destLoc = dest->header().datum();
+             if (originLoc == GeoPoint::empty || destLoc == GeoPoint::empty)
+             {
+                 return 60 * 60 * 3;
+             }
+
+             const double distanceMeters = GeoMath::getDistanceMeters(originLoc, destLoc);
+             const double distanceNm = distanceMeters / 1852.0;
+             const double cruiseSpeedKt = 450.0;
+             const double timeSeconds = (distanceNm / cruiseSpeedKt) * 3600.0;
+
+             // Add 20% buffer for climb/descent/STAR/SID
+             return static_cast<int>(timeSeconds * 1.2);
+         }
+         catch (const exception&)
+         {
+             return 60 * 60 * 3;
+         }
+     }
+
+     int estimateArrivalLeadSeconds(const shared_ptr<FlightPlan>& flightPlan) const
     {
         if (!flightPlan)
         {
@@ -3347,6 +3388,151 @@ private:
             return string("B738");
         };
 
+        // Turnaround flight: arrives, parks at a gate, then departs again.
+        auto addLiveTurnaroundFlight = [this, &chooseRemoteAirport, &activeDepartureRunway, &activeArrivalRunway1, &activeArrivalRunway2, &resolveModel, &fallbackIcao, &minimumRunwayLengthMeters] (
+            const Fr24ScheduleEntry& arrEntry,
+            const Fr24ScheduleEntry& depEntry,
+            int flightId,
+            shared_ptr<ParkingStand> gate,
+            time_t arrivalTime,
+            time_t departureTime)
+        {
+            reserveTrafficStand(gate);
+
+            string model = resolveModel(depEntry);
+            string airline = depEntry.airlineIcao;
+            string callsign = depEntry.callsign.empty() ? (airline.empty() ? model : airline + " " + depEntry.flightNumber) : depEntry.callsign;
+            string destination = !depEntry.destinationIcao.empty() ? depEntry.destinationIcao : fallbackIcao;
+            auto destinationAirport = chooseRemoteAirport(destination, "destination");
+            if (destinationAirport->header().icao() == m_airport->header().icao())
+            {
+                m_host->writeLog("SCHEDL|Turnaround departure destination [%s] resolved to local airport - using fallback [%s]", destination.c_str(), fallbackIcao.c_str());
+                destinationAirport = chooseRemoteAirport(fallbackIcao, "fallback destination");
+            }
+
+            string origin = !arrEntry.originIcao.empty() ? arrEntry.originIcao : fallbackIcao;
+            auto originAirport = chooseRemoteAirport(origin, "origin");
+            if (originAirport->header().icao() == m_airport->header().icao())
+            {
+                m_host->writeLog("SCHEDL|Turnaround arrival origin [%s] resolved to local airport - using fallback [%s]", origin.c_str(), fallbackIcao.c_str());
+                originAirport = chooseRemoteAirport(fallbackIcao, "fallback origin");
+            }
+
+            // Flight plan spans the full turnaround: origin arrival → local airport → destination departure
+            const int arrivalDuration = estimateFlightDurationSeconds(originAirport->header().icao(), m_airport->header().icao());
+            const int departureDuration = estimateFlightDurationSeconds(m_airport->header().icao(), destinationAirport->header().icao());
+            auto flightPlan = shared_ptr<FlightPlan>(new FlightPlan(arrivalTime - arrivalDuration, departureTime + departureDuration, originAirport->header().icao(), destinationAirport->header().icao()));
+            flightPlan->setArrivalGate(gate->name());
+            flightPlan->setDepartureGate(gate->name());
+            flightPlan->setArrivalRunway(bestSuitableRunwayName(m_airport, { activeArrivalRunway1, activeArrivalRunway2 }, minimumRunwayLengthMeters));
+            flightPlan->setDepartureRunway(!activeDepartureRunway.empty() ? activeDepartureRunway : bestSuitableRunwayName(m_airport, m_airport->activeDepartureRunways(), minimumRunwayLengthMeters));
+
+            // Select STAR for arrival
+            auto arrivalSelection = selectProcedureAndRunway(
+                m_airport,
+                m_airport->activeArrivalRunways(),
+                "STAR",
+                originAirport->header().icao(),
+                true,
+                minimumRunwayLengthMeters);
+            if (!arrivalSelection.procedureName.empty())
+            {
+                flightPlan->setStar(arrivalSelection.procedureName);
+                GeoPoint originLocation = originAirport->header().datum();
+                GeoPoint airportLocation = m_airport->header().datum();
+                if (originLocation != GeoPoint::empty && airportLocation != GeoPoint::empty)
+                {
+                    string transition = selectStarTransition(
+                        m_airport->header().icao(),
+                        arrivalSelection.procedureName,
+                        flightPlan->arrivalRunway(),
+                        originLocation,
+                        airportLocation);
+                    if (!transition.empty())
+                    {
+                        flightPlan->setStarTransition(transition);
+                    }
+                }
+            }
+
+            // Select approach for arrival runway
+            string approach = selectApproachForRunway(m_airport->header().icao(), flightPlan->arrivalRunway());
+            if (!approach.empty())
+            {
+                flightPlan->setApproach(approach);
+            }
+
+            // Select SID for departure
+            auto departureSelection = selectProcedureAndRunway(
+                m_airport,
+                m_airport->activeDepartureRunways(),
+                "SID",
+                destinationAirport->header().icao(),
+                false,
+                minimumRunwayLengthMeters);
+            if (!departureSelection.procedureName.empty())
+            {
+                flightPlan->setSid(departureSelection.procedureName);
+            }
+
+            // Select STAR at destination
+            auto destArrivalSelection = selectProcedureAndRunway(
+                destinationAirport,
+                destinationAirport->activeArrivalRunways(),
+                "STAR",
+                m_airport->header().icao(),
+                true,
+                minimumRunwayLengthMeters);
+            const string destArrivalRunway = destArrivalSelection.runwayName.empty()
+                ? bestSuitableRunwayName(destinationAirport, destinationAirport->activeArrivalRunways(), minimumRunwayLengthMeters)
+                : destArrivalSelection.runwayName;
+            flightPlan->setArrivalRunway(destArrivalRunway);
+            if (!destArrivalSelection.procedureName.empty())
+            {
+                flightPlan->setStar(destArrivalSelection.procedureName);
+            }
+            string destApproach = selectApproachForRunway(destinationAirport->header().icao(), destArrivalRunway);
+            if (!destApproach.empty())
+            {
+                flightPlan->setApproach(destApproach);
+            }
+
+            flightPlan->setAirlineIcao(airline);
+            flightPlan->setFlightNo(depEntry.flightNumber);
+            flightPlan->setCallsign(callsign);
+
+            auto flight = shared_ptr<Flight>(new Flight(m_host, flightId, Flight::RulesType::IFR, airline, depEntry.flightNumber, callsign, flightPlan));
+            auto aircraft = m_host->createAIAircraft(model, airline, depEntry.flightNumber, world::Aircraft::Category::Jet);
+            flight->setAircraft(aircraft);
+            auto pilot = m_host->createAIPilot(flight);
+            flight->setPilot(pilot);
+            flight->setPhase(Flight::Phase::TurnAround);
+            m_world->addFlightColdAndDark(flight);
+
+            // Schedule the arrival (on final approach) and then the departure
+            auto copyOfWorld = m_world;
+            auto copyOfAirport = m_airport;
+            auto copyOfFlight = flight;
+
+            const time_t arrivalStartTime = max(arrivalTime - estimateArrivalLeadSeconds(flight->plan()), m_world->currentTime() + 30);
+            m_world->deferUntil(
+                "turnaroundArrival/" + flight->callSign(),
+                arrivalStartTime,
+                [copyOfFlight, copyOfWorld, copyOfAirport]() {
+                    const auto& landingRunwayEnd = copyOfWorld->getRunwayEnd(copyOfAirport->header().icao(), copyOfFlight->plan()->arrivalRunway());
+                    copyOfWorld->addFlight(copyOfFlight);
+                    copyOfFlight->aircraft()->setOnFinal(landingRunwayEnd);
+                });
+
+            // Schedule the departure after the aircraft has parked and turned around
+            m_world->deferUntil(
+                "turnaroundDeparture/" + flight->callSign(),
+                departureTime,
+                [copyOfFlight, copyOfWorld, copyOfAirport]() {
+                    copyOfFlight->setPhase(Flight::Phase::Departure);
+                });
+        };
+
         auto addLiveDepartureFlight = [this, &chooseRemoteAirport, &activeDepartureRunway, &resolveModel, &fallbackIcao, &minimumRunwayLengthMeters] (
             const Fr24ScheduleEntry& entry,
             int flightId,
@@ -3359,9 +3545,14 @@ private:
             string airline = entry.airlineIcao;
             string callsign = entry.callsign.empty() ? (airline.empty() ? model : airline + " " + entry.flightNumber) : entry.callsign;
             string destination = !entry.destinationIcao.empty() ? entry.destinationIcao : fallbackIcao;
+            if (entry.destinationIcao.empty())
+            {
+                m_host->writeLog("SCHEDL|Live departure flight[%s] destination empty - using fallback[%s]", entry.callsign.c_str(), fallbackIcao.c_str());
+            }
             auto destinationAirport = chooseRemoteAirport(destination, "destination");
 
-            auto flightPlan = shared_ptr<FlightPlan>(new FlightPlan(departureTime, departureTime + 60 * 60 * 3, m_airport->header().icao(), destinationAirport->header().icao()));
+            const int flightDurationSec = estimateFlightDurationSeconds(m_airport->header().icao(), destinationAirport->header().icao());
+            auto flightPlan = shared_ptr<FlightPlan>(new FlightPlan(departureTime, departureTime + flightDurationSec, m_airport->header().icao(), destinationAirport->header().icao()));
             flightPlan->setDepartureGate(gate->name());
             flightPlan->setArrivalAirportIcao(destinationAirport->header().icao());
 
@@ -3433,6 +3624,10 @@ private:
             string airline = entry.airlineIcao;
             string callsign = entry.callsign.empty() ? (airline.empty() ? model : airline + " " + entry.flightNumber) : entry.callsign;
             string origin = !entry.originIcao.empty() ? entry.originIcao : fallbackIcao;
+            if (entry.originIcao.empty())
+            {
+                m_host->writeLog("SCHEDL|Live arrival flight[%s] origin empty - using fallback[%s]", entry.callsign.c_str(), fallbackIcao.c_str());
+            }
             auto originAirport = chooseRemoteAirport(origin, "origin");
 
             auto arrivalSelection = selectProcedureAndRunway(
@@ -3450,7 +3645,8 @@ private:
                 throw runtime_error("SCHEDL|no suitable live arrival runway available");
             }
 
-            auto flightPlan = shared_ptr<FlightPlan>(new FlightPlan(arrivalTime - 60 * 60 * 3, arrivalTime, originAirport->header().icao(), m_airport->header().icao()));
+            const int flightDurationSec = estimateFlightDurationSeconds(originAirport->header().icao(), m_airport->header().icao());
+            auto flightPlan = shared_ptr<FlightPlan>(new FlightPlan(arrivalTime - flightDurationSec, arrivalTime, originAirport->header().icao(), m_airport->header().icao()));
             flightPlan->setArrivalGate(gate->name());
             flightPlan->setArrivalRunway(arrivalRunway);
             flightPlan->setDepartureAirportIcao(originAirport->header().icao());
@@ -3533,7 +3729,9 @@ private:
             if (entry.scheduledTime > 0)
             {
                 const time_t resolvedTime = entry.scheduledTime;
-                nextTime = max(nextTime + spacingSeconds, resolvedTime + spacingSeconds);
+                // Avoid double-spacing: base nextTime on the resolved time, not on a
+                // shifted accumulator that already includes spacing.
+                nextTime = max(nextTime, resolvedTime) + spacingSeconds;
                 return resolvedTime;
             }
 
@@ -3542,7 +3740,7 @@ private:
             return resolvedTime;
         };
 
-        int diversionUpdates = 0;
+         int diversionUpdates = 0;
         for (const auto& trafficItem : traffic)
         {
             if (retargetLiveFlightForDiversion(trafficItem.first))
@@ -3555,21 +3753,155 @@ private:
             m_host->writeLog("SCHEDL|Applied [%d] live diversion update(s)", diversionUpdates);
         }
 
+        // --- Turnaround pairing: match arrivals to departures of the same flight ---
+        // Build a lookup of arrival entries by normalized callsign, so that when we
+        // encounter a departure with the same airline+flight number (or callsign),
+        // we can create a single flight that arrives, turns around, and departs.
+        unordered_map<string, size_t> arrivalByCallsign;
+        for (size_t i = 0; i < traffic.size(); ++i)
+        {
+            if (!traffic[i].second) // skip departures
+            {
+                const string& callsign = traffic[i].first.callsign;
+                if (!callsign.empty())
+                {
+                    string normCallsign = normalizeCallsign(callsign);
+                    arrivalByCallsign[normCallsign] = i;
+                }
+            }
+        }
+
+        // Track which traffic items were already consumed by a turnaround pair, so
+        // the main loop does not create them a second time as standalone flights.
+        // Both the arrival and the departure of a pair are covered by one flight.
+        unordered_set<size_t> pairedArrivalIndices;
+
+        // For each departure, look for a matching arrival within a turnaround window
+        const int maxTurnaroundMinutes = 90; // typical commercial turnaround
+        vector<pair<size_t, size_t>> turnaroundPairs; // (arrivalIndex, departureIndex)
+
+        for (size_t i = 0; i < traffic.size(); ++i)
+        {
+            if (!traffic[i].second) // skip arrivals here, only look at departures
+            {
+                continue;
+            }
+
+            const auto& depEntry = traffic[i].first;
+            string depCallsign = normalizeCallsign(depEntry.callsign);
+            string depFlightNo = normalizeFlightNumber(depEntry.flightNumber);
+            string depAirline = normalizeCode(depEntry.airlineIcao);
+
+            // Build a list of possible matching keys
+            vector<string> matchKeys;
+            if (!depCallsign.empty())
+            {
+                matchKeys.push_back(depCallsign);
+            }
+            // Also try airline + flight number pattern (e.g., "UAL123" matches "UAL124" via parent)
+            // For now, simple callsign equality is the strongest signal.
+
+            for (const string& key : matchKeys)
+            {
+                auto it = arrivalByCallsign.find(key);
+                if (it != arrivalByCallsign.end())
+                {
+                    size_t arrIdx = it->second;
+                    const auto& arrEntry = traffic[arrIdx].first;
+                    if (arrEntry.scheduledTime > 0 && depEntry.scheduledTime > 0)
+                    {
+                        int gapMinutes = static_cast<int>(
+                            (depEntry.scheduledTime - arrEntry.scheduledTime) / 60);
+                        if (gapMinutes > 0 && gapMinutes <= maxTurnaroundMinutes)
+                        {
+                            turnaroundPairs.push_back({arrIdx, i});
+                            pairedArrivalIndices.insert(arrIdx);
+                            pairedArrivalIndices.insert(i); // the paired departure is covered by the same flight
+                            m_host->writeLog(
+                                "SCHEDL|Turnaround pair found: arrival[%s] -> departure[%s] gap[%d min]",
+                                arrEntry.callsign.c_str(), depEntry.callsign.c_str(), gapMinutes);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        // The live feed may hold far more entries than there are usable gates.
+        // Gates are a shared, time-multiplexed resource: every flight is placed on
+        // the stand that becomes free first, so the number of gates must not be used
+        // as a quota for how many flights get created.
         size_t requestedCount = static_cast<size_t>(traffic.size() * loadFactor);
         if (requestedCount == 0)
         {
             requestedCount = 1;
         }
-        requestedCount = min(requestedCount, gates.size());
+        requestedCount = min(requestedCount, traffic.size());
+
+        // Greedy stand allocation: traffic is sorted by scheduled time, so handing
+        // each flight the stand that frees up earliest keeps concurrent occupancy
+        // bounded by the number of gates without dropping any schedule entry.
+        vector<time_t> gateFreeAt(gates.size(), (time_t)0);
+        const auto pickGateForFlight = [&gates, &gateFreeAt](time_t gateOccupiedUntil) -> shared_ptr<ParkingStand> {
+            size_t bestIndex = 0;
+            for (size_t i = 1 ; i < gates.size() ; ++i)
+            {
+                if (gateFreeAt[i] < gateFreeAt[bestIndex])
+                {
+                    bestIndex = i;
+                }
+            }
+
+            gateFreeAt[bestIndex] = max(gateFreeAt[bestIndex], gateOccupiedUntil);
+            return gates[bestIndex];
+        };
+
+        // Nominal time an arrival keeps its stand before the next flight can use it.
+        const time_t arrivalStandHoldSeconds = 60 * 60;
 
         time_t nextDepartureTime = m_world->currentTime() + 200;
         time_t nextArrivalTime = m_world->currentTime() + 30;
         int arrivalIndex = 0;
 
+        // Create turnaround flights first (arrival + continued departure)
+        for (const auto& pair : turnaroundPairs)
+        {
+            size_t arrIdx = pair.first;
+            size_t depIdx = pair.second;
+            const auto& arrEntry = traffic[arrIdx].first;
+            const auto& depEntry = traffic[depIdx].first;
+
+            try
+            {
+                // Create arrival flight that will also serve as the departing aircraft
+                int flightId = 2000 + static_cast<int>(arrIdx);
+                const time_t arrTime = resolveTrafficTime(nextArrivalTime, arrEntry, secondsBetweenArrivals);
+                time_t depTime = resolveTrafficTime(nextDepartureTime, depEntry, secondsBetweenDepartures);
+
+                if (depTime < arrTime + 60) // ensure departure is after arrival
+                {
+                    depTime = arrTime + 600;
+                }
+
+                const auto& gate = pickGateForFlight(depTime);
+
+                addLiveTurnaroundFlight(arrEntry, depEntry, flightId, gate, arrTime, depTime);
+            }
+            catch (const exception& e)
+            {
+                m_host->writeLog("SCHEDL|Turnaround flight creation failed: %s", e.what());
+            }
+        }
+
         for (size_t index = 0 ; index < requestedCount ; ++index)
         {
+            // Skip entries that were already covered by a turnaround flight
+            if (pairedArrivalIndices.find(index) != pairedArrivalIndices.end())
+            {
+                continue;
+            }
+
             const auto& trafficItem = traffic.at(index);
-            const auto& gate = gates.at(index % gates.size());
             int flightId = 1000 + static_cast<int>(index);
 
             try
@@ -3577,11 +3909,13 @@ private:
                 if (trafficItem.second)
                 {
                     const time_t departureTime = resolveTrafficTime(nextDepartureTime, trafficItem.first, secondsBetweenDepartures);
+                    const auto& gate = pickGateForFlight(departureTime);
                     addLiveDepartureFlight(trafficItem.first, flightId, gate, departureTime);
                 }
                 else
                 {
                     const time_t arrivalTime = resolveTrafficTime(nextArrivalTime, trafficItem.first, secondsBetweenArrivals);
+                    const auto& gate = pickGateForFlight(arrivalTime + arrivalStandHoldSeconds);
                     addLiveArrivalFlight(trafficItem.first, flightId, gate, arrivalTime, arrivalIndex);
                 }
             }

@@ -93,7 +93,7 @@ public:
         const bool hasContextLocation = (contextLocation != GeoPoint::empty);
 
         const Record* bestRecord = nullptr;
-        int bestScore = numeric_limits<int>::min();
+        int bestScore = std::numeric_limits<int>::min();
 
         for (const auto& candidateKey : candidateKeys)
         {

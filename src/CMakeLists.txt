@@ -95,3 +95,33 @@ if (WIN32)
 endif()
 add_subdirectory(pluginxp)
 
+# Rewrite core library (new foundation)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/core/CMakeLists.txt")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/core rewrite_core)
+endif()
+
+# Rewrite world model library (depends on core)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/world/CMakeLists.txt")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/world rewrite_world)
+endif()
+
+# Rewrite AI systems library (depends on world_model and core)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/ai/CMakeLists.txt")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/ai rewrite_ai)
+endif()
+
+# Rewrite ATC systems library (depends on ai_model and world_model)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/atc/CMakeLists.txt")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/atc rewrite_atc)
+endif()
+
+# Network layer library (depends on core, gRPC/protobuf external)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/network/CMakeLists.txt")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/network rewrite_network)
+endif()
+
+# X-Plane plugin library (depends on atc_model, network_model, X-Plane SDK external)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/xplane/CMakeLists.txt")
+    add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../rewrite/src/xplane rewrite_xplane)
+endif()
+

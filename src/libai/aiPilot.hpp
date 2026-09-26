@@ -11,6 +11,7 @@
 #include <iomanip>
 #include <random>
 #include <atomic>
+#include <limits>
 #include "libworld.h"
 #include "worldHelper.hpp"
 #include "basicManeuverTypes.hpp"
@@ -265,7 +266,7 @@ namespace ai
 
             const string normalizedWaypointName = normalizeWaypointName(waypointName);
             bool found = false;
-            double bestDistanceMeters = numeric_limits<double>::max();
+            double bestDistanceMeters = std::numeric_limits<double>::max();
             GeoPoint bestLocation = GeoPoint::empty;
 
             for (const auto& routeWaypoint : plan->knownWaypoints())
@@ -550,7 +551,7 @@ namespace ai
                     // This ensures smooth transitions between leg types (e.g., STAR->Approach)
                     // where the aircraft may not be exactly at the leg's from-point
                     const float targetHeading = hasGeometricLeg
-                        ? GeoMath::getHeadingFromPoints(m_aircraft->location(), toPoint)
+                        ? GeoMath::getHeadingFromPoints(hasFromPoint ? fromPoint : m_aircraft->location(), toPoint)
                         : m_aircraft->attitude().heading();
                     const int legDurationSeconds = hasGeometricLeg
                         ? procedureLegDurationSeconds(legType, leg, fromPoint, toPoint)
@@ -564,7 +565,6 @@ namespace ai
                     const bool currentHasGeometricLeg = hasGeometricLeg;
                     const float currentTargetGroundSpeed = targetGroundSpeed;
                     const float currentTargetVerticalSpeed = targetVerticalSpeed;
-                    const float currentTargetHeading = targetHeading;
                     const int currentLegDurationSeconds = legDurationSeconds;
                     const string currentLegStepId = legStepId;
                     
@@ -681,18 +681,12 @@ namespace ai
                                         : (isHelicopter()
                                             ? std::min(20.0f, speedKt / 12.0f + 5.0f)
                                             : std::min(30.0f, speedKt / 10.0f + 7.0f));
-                                    // Turn rate (deg/s) from bank: rate = g*tan(bank)/V, approx 1091*tan(bank)/V_kt.
-                                    const float bankRad = maxBank * 3.14159265f / 180.0f;
-                                    const float turnRateDegPerSec = std::max(1.5f, 1091.0f * std::tan(bankRad) / speedKt);
-                                    // Proportional control: reduce commanded turn rate near rollout.
-                                    const float proportionalRate = std::min(turnRateDegPerSec, headingDiff * 0.4f);
-                                    const float limitedTurn = std::max(-proportionalRate, std::min(proportionalRate, turnDegrees));
-                                    float newHeading = GeoMath::addTurnToHeading(currentHeading, limitedTurn);
-                                    const float targetBank = std::max(5.0f, std::min(maxBank, std::abs(limitedTurn) / turnRateDegPerSec * maxBank));
-                                    const float bankSign = (limitedTurn >= 0.0f ? 1.0f : -1.0f);
+                                    // Bank proportional to heading error; sim integrates yaw from bank.
+                                    const float targetBank = std::max(0.5f, std::min(maxBank, std::abs(turnDegrees) * 1.5f));
+                                    const float bankSign = (turnDegrees >= 0.0f ? 1.0f : -1.0f);
                                     const float roll = targetBank * bankSign;
                                     m_aircraft->setAttitude(
-                                        m_aircraft->attitude().withHeading(newHeading).withRoll(roll));
+                                        m_aircraft->attitude().withRoll(roll));
                                 }
                                 else if (std::abs(m_aircraft->attitude().roll()) > 0.5)
                                 {
@@ -733,15 +727,15 @@ namespace ai
                                     const double distanceNm = distanceMeters / 1852.0;
                                     const double groundSpeedKt = max(80.0, m_aircraft->groundSpeedKt());
                                     const double groundSpeedMps = groundSpeedKt * 1852.0 / 3600.0;
-                                    const double timeToGoSeconds = max(20.0, distanceMeters / groundSpeedMps);
+                                    const double timeToGoSeconds = max(8.0, distanceMeters / groundSpeedMps);
 
                                     // On approach/landing legs, clamp descent to a realistic
                                     // glidepath angle (max ~4.5 deg ≈ 475 ft/NM) to prevent
                                     // dive-bombing on short legs of complex RNP procedures.
                                     double requiredVsFpm = (altitudeDeltaFeet / timeToGoSeconds) * 60.0;
-                                    if (altitudeDeltaFeet < 0.0 && distanceNm > 0.3)
+                                    if (altitudeDeltaFeet < 0.0 && distanceNm > 1.0)
                                     {
-                                        const double maxDescentPerNm = 475.0; // ~4.5 deg
+                                        const double maxDescentPerNm = 700.0; // ~6.5 deg
                                         const double maxAltLoss = maxDescentPerNm * distanceNm;
                                         if (fabs(altitudeDeltaFeet) > maxAltLoss)
                                         {
@@ -1995,9 +1989,11 @@ namespace ai
                 });
             });
             const float preFlarePitchEnd = static_cast<float>(max(2.0, m_aircraft->attitude().pitch() + 1.5));
-            const float flarePitchDelta = isHelicopter() ? 0.5f :
-                (m_aircraft->category() == Aircraft::Category::Heavy ? 3.0f :
-                (m_aircraft->category() == Aircraft::Category::LightProp ? 1.5f : 2.5f));
+            const float currentVsFpm = static_cast<float>(m_aircraft->verticalSpeedFpm());
+            const float flarePitchDelta = (isHelicopter() ? 0.5f :
+                (m_aircraft->category() == Aircraft::Category::Heavy ? 4.0f :
+                (m_aircraft->category() == Aircraft::Category::LightProp ? 1.5f : 2.5f)))
+                + std::max(0.0f, -currentVsFpm / 400.0f);
             auto flare = M.parallel(Maneuver::Type::ArrivalLanding, "flare", {
                 shared_ptr<Maneuver>(new AnimationManeuver<double>(
                     "pitch",
@@ -2038,7 +2034,7 @@ namespace ai
                     )),
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "verspd_2",
-                        isHelicopter() ? -30.0 : -80.0,
+                        -performance.descentRateFpm * 0.05,
                         isHelicopter() ? -15.0 : (m_aircraft->category() == Aircraft::Category::Heavy ? -60.0 : (m_aircraft->category() == Aircraft::Category::LightProp ? -30.0 : -45.0)),
                         chrono::seconds(1),
                         [](const double &from, const double &to, double progress, double &value) {
@@ -2121,15 +2117,15 @@ namespace ai
             return M.sequence(Maneuver::Type::ArrivalLanding, "landing", {
                 landingProcedure,
                 M.await(Maneuver::Type::Unspecified, "await_55_agl", [=]() {
-                    return (m_aircraft->altitude().type() == Altitude::Type::AGL && m_aircraft->altitude().feet() <= 55);
+                    return currentAglFeet() <= 80;
                 }),
                 preFlare,
                 M.await(Maneuver::Type::Unspecified, "await_20_agl", [=]() {
-                    return (m_aircraft->altitude().type() == Altitude::Type::AGL && m_aircraft->altitude().feet() <= 20);
+                    return currentAglFeet() <= 20;
                 }),
                 flare,
                 M.await(Maneuver::Type::Unspecified, "await_touch_down", [=]() {
-                    return (m_aircraft->altitude().type() == Altitude::Type::Ground);
+                    return m_aircraft->altitude().type() == Altitude::Type::Ground || currentAglFeet() <= 0.5;
                 }),
                 logTouchDown,
                 touchDownAndDeccelerate
@@ -2624,7 +2620,7 @@ namespace ai
 
                 const auto edgeMatchesDepartureRunway = [departureRunway](shared_ptr<TaxiEdge> edge) {
                     return edge && (
-                        edge->activeZones().departue.has(departureRunway) ||
+                        edge->activeZones().departure.has(departureRunway) ||
                         edge->activeZones().arrival.has(departureRunway) ||
                         edge->activeZones().ils.has(departureRunway));
                 };
@@ -3781,7 +3777,7 @@ namespace ai
                 "AIPILO|getActiveZoneRunway: edge [%d|%s] departure-mask [%d] arrival-mask [%d] ils-mask [%d]",
                 activeZoneEdge->id(),
                 activeZoneEdge->name().c_str(),
-                activeZoneEdge->activeZones().departue.runwaysMask(),
+                activeZoneEdge->activeZones().departure.runwaysMask(),
                 activeZoneEdge->activeZones().arrival.runwaysMask(),
                 activeZoneEdge->activeZones().ils.runwaysMask());
 
@@ -3791,7 +3787,7 @@ namespace ai
                     "AIPILO|getActiveZoneRunway: checking runway [%s/%s], maskbit [%d]",
                     runway->end1().name().c_str(), runway->end2().name().c_str(), runway->maskBit());
 
-                if (activeZoneEdge->activeZones().departue.has(runway) ||
+                if (activeZoneEdge->activeZones().departure.has(runway) ||
                     activeZoneEdge->activeZones().arrival.has(runway) ||
                     activeZoneEdge->activeZones().ils.has(runway))
                 {
@@ -3856,12 +3852,12 @@ namespace ai
             
             if (abs(turnToPointDegrees) >= 120.0f && distanceToPoint > effectiveThresholdMeters * 1.5f)
             {
-                host()->writeLog(
-                    "AIPILO|Flight[%s] waypoint appears to be missed - behind by %.1f degrees, distance %.0f m",
-                    flight()->callSign().c_str(),
-                    turnToPointDegrees,
-                    distanceToPoint);
-                return true;
+                 host()->writeLog(
+                     "AIPILO|Flight[%s] waypoint appears to be missed - behind by %.1f degrees, distance %.0f m",
+                     flight()->callSign().c_str(),
+                     turnToPointDegrees,
+                     distanceToPoint);
+                 return false;
             }
             
             return false;

@@ -1,0 +1,41 @@
+[1/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\airspaceClass.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/airspaceClass.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\airspaceClass.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\airspaceClass.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\libworld.h(8): fatal error C1034: cmath: no se ha establecido ninguna ruta de acceso de inclusión
+[2/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\aircraft.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/aircraft.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\aircraft.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\aircraft.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\aircraft.cpp(5): fatal error C1034: sstream: no se ha establecido ninguna ruta de acceso de inclusión
+[3/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\airport.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/airport.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\airport.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\airport.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\airport.cpp(5): fatal error C1034: memory: no se ha establecido ninguna ruta de acceso de inclusión
+[4/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\airlineReferenceTable.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/airlineReferenceTable.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\airlineReferenceTable.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\airlineReferenceTable.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\airlineReferenceTable.cpp(6): fatal error C1034: string: no se ha establecido ninguna ruta de acceso de inclusión
+[5/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\actor.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/actor.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\actor.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\actor.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\actor.cpp(5): fatal error C1034: vector: no se ha establecido ninguna ruta de acceso de inclusión
+[6/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\aircraftTypeReferenceTable.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/aircraftTypeReferenceTable.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\aircraftTypeReferenceTable.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\aircraftTypeReferenceTable.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\aircraftTypeReferenceTable.cpp(6): fatal error C1034: string: no se ha establecido ninguna ruta de acceso de inclusión
+[7/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\airportFlow.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/airportFlow.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\airportFlow.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\airportFlow.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\airportFlow.hpp(7): fatal error C1034: string: no se ha establecido ninguna ruta de acceso de inclusión
+[8/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\altitude.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/altitude.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\altitude.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\altitude.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\libworld.h(8): fatal error C1034: cmath: no se ha establecido ninguna ruta de acceso de inclusión
+[9/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\arrivalFlowController.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/arrivalFlowController.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\arrivalFlowController.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\arrivalFlowController.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\arrivalFlowController.hpp(7): fatal error C1034: memory: no se ha establecido ninguna ruta de acceso de inclusión
+[10/63] Building CXX object src\libworld\CMakeFiles\libworld.dir\controlFacility.cpp.obj
+FAILED: src/libworld/CMakeFiles/libworld.dir/controlFacility.cpp.obj 
+C:\PROGRA~1\MICROS~2\2022\COMMUN~1\VC\Tools\MSVC\1442~1.344\bin\Hostx64\x64\cl.exe  /nologo /TP   /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MD /O2 /Ob2 /DNDEBUG -std:c++14 /showIncludes /Fosrc\libworld\CMakeFiles\libworld.dir\controlFacility.cpp.obj /Fdsrc\libworld\CMakeFiles\libworld.dir\libworld.pdb /FS -c C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\controlFacility.cpp
+C:\Users\marti\source\repos\Plane14\MGGXPATC\src\libworld\controlFacility.cpp(5): fatal error C1034: cmath: no se ha establecido ninguna ruta de acceso de inclusión
+ninja: build stopped: subcommand failed.

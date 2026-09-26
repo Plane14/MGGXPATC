@@ -303,7 +303,7 @@ namespace world
     {
         if (departure) 
         {
-            edge->m_activeZones.departue.add(runwayName);
+            edge->m_activeZones.departure.add(runwayName);
         }
 
         if (arrival) 
@@ -551,7 +551,7 @@ namespace world
                 break;
             }
 
-            resolveActiveZoneMask(edge->m_activeZones.departue);
+            resolveActiveZoneMask(edge->m_activeZones.departure);
             resolveActiveZoneMask(edge->m_activeZones.arrival);
             resolveActiveZoneMask(edge->m_activeZones.ils);
         };

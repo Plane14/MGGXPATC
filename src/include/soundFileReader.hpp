@@ -108,10 +108,10 @@ protected:
     }
     string readMagic(size_t size)
     {
-        char magic[size + 1];
-        readOrThrow((unsigned char*)magic, size);
+        vector<char> magic(size + 1);
+        readOrThrow((unsigned char*)magic.data(), size);
         magic[size] = '\0';
-        return string(magic);
+        return string(magic.data());
     }
     void readMagicOrThrow(const string& magic)
     {

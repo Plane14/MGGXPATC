@@ -73,6 +73,20 @@ private:
         return chrono::seconds(300);
     }
 
+    // Clear the static procedure list cache
+public:
+    static void clearCache()
+    {
+        lock_guard<mutex> lock(procedureCacheMutex());
+        procedureCache().clear();
+    }
+
+    // Instance-accessible wrapper for the static cache clear
+    void clearInstanceCache() const
+    {
+        clearCache();
+    }
+
     shared_ptr<HostServices> m_host;
 
 public:
@@ -83,6 +97,7 @@ public:
         float longitude = 0.0f;
         bool hasLocation = false;
         string pathTerminator;  // Waypoint type: FI (fix), TF (track to fix), VI (vectors), IF (initial fix), etc.
+        int sequence = -1;      // Sequence number from CIFP record
         // Altitude/speed constraints from the CIFP row layout
         float altitudeConstraint = 0.0f;
         char altitudeConstraintType = 0;  // '+' = at/above (minimum), '-' = at/below (maximum), ' ' = at (exact)
@@ -96,6 +111,11 @@ public:
                              const string& pt, float altConstr, char altType, float spdConstr, char spdType)
             : name(n), latitude(lat), longitude(lon), hasLocation(hasLoc), pathTerminator(pt),
               altitudeConstraint(altConstr), altitudeConstraintType(altType),
+              speedConstraint(spdConstr), speedConstraintType(spdType) {}
+        WaypointWithLocation(const string& n, float lat, float lon, bool hasLoc,
+                             const string& pt, float altConstr, char altType, float spdConstr, char spdType, int seq)
+            : name(n), latitude(lat), longitude(lon), hasLocation(hasLoc), pathTerminator(pt),
+              sequence(seq), altitudeConstraint(altConstr), altitudeConstraintType(altType),
               speedConstraint(spdConstr), speedConstraintType(spdType) {}
     };
     
@@ -600,7 +620,7 @@ private:
         const bool hasExplicitProcedureName = !procedureName.empty();
 
         const RawTrack* bestTrack = nullptr;
-        int bestScore = numeric_limits<int>::min();
+        int bestScore = std::numeric_limits<int>::min();
 
         // First pass: determine if any track has explicit runway matching
         // This helps us prefer runway-specific procedures over generic ones
@@ -717,7 +737,7 @@ private:
                 result.waypoints.emplace_back(initialKey, 0.0f, 0.0f, false,
                     firstRecord.pathTerminator,
                     firstRecord.altitudeConstraint, firstRecord.altitudeConstraintType,
-                    firstRecord.speedConstraint, firstRecord.speedConstraintType);
+                    firstRecord.speedConstraint, firstRecord.speedConstraintType, firstRecord.sequence);
             }
         }
 
@@ -728,7 +748,7 @@ private:
                 result.waypoints.emplace_back(record.waypoint, record.latitude, record.longitude, record.hasLocation,
                     record.pathTerminator,
                     record.altitudeConstraint, record.altitudeConstraintType,
-                    record.speedConstraint, record.speedConstraintType);
+                    record.speedConstraint, record.speedConstraintType, record.sequence);
             }
         }
 

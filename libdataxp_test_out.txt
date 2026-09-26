@@ -1,0 +1,175 @@
+Running main() from C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/googletest/src/gtest_main.cc
+[==========] Running 47 tests from 11 test suites.
+[----------] Global test environment set-up.
+[----------] 1 test from HydrationTest
+[ RUN      ] HydrationTest.scalarFieldsObject
+[       OK ] HydrationTest.scalarFieldsObject (0 ms)
+[----------] 1 test from HydrationTest (0 ms total)
+
+[----------] 2 tests from XPMinimumAltitudeReaderTest
+[ RUN      ] XPMinimumAltitudeReaderTest.readsMoraGridAltitudes
+[       OK ] XPMinimumAltitudeReaderTest.readsMoraGridAltitudes (0 ms)
+[ RUN      ] XPMinimumAltitudeReaderTest.readsHighestMsaSectorAltitude
+[       OK ] XPMinimumAltitudeReaderTest.readsHighestMsaSectorAltitude (0 ms)
+[----------] 2 tests from XPMinimumAltitudeReaderTest (0 ms total)
+
+[----------] 1 test from XPNavaidReaderTest
+[ RUN      ] XPNavaidReaderTest.resolvesFixAndRunwayAlias
+[       OK ] XPNavaidReaderTest.resolvesFixAndRunwayAlias (0 ms)
+[----------] 1 test from XPNavaidReaderTest (0 ms total)
+
+[----------] 4 tests from XPCifpReaderTest
+[ RUN      ] XPCifpReaderTest.selectsProcedureTrackByAliasAndRunway
+[       OK ] XPCifpReaderTest.selectsProcedureTrackByAliasAndRunway (1 ms)
+[ RUN      ] XPCifpReaderTest.starTrackUsesInboundWaypointsNotRunwayQualifier
+[       OK ] XPCifpReaderTest.starTrackUsesInboundWaypointsNotRunwayQualifier (0 ms)
+[ RUN      ] XPCifpReaderTest.parsesApproachAltitudeAndSpeedConstraints
+[       OK ] XPCifpReaderTest.parsesApproachAltitudeAndSpeedConstraints (0 ms)
+[ RUN      ] XPCifpReaderTest.parsesPathTerminatorField
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libdataxp_test/cifpProcedureTest.cpp:269: Failure
+Expected equality of these values:
+  sidTrack.waypoints[0].pathTerminator
+    Which is: "VA"
+  "VI"
+[  FAILED  ] XPCifpReaderTest.parsesPathTerminatorField (0 ms)
+[----------] 4 tests from XPCifpReaderTest (1 ms total)
+
+[----------] 4 tests from FlightPlanTest
+[ RUN      ] FlightPlanTest.rebuildsProcedureLegsUsingCifpWaypoints
+[       OK ] FlightPlanTest.rebuildsProcedureLegsUsingCifpWaypoints (0 ms)
+[ RUN      ] FlightPlanTest.rebuildsTerrainAwareProcedureAltitudes
+[       OK ] FlightPlanTest.rebuildsTerrainAwareProcedureAltitudes (1 ms)
+[ RUN      ] FlightPlanTest.repeatedProcedureRebuildKeepsPrimaryRouteStableAndPreservesMissedApproachWaypointsSeparately
+[       OK ] FlightPlanTest.repeatedProcedureRebuildKeepsPrimaryRouteStableAndPreservesMissedApproachWaypointsSeparately (0 ms)
+[ RUN      ] FlightPlanTest.appliesAltitudeConstraintTypesCorrectly
+[       OK ] FlightPlanTest.appliesAltitudeConstraintTypesCorrectly (0 ms)
+[----------] 4 tests from FlightPlanTest (1 ms total)
+
+[----------] 2 tests from FlightTest
+[ RUN      ] FlightTest.setPlanRebuildsProcedureLegsFromHostData
+[       OK ] FlightTest.setPlanRebuildsProcedureLegsFromHostData (1 ms)
+[ RUN      ] FlightTest.setArrivalRunwayRebuildsApproachAndResetsCursor
+[       OK ] FlightTest.setArrivalRunwayRebuildsApproachAndResetsCursor (0 ms)
+[----------] 2 tests from FlightTest (1 ms total)
+
+[----------] 2 tests from XPFmsxReaderTest
+[ RUN      ] XPFmsxReaderTest.readFmx
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPFmsxReaderTest.readFmx (0 ms)
+[ RUN      ] XPFmsxReaderTest.readFms
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPFmsxReaderTest.readFms (1 ms)
+[----------] 2 tests from XPFmsxReaderTest (1 ms total)
+
+[----------] 1 test from AirportOpsTest
+[ RUN      ] AirportOpsTest.taxi_separateArrivalsAndDepartures
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] AirportOpsTest.taxi_separateArrivalsAndDepartures (0 ms)
+[----------] 1 test from AirportOpsTest (0 ms total)
+
+[----------] 25 tests from XPAirportReaderTest
+[ RUN      ] XPAirportReaderTest.readAptDat_empty
+[       OK ] XPAirportReaderTest.readAptDat_empty (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_header
+[       OK ] XPAirportReaderTest.readAptDat_header (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_metadata
+[       OK ] XPAirportReaderTest.readAptDat_metadata (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_singleTaxiNode
+[       OK ] XPAirportReaderTest.readAptDat_singleTaxiNode (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_singleTaxiEdge
+[       OK ] XPAirportReaderTest.readAptDat_singleTaxiEdge (0 ms)
+[ RUN      ] XPAirportReaderTest.routeAwareTaxiPathsPreferRouteNodes
+[       OK ] XPAirportReaderTest.routeAwareTaxiPathsPreferRouteNodes (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_singleTaxiAndGroundEdge
+[       OK ] XPAirportReaderTest.readAptDat_singleTaxiAndGroundEdge (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_runways
+[       OK ] XPAirportReaderTest.readAptDat_runways (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_trafficFlows
+[       OK ] XPAirportReaderTest.readAptDat_trafficFlows (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_assignRunwaysHeaderElevation
+[       OK ] XPAirportReaderTest.readAptDat_assignRunwaysHeaderElevation (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_runwayEdges
+[       OK ] XPAirportReaderTest.readAptDat_runwayEdges (1 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_parkingStands
+[       OK ] XPAirportReaderTest.readAptDat_parkingStands (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_skipUnrecognizedLines
+[       OK ] XPAirportReaderTest.readAptDat_skipUnrecognizedLines (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_realKJFK
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPAirportReaderTest.readAptDat_realKJFK (0 ms)
+[ RUN      ] XPAirportReaderTest.findTaxiPath_KJFK_1
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPAirportReaderTest.findTaxiPath_KJFK_1 (0 ms)
+[ RUN      ] XPAirportReaderTest.findTaxiPath_KJFK_2
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPAirportReaderTest.findTaxiPath_KJFK_2 (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_realKMIA
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPAirportReaderTest.readAptDat_realKMIA (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_realKORD
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPAirportReaderTest.readAptDat_realKORD (0 ms)
+[ RUN      ] XPAirportReaderTest.readToEndOfLine
+[       OK ] XPAirportReaderTest.readToEndOfLine (0 ms)
+[ RUN      ] XPAirportReaderTest.skipToNextLine
+[       OK ] XPAirportReaderTest.skipToNextLine (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_assembleTower
+[       OK ] XPAirportReaderTest.readAptDat_assembleTower (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_augmentsControllerScopesFromAtcNavData
+[       OK ] XPAirportReaderTest.readAptDat_augmentsControllerScopesFromAtcNavData (1 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_addsControllerPositionsFromAtcNavDataWhenMissingInAptDat
+[       OK ] XPAirportReaderTest.readAptDat_addsControllerPositionsFromAtcNavDataWhenMissingInAptDat (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_enrichesTerminalAirspaceNameFromAirspaceTxtAlias
+[       OK ] XPAirportReaderTest.readAptDat_enrichesTerminalAirspaceNameFromAirspaceTxtAlias (0 ms)
+[ RUN      ] XPAirportReaderTest.readAptDat_canonicalizesDecoratedAirspaceTxtNames
+[       OK ] XPAirportReaderTest.readAptDat_canonicalizesDecoratedAirspaceTxtNames (0 ms)
+[----------] 25 tests from XPAirportReaderTest (2 ms total)
+
+[----------] 3 tests from XPAptDatReaderTest
+[ RUN      ] XPAptDatReaderTest.readAptDat_allAirports
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPAptDatReaderTest.readAptDat_allAirports (0 ms)
+[ RUN      ] XPAptDatReaderTest.readAptDat_filterAirports
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPAptDatReaderTest.readAptDat_filterAirports (0 ms)
+[ RUN      ] XPAptDatReaderTest.readAptDat_skipAirportsFailingToLoad
+unknown file: Failure
+C++ exception with description "basic_ios::clear: iostream error" thrown in the test body.
+[  FAILED  ] XPAptDatReaderTest.readAptDat_skipAirportsFailingToLoad (1 ms)
+[----------] 3 tests from XPAptDatReaderTest (1 ms total)
+
+[----------] 2 tests from CppTest
+[ RUN      ] CppTest.extractFromStreamTillEndOfLine
+[       OK ] CppTest.extractFromStreamTillEndOfLine (0 ms)
+[ RUN      ] CppTest.extractFromStream_8_decimalDigits
+[       OK ] CppTest.extractFromStream_8_decimalDigits (0 ms)
+[----------] 2 tests from CppTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 47 tests from 11 test suites ran. (7 ms total)
+[  PASSED  ] 35 tests.
+[  FAILED  ] 12 tests, listed below:
+[  FAILED  ] XPCifpReaderTest.parsesPathTerminatorField
+[  FAILED  ] XPFmsxReaderTest.readFmx
+[  FAILED  ] XPFmsxReaderTest.readFms
+[  FAILED  ] AirportOpsTest.taxi_separateArrivalsAndDepartures
+[  FAILED  ] XPAirportReaderTest.readAptDat_realKJFK
+[  FAILED  ] XPAirportReaderTest.findTaxiPath_KJFK_1
+[  FAILED  ] XPAirportReaderTest.findTaxiPath_KJFK_2
+[  FAILED  ] XPAirportReaderTest.readAptDat_realKMIA
+[  FAILED  ] XPAirportReaderTest.readAptDat_realKORD
+[  FAILED  ] XPAptDatReaderTest.readAptDat_allAirports
+[  FAILED  ] XPAptDatReaderTest.readAptDat_filterAirports
+[  FAILED  ] XPAptDatReaderTest.readAptDat_skipAirportsFailingToLoad
+
+12 FAILED TESTS

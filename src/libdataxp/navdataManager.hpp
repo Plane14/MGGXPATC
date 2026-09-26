@@ -41,13 +41,6 @@ private:
         chrono::steady_clock::time_point timestamp;
     };
 
-    // Cache for holding patterns
-    struct HoldingCacheEntry
-    {
-        vector<XPHoldingPatternReader::HoldingPattern> patterns;
-        chrono::steady_clock::time_point timestamp;
-    };
-
     shared_ptr<HostServices> m_host;
 
     // Component readers
@@ -62,8 +55,29 @@ private:
     // Caches
     mutable mutex m_cacheMutex;
     mutable unordered_map<string, ProcedureCacheEntry> m_procedureCache;
-    mutable unordered_map<string, HoldingCacheEntry> m_holdingCache;
     static constexpr chrono::seconds CACHE_TTL = chrono::seconds(300);
+
+    // Helper to resolve waypoint locations via navaid reader
+    void resolveWaypointLocations(XPCifpReader::ProcedureTrackWithLocations& track, const string& airportIcao) const
+    {
+        if (!m_navaidReader)
+        {
+            return;
+        }
+        for (auto& wp : track.waypoints)
+        {
+            if (!wp.hasLocation)
+            {
+                GeoPoint location;
+                if (m_navaidReader->tryResolveWaypoint(airportIcao, wp.name, location))
+                {
+                    wp.latitude = static_cast<float>(location.latitude);
+                    wp.longitude = static_cast<float>(location.longitude);
+                    wp.hasLocation = true;
+                }
+            }
+        }
+    }
 
     static string normalizeKey(const string& text)
     {
@@ -174,8 +188,7 @@ public:
         m_missedApproachReader(nullptr),
         m_validator(nullptr),
         m_cacheMutex(),
-        m_procedureCache(),
-        m_holdingCache()
+        m_procedureCache()
     {
         if (m_host)
         {
@@ -211,6 +224,10 @@ public:
 
         if (!m_cifpReader || !m_host)
         {
+            if (m_host)
+            {
+                m_host->writeLog("NAVDATA|readApproachProcedure: cifpReader or host not initialized for %s %s", airportIcao.c_str(), procedureName.c_str());
+            }
             return result;
         }
 
@@ -252,6 +269,7 @@ public:
             }
             if (!input)
             {
+                m_host->writeLog("NAVDATA|readApproachProcedure: CIFP file not found for airport %s (procedure %s)", airportIcao.c_str(), procedureName.c_str());
                 return result;
             }
 
@@ -261,6 +279,11 @@ public:
             result.procedureTrack = selection.procedureTrack;
             result.missedTrack = selection.missedTrack;
             result.hasMissedApproach = !result.missedTrack.waypoints.empty();
+
+            // Resolve waypoint locations for procedure track
+            resolveWaypointLocations(result.procedureTrack, airportIcao);
+            // Resolve waypoint locations for missed approach track
+            resolveWaypointLocations(result.missedTrack, airportIcao);
 
             // Collapse waypoints
             for (const auto& wp : result.procedureTrack.waypoints)
@@ -272,16 +295,24 @@ public:
                 result.missedWaypoints.push_back(wp.name);
             }
 
-            // Update cache
-            lock_guard<mutex> lock(m_cacheMutex);
-            ProcedureCacheEntry entry;
-            entry.procedureTrack = result.procedureTrack;
-            entry.missedTrack = result.missedTrack;
-            entry.timestamp = chrono::steady_clock::now();
-            m_procedureCache[cacheKey] = std::move(entry);
+            // Update cache only if procedure track has waypoints
+            if (!result.procedureTrack.waypoints.empty())
+            {
+                lock_guard<mutex> lock(m_cacheMutex);
+                ProcedureCacheEntry entry;
+                entry.procedureTrack = result.procedureTrack;
+                entry.missedTrack = result.missedTrack;
+                entry.timestamp = chrono::steady_clock::now();
+                m_procedureCache[cacheKey] = std::move(entry);
+            }
+            else
+            {
+                m_host->writeLog("NAVDATA|readApproachProcedure: skipping cache for empty procedure %s at %s", procedureName.c_str(), airportIcao.c_str());
+            }
         }
-        catch (const exception&)
+        catch (const exception& e)
         {
+            m_host->writeLog("NAVDATA|readApproachProcedure: parse error for %s %s: %s", airportIcao.c_str(), procedureName.c_str(), e.what());
             return result;
         }
 
@@ -297,6 +328,10 @@ public:
     {
         if (!m_cifpReader || !m_host)
         {
+            if (m_host)
+            {
+                m_host->writeLog("NAVDATA|readSid: cifpReader or host not initialized for %s %s", airportIcao.c_str(), procedureName.c_str());
+            }
             return {};
         }
 
@@ -311,13 +346,15 @@ public:
             }
             if (!input)
             {
+                m_host->writeLog("NAVDATA|readSid: CIFP file not found for airport %s (procedure %s)", airportIcao.c_str(), procedureName.c_str());
                 return {};
             }
 
             return m_cifpReader->readProcedureTrack(*input, "SID", procedureName, preferredRunway, preferredTransition);
         }
-        catch (const exception&)
+        catch (const exception& e)
         {
+            m_host->writeLog("NAVDATA|readSid: parse error for %s %s: %s", airportIcao.c_str(), procedureName.c_str(), e.what());
             return {};
         }
     }
@@ -331,6 +368,10 @@ public:
     {
         if (!m_cifpReader || !m_host)
         {
+            if (m_host)
+            {
+                m_host->writeLog("NAVDATA|readStar: cifpReader or host not initialized for %s %s", airportIcao.c_str(), procedureName.c_str());
+            }
             return {};
         }
 
@@ -345,13 +386,15 @@ public:
             }
             if (!input)
             {
+                m_host->writeLog("NAVDATA|readStar: CIFP file not found for airport %s (procedure %s)", airportIcao.c_str(), procedureName.c_str());
                 return {};
             }
 
             return m_cifpReader->readProcedureTrack(*input, "STAR", procedureName, preferredRunway, preferredTransition);
         }
-        catch (const exception&)
+        catch (const exception& e)
         {
+            m_host->writeLog("NAVDATA|readStar: parse error for %s %s: %s", airportIcao.c_str(), procedureName.c_str(), e.what());
             return {};
         }
     }
@@ -361,6 +404,10 @@ public:
     {
         if (!m_cifpReader || !m_host)
         {
+            if (m_host)
+            {
+                m_host->writeLog("NAVDATA|enumProcedures: cifpReader or host not initialized for %s %s", airportIcao.c_str(), recordType.c_str());
+            }
             return {};
         }
 
@@ -375,13 +422,15 @@ public:
             }
             if (!input)
             {
+                m_host->writeLog("NAVDATA|enumProcedures: CIFP file not found for airport %s (record type %s)", airportIcao.c_str(), recordType.c_str());
                 return {};
             }
 
             return m_cifpReader->enumProcedures(*input, recordType);
         }
-        catch (const exception&)
+        catch (const exception& e)
         {
+            m_host->writeLog("NAVDATA|enumProcedures: parse error for %s %s: %s", airportIcao.c_str(), recordType.c_str(), e.what());
             return {};
         }
     }
@@ -497,7 +546,9 @@ public:
     // Validate a complete procedure
     XPProcedureValidator::ValidationResult validateProcedure(
         const vector<XPCifpReader::WaypointWithLocation>& waypoints,
+        const vector<XPCifpReader::WaypointWithLocation>& missedWaypoints,
         const string& procedureType,
+        const string& procedureName,
         float aircraftSpeedKnots = 250.0f,
         float aircraftAltitudeFeet = 0.0f) const
     {
@@ -506,13 +557,14 @@ public:
             return {};
         }
         return m_validator->validateProcedureTrack(
-            waypoints, procedureType, aircraftSpeedKnots, aircraftAltitudeFeet);
+            waypoints, missedWaypoints, procedureType, procedureName, aircraftSpeedKnots, aircraftAltitudeFeet);
     }
 
     // Validate altitude constraints
     XPProcedureValidator::ValidationResult validateAltitudeConstraints(
         const vector<XPCifpReader::WaypointWithLocation>& waypoints,
         float aircraftAltitudeFeet,
+        float aircraftSpeedKnots = 250.0f,
         float aircraftRateOfClimbFpm = 1000.0f) const
     {
         if (!m_validator)
@@ -520,7 +572,7 @@ public:
             return {};
         }
         return m_validator->validateAltitudeConstraints(
-            waypoints, aircraftAltitudeFeet, aircraftRateOfClimbFpm);
+            waypoints, aircraftAltitudeFeet, aircraftSpeedKnots, aircraftRateOfClimbFpm);
     }
 
     // Validate speed constraints
@@ -538,13 +590,14 @@ public:
     // Validate RNAV/RNP procedures
     XPProcedureValidator::ValidationResult validateRnavRnp(
         const vector<XPCifpReader::WaypointWithLocation>& waypoints,
-        const string& procedureType) const
+        const string& procedureType,
+        const string& procedureName) const
     {
         if (!m_validator)
         {
             return {};
         }
-        return m_validator->validateRnavRnp(waypoints, procedureType);
+        return m_validator->validateRnavRnp(waypoints, procedureType, procedureName);
     }
 
     // Validate aircraft compatibility
@@ -633,7 +686,14 @@ public:
     {
         lock_guard<mutex> lock(m_cacheMutex);
         m_procedureCache.clear();
-        m_holdingCache.clear();
+        if (m_holdingReader)
+        {
+            m_holdingReader->clearCache();
+        }
+        if (m_cifpReader)
+        {
+            m_cifpReader->clearInstanceCache();
+        }
     }
 
     // Clear procedure cache
@@ -643,18 +703,10 @@ public:
         m_procedureCache.clear();
     }
 
-    // Clear holding pattern cache
-    void clearHoldingCache()
-    {
-        lock_guard<mutex> lock(m_cacheMutex);
-        m_holdingCache.clear();
-    }
-
     // Get cache statistics
     struct CacheStatistics
     {
         size_t procedureCacheSize = 0;
-        size_t holdingCacheSize = 0;
     };
 
     CacheStatistics getCacheStatistics() const
@@ -662,7 +714,6 @@ public:
         lock_guard<mutex> lock(m_cacheMutex);
         CacheStatistics stats;
         stats.procedureCacheSize = m_procedureCache.size();
-        stats.holdingCacheSize = m_holdingCache.size();
         return stats;
     }
 };

@@ -515,13 +515,13 @@ TEST(XPAirportReaderTest, readAptDat_runwayEdges) {
     EXPECT_EQ(e210_1432->runway(), rwy1432);
 
     EXPECT_EQ(e78_a1->type(), TaxiEdge::Type::Taxiway);
-    EXPECT_TRUE(e78_a1->activeZones().departue.has(rwy1432));
+    EXPECT_TRUE(e78_a1->activeZones().departure.has(rwy1432));
     EXPECT_TRUE(e78_a1->activeZones().ils.has(rwy1432));
     EXPECT_FALSE(e78_a1->activeZones().arrival.has(rwy1432));
-    EXPECT_FALSE(e78_a1->activeZones().departue.has(rwy0622));
+    EXPECT_FALSE(e78_a1->activeZones().departure.has(rwy0622));
 
     EXPECT_EQ(e92_c2->type(), TaxiEdge::Type::Taxiway);
-    EXPECT_FALSE(e92_c2->activeZones().departue.hasAny());
+    EXPECT_FALSE(e92_c2->activeZones().departure.hasAny());
     EXPECT_FALSE(e92_c2->activeZones().ils.hasAny());
     EXPECT_TRUE(e92_c2->activeZones().arrival.has(rwy0622));
     EXPECT_TRUE(e92_c2->activeZones().arrival.has(rwy1432));

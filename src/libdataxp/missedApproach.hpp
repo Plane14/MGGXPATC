@@ -231,7 +231,10 @@ private:
             const string waypointDescription = fields.size() > 8 ? trimCopy(fields[8]) : "";
             const string pathTerminator = fields.size() > 11 ? trimCopy(fields[11]) : "";
 
-            // Parse waypoint coordinates
+            // Parse waypoint coordinates - CIFP APPCH records may carry packed
+            // coordinates in fields[6]/[7] ONLY when they start with N/S/E/W.
+            // Otherwise these fields hold type/region tokens (e.g. "D", "P", "C")
+            // and must NOT be parsed as coordinates.
             float latitude = 0.0f;
             float longitude = 0.0f;
             bool hasLocation = false;
@@ -239,7 +242,8 @@ private:
             {
                 const string latPacked = trimCopy(fields[6]);
                 const string lonPacked = trimCopy(fields[7]);
-                if (!latPacked.empty() && !lonPacked.empty())
+                if (latPacked.size() >= 7 && (latPacked[0] == 'N' || latPacked[0] == 'S') &&
+                    lonPacked.size() >= 8 && (lonPacked[0] == 'E' || lonPacked[0] == 'W'))
                 {
                     latitude = parsePackedCoordinate(latPacked);
                     longitude = parsePackedCoordinate(lonPacked);
@@ -296,11 +300,15 @@ private:
                 }
             }
 
-            // Check if this is a missed approach segment
-            // Missed approach waypoints typically have 'M' in the description or
-            // are part of a missed approach track
-            const bool isMissedApproach = waypointDescription.find('M') != string::npos ||
-                waypointDescription.find('m') != string::npos;
+            // Check if this is a missed approach segment.
+            // In CIFP, the waypoint type field (fields[8]) ends with 'M' for
+            // missed approach legs (e.g. "EE M", "GY M", "  M"). We check the
+            // last character of the trimmed description rather than using find('M')
+            // to avoid false positives from descriptions that merely contain 'M'
+            // elsewhere (e.g. "EE CM").
+            const string trimmedDesc = trimCopy(waypointDescription);
+            const bool isMissedApproach = !trimmedDesc.empty() &&
+                (trimmedDesc.back() == 'M' || trimmedDesc.back() == 'm');
 
             if (!isMissedApproach)
             {
@@ -543,16 +551,25 @@ public:
         for (auto it = track.waypoints.rbegin(); it != track.waypoints.rend(); ++it)
         {
             const string& name = it->name;
-            // Skip runway waypoints
-            if (name.size() >= 2 && name.substr(0, 2) == "RW")
+            if (name.empty())
             {
                 continue;
             }
-            // Skip if it looks like a runway number
-            if (name.size() <= 3 && all_of(name.begin(), name.end(), [](char c) { return isdigit(c); }))
+
+            // Skip runway waypoints: "RW03", "RW26", "03", "R03", "03L", "03R"
+            const string norm = normalizeToken(name);
+            if (norm.rfind("RW", 0) == 0)
             {
                 continue;
             }
+
+            // Pure runway numbers (e.g., "03", "26") or with L/C/R suffix
+            if (all_of(norm.begin(), norm.end(), [](char c) { return isdigit(static_cast<unsigned char>(c)) || c == 'L' || c == 'C' || c == 'R'; }) &&
+                any_of(norm.begin(), norm.end(), [](char c) { return isdigit(static_cast<unsigned char>(c)); }))
+            {
+                continue;
+            }
+
             return &name;
         }
 
@@ -576,7 +593,7 @@ private:
         const bool hasExplicitProcedureName = !procedureName.empty();
 
         const RawMissedTrack* bestTrack = nullptr;
-        int bestScore = numeric_limits<int>::min();
+        int bestScore = std::numeric_limits<int>::min();
 
         for (const auto& track : tracks)
         {
@@ -590,22 +607,22 @@ private:
                 }
             }
 
-            if (!runwayNorm.empty())
-            {
-                // Check if branch key matches runway
-                if (normalizeToken(track.branchKey).find(runwayNorm) != string::npos)
-                {
-                    score += 5000;
-                }
-            }
+             if (!runwayNorm.empty())
+             {
+                 // Check if branch key matches runway
+                 if (matchesToken(track.branchKey, preferredRunway))
+                 {
+                     score += 5000;
+                 }
+             }
 
-            if (!transitionNorm.empty())
-            {
-                if (normalizeToken(track.branchKey).find(transitionNorm) != string::npos)
-                {
-                    score += 600;
-                }
-            }
+             if (!transitionNorm.empty())
+             {
+                 if (matchesToken(track.branchKey, preferredTransition))
+                 {
+                     score += 600;
+                 }
+             }
 
             if (!bestTrack || score > bestScore)
             {

@@ -642,6 +642,7 @@ private:
     float m_smoothedEngineRpm;
     float m_smoothedPropRpm;
 public:
+    const shared_ptr<Flight>& flight() const { return m_flight; }
     Xpmp2AircraftObject(
         shared_ptr<HostServices> _host,
         const shared_ptr<Flight>& _flight
@@ -689,9 +690,9 @@ public:
         colLabel[1] = 1.0f;
         colLabel[2] = 0.0f;
 
-        // Radar
+        // Radar - set initial transponder mode based on TCAS configuration
         acRadar.code = 0;
-        acRadar.mode = xpmpTransponderMode_ModeC;
+        acRadar.mode = m_config->enableTcasTargets ? xpmpTransponderMode_ModeC : xpmpTransponderMode_Standby;
 
         // informational texts
         strcpy(acInfoTexts.icaoAcType, source->modelIcao().c_str());
@@ -702,7 +703,10 @@ public:
         m_smoothedPitch = static_cast<float>(source->attitude().pitch());
         m_smoothedRoll = static_cast<float>(source->attitude().roll());
 
-        SetLocation(location.latitude, location.longitude, 0.0f);
+        // Set initial altitude correctly based on whether aircraft is on ground or airborne
+        const auto& altitude = source->altitude();
+        float initialAltitudeFeet = altitude.isGroundBased() ? 0.0f : altitude.feet();
+        SetLocation(location.latitude, location.longitude, initialAltitudeFeet);
         SetHeading(source->attitude().heading());
         SetPitch(0.0f);
         SetRoll(0.0f);
@@ -724,9 +728,12 @@ public:
         SetTouchDown(false);
 
         float groundPitch = 0.0f;
-        safeClampToGround(groundPitch);
-        SetPitch(groundPitch);
-        m_smoothedPitch = groundPitch;
+        if (altitude.isGroundBased())
+        {
+            safeClampToGround(groundPitch);
+            SetPitch(groundPitch);
+            m_smoothedPitch = groundPitch;
+        }
         m_visualStateInitialized = true;
     }
 
@@ -1118,6 +1125,16 @@ private:
             const auto& altitude = source->altitude();
             touchedDown = source->justTouchedDown(m_host->getWorld()->timestamp());
 
+            // Update transponder mode based on TCAS configuration
+            if (m_config->enableTcasTargets)
+            {
+                acRadar.mode = xpmpTransponderMode_ModeC;
+            }
+            else
+            {
+                acRadar.mode = xpmpTransponderMode_Standby;
+            }
+
             float pitchAdjustment = 0.0f;
             const float dt = max(0.016f, elapsedSinceLastCall);
             const float altitudeFeet = altitudeMslFeet(source);
@@ -1228,20 +1245,9 @@ private:
     void safeClampToGround(float& groundPitch)
     {
         ClampToGround();
-
-        //TODO: use actual model matched by XPMP2
-        groundPitch = -1.5;
-        // const string& model = m_flight->aircraft()->modelIcao();
-
-        // if (model.compare("B738") == 0)
-        // {
-        //     SetPitch(-1.5);
-        // }
-        // else if (model.compare("A320") == 0)
-        // {
-        //     drawInfo.y += 0.4;
-        //     SetPitch(-0.5);
-        // }
+        // ClampToGround() from XPMP2 automatically adjusts drawInfo.y and drawInfo.pitch
+        // based on the matched CSL model. No manual override needed.
+        groundPitch = drawInfo.pitch;
     }
 
     static float clampRatio(float value)
@@ -2066,7 +2072,7 @@ public:
 
         if (error[0])
         {
-            m_host->writeLog("MP2SVC|XPMPMultiplayerInit: FAILED!");
+            m_host->writeLog("MP2SVC|XPMPMultiplayerInit: FAILED! %s", error);
             return;
         }
 
@@ -2076,7 +2082,7 @@ public:
         error = XPMPLoadCSLPackage(resourceDirectory.c_str());     // CSL folder root path
         if (error[0])
         {
-            m_host->writeLog("MP2SVC|XPMPLoadCSLPackage: FAILED!");
+            m_host->writeLog("MP2SVC|XPMPLoadCSLPackage: FAILED! %s", error);
             return;
         }
 
@@ -2087,11 +2093,11 @@ public:
         // could have control already
         error = XPMPMultiplayerEnable(CPRequestAIAgain);
         if (error[0]) {
-            m_host->writeLog("MP2SVC|XPMPMultiplayerEnable FAILED! %s", error);
-            return;
+            m_host->writeLog("MP2SVC|XPMPMultiplayerEnable FAILED (will retry): %s", error);
+            // Don't return - the callback CPRequestAIAgain will retry
+        } else {
+            m_host->writeLog("MP2SVC|XPMPMultiplayerEnable: SUCCESS");
         }
-
-        m_host->writeLog("MP2SVC|XPMPMultiplayerEnable: SUCCESS");
     }
 
     ~Xpmp2AircraftObjectService()
@@ -2111,6 +2117,21 @@ public:
     {
         m_lastChangeSet = changeSet;
 
+        // Handle removed flights first
+        for (const auto& removedFlight : m_lastChangeSet->flights().removed())
+        {
+            auto it = std::find_if(m_simAircraft.begin(), m_simAircraft.end(),
+                [&removedFlight](const shared_ptr<Xpmp2AircraftObject>& ac) {
+                    return ac->flight() && ac->flight()->id() == removedFlight->id();
+                });
+            if (it != m_simAircraft.end())
+            {
+                m_host->writeLog("MP2SVC|Removing XPMP2 aircraft for flight %s", removedFlight->callSign().c_str());
+                m_simAircraft.erase(it);
+            }
+        }
+
+        // Handle added flights
         for (const auto& addedFlight : m_lastChangeSet->flights().added())
         {
             if (addedFlight->aircraft()->nature() != world::Actor::Nature::AI)
@@ -2118,13 +2139,21 @@ public:
                 continue;
             }
 
-            auto newSimAircraft = shared_ptr<Xpmp2AircraftObject>(new Xpmp2AircraftObject(m_host, addedFlight));
-            newSimAircraft->onQueryChanges([this, addedFlight](){
-                //m_host->writeLog("onQueryChanges from %s", addedFlight->callSign().c_str());
-                return m_lastChangeSet;
-            });
+            try
+            {
+                auto newSimAircraft = shared_ptr<Xpmp2AircraftObject>(new Xpmp2AircraftObject(m_host, addedFlight));
+                newSimAircraft->onQueryChanges([this, addedFlight](){
+                    //m_host->writeLog("onQueryChanges from %s", addedFlight->callSign().c_str());
+                    return m_lastChangeSet;
+                });
 
-            m_simAircraft.push_back(newSimAircraft);
+                m_simAircraft.push_back(newSimAircraft);
+                m_host->writeLog("MP2SVC|Created XPMP2 aircraft for flight %s", addedFlight->callSign().c_str());
+            }
+            catch (const exception& e)
+            {
+                m_host->writeLog("MP2SVC|FAILED to create XPMP2 aircraft for flight %s: %s", addedFlight->callSign().c_str(), e.what());
+            }
         }
     }
 
@@ -2151,7 +2180,14 @@ private:
 
     static void CPRequestAIAgain(void*)
     {
-        PrintDebugString("MP2SVC|CPRequestAIAgain: invoking XPMPMultiplayerEnable");
-        XPMPMultiplayerEnable(CPRequestAIAgain);
+        if (!XPMPHasControlOfAIAircraft())
+        {
+            PrintDebugString("MP2SVC|CPRequestAIAgain: invoking XPMPMultiplayerEnable");
+            const char* error = XPMPMultiplayerEnable(CPRequestAIAgain);
+            if (error[0])
+            {
+                PrintDebugString("MP2SVC|CPRequestAIAgain: XPMPMultiplayerEnable failed: %s", error);
+            }
+        }
     }
 };

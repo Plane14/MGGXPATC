@@ -22,4 +22,5 @@ public:
     bool enableAirnavSchedules = false;
     bool enablePlanefinderSchedules = false;
     float trafficBubbleRadiusNm = 80.0f;
+    bool enableTcasTargets = false;
 };

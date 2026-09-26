@@ -1194,7 +1194,10 @@ namespace ai
                 // Auto-bank: if we need to turn, calculate required bank
                 if (abs(turnDegrees) > 0.5) {
                     const double requiredRate = min(targetTurnRateDegPerSec, abs(turnDegrees) / elapsedSeconds);
-                    const double requiredBankRad = atan(requiredRate * speedMps / 9.81);
+                    // requiredRate is in deg/s; convert to rad/s for the rate·V/g bank formula
+                    // (rate_rad/s = rate_deg/s * PI/180). Without this the bank is massively
+                    // overestimated and saturates at the category maximum on every turn.
+                    const double requiredBankRad = atan(requiredRate * (M_PI / 180.0) * speedMps / 9.81);
                     const double requiredBankDeg = requiredBankRad * 180.0 / M_PI;
                     const double maxBankDeg = helicopter ? 20.0 : (fighter ? 60.0 : 30.0);
                     const double clampedBankDeg = min(maxBankDeg, max(5.0, requiredBankDeg));

@@ -132,7 +132,7 @@ public:
         message.set_heading(0); //TODO: add heading to core model
 
         message.mutable_active_zones()->set_arrival((uint32_t)taxiEdge->activeZones().arrival.runwaysMask());
-        message.mutable_active_zones()->set_departure((uint32_t)taxiEdge->activeZones().departue.runwaysMask());
+        message.mutable_active_zones()->set_departure((uint32_t)taxiEdge->activeZones().departure.runwaysMask());
         message.mutable_active_zones()->set_ils((uint32_t)taxiEdge->activeZones().ils.runwaysMask());
 
         return message;

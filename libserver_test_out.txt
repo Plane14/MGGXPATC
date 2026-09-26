@@ -1,0 +1,62 @@
+Running main() from C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/googletest/src/gtest_main.cc
+[==========] Running 1 test from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 1 test from ServerE2ETest
+[ RUN      ] ServerE2ETest.sendHello
+AT&C [+         0] SRVDSP|INIT starting
+AT&C [+         0] SRVDSP|INIT completed
+AT&C [+         0] SRVHST|INIT starting
+AT&C [+         0] SRVHST|INIT completed
+AT&C [+         0] SRVDSP|RUN thread[sender] index[0] loop starting
+AT&C [+         0] SRVDSP|RUN thread[service] index[0] loop starting
+AT&C [+         0] SRVHST|ENDP entered runOnCurrentThread
+AT&C [+         1] SRVHST|ENDP listening on port[9002]
+[2026-09-25 21:29:18] [connect] Successful connection
+AT&C [+       270] SRVHST|CONN approved new connection [0000012aa3197f10]
+[[2026-09-25 21:29:18] [connect] WebSocket Connection [::1]:9002 v-2 "WebSocket++/0.8.2" / 101
+2026-09-25 21:29:18] [connect] WebSocket Connection [::1]:62366 v13 "WebSocket++/0.8.2" / 101
+AT&C [+       384] SRVHST|RECV size[10]
+AT&C [+       384] SRVHST|RECV payload case[101], enqueue
+AT&C [+       384] SRVDSP|RECV envelope id[0] payload[101] enqueue
+AT&C [+       384] SRVDSP|RECV envelope id[0] payload[101] dequeued
+AT&C [+       384] SRVSVC|received connect
+AT&C [+       384] SRVSVC|connect > reply OK
+AT&C [+       384] SRVDSP|SEND enqueueing envelope id[0] payload[1101]
+AT&C [+       384] SRVDSP|SEND dequeued envelope id[0] payload[1101]
+AT&C [+       384] SRVHST|SEND payload case[1101] to connection[0000012aa3197f10] size[16] OK
+[2026-09-25 21:29:18] [frame_header] Dispatching write containing 1 message(s) containing 2 header bytes and 16 payload bytes
+[2026-09-25 21:29:18] [frame_header] Header Bytes: 
+[0] (2) 82 10 
+
+[2026-09-25 21:29:18] [frame_payload] Payload Bytes: 
+[0] (16) [2] EA 44 0D 12 0B 41 54 26 43 20 70 6C 75 67 69 6E 
+
+[2026-09-25 21:29:18] [control] Control frame received with opcode 8
+[2026-09-25 21:29:18] [frame_header] Dispatching write containing 1 message(s) containing 2 header bytes and 15 payload bytes
+[2026-09-25 21:29:18] [frame_header] Header Bytes: 
+[0] (2) 88 0F 
+
+[2026-09-25 21:29:18] [frame_payload] Payload Bytes: 
+[0] (15) [8] 03 E9 73 68 75 74 74 69 6E 67 20 64 6F 77 6E 
+
+[2026-09-25 21:29:18] [control] Control frame received with opcode 8
+[2026-09-25 21:29:18] [disconnect] Disconnect close local:[1001,shutting down] remote:[1001,shutting down]
+[2026-09-25 21:29:18] [disconnect] Disconnect close local:[1001,shutting down] remote:[1001,shutting down]
+AT&C [+       510] SRVHST|ENDP beginGracefulShutdown starting
+AT&C [+       510] SRVHST|ENDP beginGracefulShutdown completed
+[2026-09-25 21:29:18] [info] asio handle_accept error: asio.system:995 (La operaci�n de E/S se anul� por una salida de subproceso o por una solicitud de aplicaci�n.)
+[2026-09-25 21:29:18] [info] Error getting remote endpoint: asio.system:10009 (El identificador de archivo proporcionado no es v�lido.)
+[2026-09-25 21:29:18] [fail] WebSocket Connection Unknown - "" - 0 asio.system:995 La operaci�n de E/S se anul� por una salida de subproceso o por una solicitud de aplicaci�n.
+[2026-09-25 21:29:18] [info] asio async_shutdown error: asio.system:10009 (El identificador de archivo proporcionado no es v�lido.)
+[2026-09-25 21:29:18] [error] handle_accept error: La operaci�n de E/S se anul� por una salida de subproceso o por una solicitud de aplicaci�n.
+[2026-09-25 21:29:18] [info] Stopping acceptance of new connections because the underlying transport is no longer listening.
+AT&C [+       510] SRVHST|ENDP endpoint stopped
+AT&C [+       510] SRVHST|ENDP exiting runOnCurrentThread
+AT&C [+       602] SRVDSP|RUN thread[sender] index[0] loop stopped
+AT&C [+       602] SRVDSP|RUN thread[service] index[0] loop stopped
+[       OK ] ServerE2ETest.sendHello (604 ms)
+[----------] 1 test from ServerE2ETest (604 ms total)
+
+[----------] Global test environment tear-down
+[==========] 1 test from 1 test suite ran. (604 ms total)
+[  PASSED  ] 1 test.

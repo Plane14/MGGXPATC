@@ -106,7 +106,9 @@ public:
     // Validate a complete procedure track
     ValidationResult validateProcedureTrack(
         const vector<XPCifpReader::WaypointWithLocation>& waypoints,
+        const vector<XPCifpReader::WaypointWithLocation>& missedWaypoints,
         const string& procedureType,
+        const string& procedureName,
         float aircraftSpeedKnots = 250.0f,
         float aircraftAltitudeFeet = 0.0f) const
     {
@@ -133,7 +135,7 @@ public:
 
         // Validate altitude constraints
         {
-            auto altResult = validateAltitudeConstraints(waypoints, aircraftAltitudeFeet);
+            auto altResult = validateAltitudeConstraints(waypoints, aircraftAltitudeFeet, aircraftSpeedKnots);
             for (const auto& issue : altResult.issues)
             {
                 result.issues.push_back(issue);
@@ -172,7 +174,7 @@ public:
 
         // Validate RNAV/RNP procedures
         {
-            auto rnavResult = validateRnavRnp(waypoints, procedureType);
+            auto rnavResult = validateRnavRnp(waypoints, procedureType, procedureName);
             for (const auto& issue : rnavResult.issues)
             {
                 result.issues.push_back(issue);
@@ -186,21 +188,7 @@ public:
         // Validate missed approach (if applicable)
         if (procedureType == "APPCH")
         {
-            auto maResult = validateMissedApproach(waypoints);
-            for (const auto& issue : maResult.issues)
-            {
-                result.issues.push_back(issue);
-            }
-            if (!maResult.isValid)
-            {
-                result.isValid = false;
-            }
-        }
-
-        // Validate missed approach (if applicable)
-        if (procedureType == "APPCH")
-        {
-            auto maResult = validateMissedApproach(waypoints);
+            auto maResult = validateMissedApproach(missedWaypoints);
             for (const auto& issue : maResult.issues)
             {
                 result.issues.push_back(issue);
@@ -218,6 +206,7 @@ public:
     ValidationResult validateAltitudeConstraints(
         const vector<XPCifpReader::WaypointWithLocation>& waypoints,
         float aircraftAltitudeFeet,
+        float aircraftSpeedKnots,
         float aircraftRateOfClimbFpm = 1000.0f) const
     {
         ValidationResult result;
@@ -295,10 +284,10 @@ public:
 
                 if (distanceNm > 0.0f && waypoint.altitudeConstraint > 0.0f)
                 {
-                    // Estimate time to cover distance at typical speed
-                    const float timeMinutes = (distanceNm / 250.0f) * 60.0f;  // Assume 250 knots
+                    // Estimate time to cover distance at aircraft speed
+                    const float timeMinutes = (distanceNm / aircraftSpeedKnots) * 60.0f;
                     const float altitudeChange = fabs(currentAltitude - waypoint.altitudeConstraint);
-                    const float requiredRate = altitudeChange / (timeMinutes / 60.0f);
+                    const float requiredRate = altitudeChange / timeMinutes;  // ft/min
 
                     if (requiredRate > aircraftRateOfClimbFpm * 1.5f)
                     {
@@ -393,7 +382,8 @@ public:
     // Validate RNAV/RNP procedure requirements
     ValidationResult validateRnavRnp(
         const vector<XPCifpReader::WaypointWithLocation>& waypoints,
-        const string& procedureType) const
+        const string& procedureType,
+        const string& procedureName) const
     {
         ValidationResult result;
 
@@ -403,12 +393,15 @@ public:
         }
 
         // Check if this is an RNAV/RNP procedure
-        const bool isRnav = procedureType.find("RNAV") != string::npos ||
-            procedureType.find("RNP") != string::npos ||
-            procedureType.find("Q") == 0 ||  // Q routes are RNAV
-            procedureType.find("T") == 0 ||  // T routes are RNAV
-            procedureType.find("L") == 0 ||  // L routes are RNAV
-            procedureType.find("Y") == 0;    // Y routes are RNAV
+        const bool isRnav = procedureName.find("RNAV") != string::npos ||
+            procedureName.find("RNP") != string::npos ||
+            procedureName.find("GNSS") != string::npos ||
+            procedureName.find("GPS") != string::npos ||
+            procedureName.find("BRAVO") != string::npos ||
+            procedureName.rfind("Q", 0) == 0 ||  // Q routes are RNAV
+            procedureName.rfind("T", 0) == 0 ||  // T routes are RNAV
+            procedureName.rfind("L", 0) == 0 ||  // L routes are RNAV
+            procedureName.rfind("Y", 0) == 0;    // Y routes are RNAV
 
         if (!isRnav)
         {
@@ -458,18 +451,18 @@ public:
 
     // Validate missed approach procedure
     ValidationResult validateMissedApproach(
-        const vector<XPCifpReader::WaypointWithLocation>& waypoints) const
+        const vector<XPCifpReader::WaypointWithLocation>& missedWaypoints) const
     {
         ValidationResult result;
 
-        if (waypoints.empty())
+        if (missedWaypoints.empty())
         {
             result.addIssue(ValidationSeverity::Warning, "No missed approach waypoints found");
             return result;
         }
 
         // Missed approach should have at least one waypoint
-        if (waypoints.size() < 2)
+        if (missedWaypoints.size() < 2)
         {
             result.addIssue(ValidationSeverity::Warning, "Missed approach has fewer than 2 waypoints");
         }
@@ -478,9 +471,9 @@ public:
         // Standard missed approach climb gradient is 2.4% (200 ft/NM) for precision approaches
         // 2.0% (160 ft/NM) for non-precision approaches
         bool hasClimbConstraint = false;
-        for (size_t i = 0; i < waypoints.size(); ++i)
+        for (size_t i = 0; i < missedWaypoints.size(); ++i)
         {
-            const auto& waypoint = waypoints[i];
+            const auto& waypoint = missedWaypoints[i];
             if (waypoint.altitudeConstraint > 0.0f && waypoint.altitudeConstraintType == '+')
             {
                 hasClimbConstraint = true;
@@ -515,27 +508,101 @@ public:
             return result;
         }
 
-        // First waypoint should typically be IF (Initial Fix) for approaches
+        // Valid path terminator transitions per ARINC 424
+        // IF -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // TF -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // CF -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // AF -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // RF -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // DF -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // VA -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // VD -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // VI -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // VM -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // HM -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // HA -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // FC -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // FM -> TF/CF/AF/RF/DF/VA/VD/VI/VM
+        // FM -> (end)
+        
+        const unordered_map<string, vector<string>> validTransitions = {
+            {"IF", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"TF", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"CF", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"AF", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"RF", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"DF", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"VA", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"VD", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"VI", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"VM", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"HM", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"HA", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"FC", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}},
+            {"FM", {"TF", "CF", "AF", "RF", "DF", "VA", "VD", "VI", "VM"}}
+        };
+
+        // Validate transitions
+        for (size_t i = 1; i < waypoints.size(); ++i)
+        {
+            const string& prevTerm = waypoints[i - 1].pathTerminator;
+            const string& currTerm = waypoints[i].pathTerminator;
+
+            if (!prevTerm.empty() && !currTerm.empty())
+            {
+                auto it = validTransitions.find(prevTerm);
+                if (it != validTransitions.end())
+                {
+                    const auto& validNext = it->second;
+                    if (find(validNext.begin(), validNext.end(), currTerm) == validNext.end())
+                    {
+                        result.addIssue(
+                            ValidationSeverity::Warning,
+                            "Invalid path terminator transition: " + prevTerm + " -> " + currTerm,
+                            static_cast<int>(i),
+                            waypoints[i].name);
+                    }
+                }
+                else if (prevTerm != "PI")  // PI (Procedure Interface) has no defined transitions
+                {
+                    result.addIssue(
+                        ValidationSeverity::Info,
+                        "Unknown path terminator: " + prevTerm,
+                        static_cast<int>(i - 1),
+                        waypoints[i - 1].name);
+                }
+            }
+        }
+
+        // Check first waypoint for approaches - should typically be IF
         if (procedureType == "APPCH" && !waypoints.empty())
         {
-            // This is a simplified check - in real implementation, path terminators
-            // would be available in the waypoint data
-            result.addIssue(
-                ValidationSeverity::Info,
-                "Procedure type: " + procedureType);
+            const string& firstTerm = waypoints.front().pathTerminator;
+            if (!firstTerm.empty() && firstTerm != "IF" && firstTerm != "PI")
+            {
+                result.addIssue(
+                    ValidationSeverity::Info,
+                    "Approach first waypoint path terminator is " + firstTerm + " (expected IF)",
+                    0,
+                    waypoints.front().name);
+            }
         }
 
         // Last waypoint should be a runway or MAP (Missed Approach Point)
         if (procedureType == "APPCH" && waypoints.size() >= 2)
         {
             const auto& lastWaypoint = waypoints.back();
-            const auto& secondLastWaypoint = waypoints[waypoints.size() - 2];
+            
+            // Normalize runway token for comparison
+            const string normalizedName = normalizeRunwayToken(lastWaypoint.name);
+            const bool isRunway = !normalizedName.empty() &&
+                all_of(normalizedName.begin(), normalizedName.end(), ::isdigit);
+            
+            // Also check if original name starts with RW prefix
+            const string upperName = normalizeToken(lastWaypoint.name);
+            const bool hasRWPrefix = upperName.rfind("RW", 0) == 0;
 
-            // Check if last waypoint is a runway
-            const bool isRunway = lastWaypoint.name.size() >= 2 &&
-                lastWaypoint.name.substr(0, 2) == "RW";
-
-            if (!isRunway)
+            if (!isRunway && !hasRWPrefix)
             {
                 result.addIssue(
                     ValidationSeverity::Warning,
@@ -543,6 +610,16 @@ public:
             }
         }
 
+        return result;
+    }
+
+    static string normalizeRunwayToken(const string& text)
+    {
+        string result = normalizeToken(text);
+        if (result.rfind("RW", 0) == 0)
+        {
+            result.erase(0, 2);
+        }
         return result;
     }
 
@@ -583,6 +660,40 @@ public:
                     "Consecutive identical waypoints: " + waypoints[i].name,
                     static_cast<int>(i),
                     waypoints[i].name);
+            }
+        }
+
+        // Check sequence monotonicity and gaps
+        int prevSequence = -1;
+        bool hasValidSequence = false;
+        for (size_t i = 0; i < waypoints.size(); ++i)
+        {
+            const int currentSequence = waypoints[i].sequence;
+            if (currentSequence >= 0)
+            {
+                if (hasValidSequence)
+                {
+                    if (currentSequence <= prevSequence)
+                    {
+                        result.addIssue(
+                            ValidationSeverity::Error,
+                            "Sequence number not monotonically increasing: " + to_string(currentSequence) +
+                            " follows " + to_string(prevSequence),
+                            static_cast<int>(i),
+                            waypoints[i].name);
+                    }
+                    else if (currentSequence > prevSequence + 1)
+                    {
+                        result.addIssue(
+                            ValidationSeverity::Warning,
+                            "Sequence gap detected: " + to_string(prevSequence) +
+                            " -> " + to_string(currentSequence) + " (gap of " + to_string(currentSequence - prevSequence - 1) + ")",
+                            static_cast<int>(i),
+                            waypoints[i].name);
+                    }
+                }
+                prevSequence = currentSequence;
+                hasValidSequence = true;
             }
         }
 

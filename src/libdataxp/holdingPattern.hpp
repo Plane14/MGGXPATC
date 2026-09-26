@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <chrono>
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -26,20 +27,17 @@ using namespace world;
 class XPHoldingPatternReader
 {
 private:
-    struct HoldingPatternRecord
+struct HoldingPatternRecord
     {
         string ident;
         string region;
         float inboundCourse = 0.0f;      // Degrees true
-        float turnDirection = 0.0f;      // 1.0 = right, 0.0 = left, 3.0-5.0 = standard rate (degrees/sec)
+        bool isRightTurn = true;         // true = right turn, false = left turn
         float legTimeMinutes = 0.0f;     // Minutes (0 if distance-based)
         float legDistanceNm = 0.0f;      // Nautical miles (0 if time-based)
         float minimumAltitude = 0.0f;    // Feet
         float maximumAltitude = 0.0f;    // Feet (0 if no limit)
         float maximumSpeed = 0.0f;       // Knots (0 if no limit)
-        bool hasLocation = false;
-        float latitude = 0.0f;
-        float longitude = 0.0f;
     };
 
     struct Cache
@@ -47,9 +45,12 @@ private:
         unordered_map<string, vector<HoldingPatternRecord>> recordsByKey;
     };
 
+    static constexpr chrono::seconds HOLDING_CACHE_TTL = chrono::seconds(300);
+
     shared_ptr<HostServices> m_host;
     mutable shared_ptr<Cache> m_cache;
     mutable mutex m_cacheMutex;
+    mutable chrono::steady_clock::time_point m_cacheTimestamp;
 
     static string normalizeKey(const string& text)
     {
@@ -98,6 +99,34 @@ private:
         return values;
     }
 
+    static vector<string> splitWhitespace(const string& text)
+    {
+        vector<string> values;
+        string current;
+
+        for (char c : text)
+        {
+            if (isspace(static_cast<unsigned char>(c)))
+            {
+                if (!current.empty())
+                {
+                    values.push_back(trimCopy(current));
+                    current.clear();
+                }
+            }
+            else
+            {
+                current.push_back(c);
+            }
+        }
+
+        if (!current.empty())
+        {
+            values.push_back(trimCopy(current));
+        }
+        return values;
+    }
+
     static float parseFloat(const string& text, float defaultValue = 0.0f)
     {
         if (text.empty())
@@ -117,13 +146,10 @@ private:
 
     void ensureLoaded() const
     {
-        if (m_cache)
-        {
-            return;
-        }
-
         lock_guard<mutex> lock(m_cacheMutex);
-        if (m_cache)
+
+        const auto now = chrono::steady_clock::now();
+        if (m_cache && (now - m_cacheTimestamp) < HOLDING_CACHE_TTL)
         {
             return;
         }
@@ -131,6 +157,7 @@ private:
         auto cache = make_shared<Cache>();
         loadHoldData(*cache);
         m_cache = cache;
+        m_cacheTimestamp = chrono::steady_clock::now();
     }
 
     void loadHoldData(Cache& cache) const
@@ -172,7 +199,7 @@ private:
             }
 
             // Data section starts after "I" header line and version line
-            if (line[0] == 'I')
+            if (line == "I")
             {
                 inDataSection = true;
                 continue;
@@ -184,29 +211,31 @@ private:
             }
 
             // Skip terminator
-            if (line[0] == '9' || line[0] == '9' && line.size() > 1 && line[1] == '9')
+            if (line == "99")
             {
                 break;
             }
 
             // Parse holding pattern record
-            // Format: IDENT TYPE REGION BEARING TURN_RATE LEG_TIME LEG_DIST MIN_ALT MAX_ALT SPEED
-            const vector<string> fields = splitCsv(line);
-            if (fields.size() < 10)
+            // Format: IDENT REGION TERMINAL TYPE BEARING LEG_TIME LEG_DIST TURN_DIR MIN_ALT MAX_ALT SPEED
+            const vector<string> fields = splitWhitespace(line);
+            if (fields.size() < 11)
             {
                 continue;
             }
 
             HoldingPatternRecord record;
             record.ident = trimCopy(fields[0]);
-            record.region = trimCopy(fields[2]);
-            record.inboundCourse = parseFloat(trimCopy(fields[3]));
-            record.turnDirection = parseFloat(trimCopy(fields[4]));
+            record.region = trimCopy(fields[1]);
+            // earth_hold.dat layout (11 whitespace-separated columns):
+            // IDENT REGION TERMINAL TYPE BEARING LEG_TIME LEG_DIST TURN_DIR MIN_ALT MAX_ALT SPEED
+            record.inboundCourse = parseFloat(trimCopy(fields[4]));
             record.legTimeMinutes = parseFloat(trimCopy(fields[5]));
             record.legDistanceNm = parseFloat(trimCopy(fields[6]));
-            record.minimumAltitude = parseFloat(trimCopy(fields[7]));
-            record.maximumAltitude = parseFloat(trimCopy(fields[8]));
-            record.maximumSpeed = parseFloat(trimCopy(fields[9]));
+            record.isRightTurn = (!fields[7].empty() && toupper(fields[7][0]) == 'R');
+            record.minimumAltitude = parseFloat(trimCopy(fields[8]));
+            record.maximumAltitude = parseFloat(trimCopy(fields[9]));
+            record.maximumSpeed = parseFloat(trimCopy(fields[10]));
 
             const string key = normalizeKey(record.ident);
             cache.recordsByKey[key].push_back(record);
@@ -233,9 +262,6 @@ public:
         float minimumAltitude = 0.0f;    // Feet
         float maximumAltitude = 0.0f;    // Feet (0 if no limit)
         float maximumSpeed = 0.0f;       // Knots (0 if no limit)
-        bool hasLocation = false;
-        float latitude = 0.0f;
-        float longitude = 0.0f;
 
         bool isTimedLeg() const
         {
@@ -295,16 +321,13 @@ public:
             pattern.ident = record.ident;
             pattern.region = record.region;
             pattern.inboundCourse = record.inboundCourse;
-            pattern.isRightTurn = (record.turnDirection >= 1.0f);
-            pattern.turnRate = (record.turnDirection >= 3.0f) ? record.turnDirection : 3.0f;
+            pattern.isRightTurn = record.isRightTurn;
+            pattern.turnRate = 3.0f;
             pattern.legTimeMinutes = record.legTimeMinutes;
             pattern.legDistanceNm = record.legDistanceNm;
             pattern.minimumAltitude = record.minimumAltitude;
             pattern.maximumAltitude = record.maximumAltitude;
             pattern.maximumSpeed = record.maximumSpeed;
-            pattern.hasLocation = record.hasLocation;
-            pattern.latitude = record.latitude;
-            pattern.longitude = record.longitude;
 
             result.push_back(pattern);
         }
@@ -349,5 +372,17 @@ public:
 
         const string key = normalizeKey(fixIdent);
         return m_cache->recordsByKey.find(key) != m_cache->recordsByKey.end();
+    }
+
+    void clearCache() const
+    {
+        clearHoldingCache();
+    }
+
+    void clearHoldingCache() const
+    {
+        lock_guard<mutex> lock(m_cacheMutex);
+        m_cache.reset();
+        m_cacheTimestamp = chrono::steady_clock::time_point();
     }
 };

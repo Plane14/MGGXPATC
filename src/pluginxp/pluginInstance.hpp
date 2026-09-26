@@ -382,6 +382,7 @@ private:
         PluginMenu::Item m_toggleDebugLabelsItem;
         PluginMenu::Item m_toggleAirnavSchedulesItem;
         PluginMenu::Item m_togglePlanefinderSchedulesItem;
+        PluginMenu::Item m_toggleTcasItem;
         PluginMenu::Item m_time1XItem;
         PluginMenu::Item m_time10XItem;
         PluginMenu::Item m_time20XItem;
@@ -415,6 +416,7 @@ private:
             m_toggleDebugLabelsItem(_menu, "Toggle debug info in labels", [this](){ toggleAIAircraftDebugLabels(); }),
             m_toggleAirnavSchedulesItem(_menu, "Toggle AirNavRadar live schedules", [this](){ toggleAirnavSchedules(); }),
             m_togglePlanefinderSchedulesItem(_menu, "Toggle Plane Finder live schedules", [this](){ togglePlanefinderSchedules(); }),
+            m_toggleTcasItem(_menu, "Toggle TCAS targets", [this](){ toggleTcasTargets(); }),
             m_time1XItem(_menu, "Time X 1", [=](){ m_simSpeed = 1; }),
             m_time10XItem(_menu, "Time X 10", [=](){ m_simSpeed = 10; }),
             m_time20XItem(_menu, "Time X 20", [=](){ m_simSpeed = 20; }),
@@ -522,6 +524,14 @@ private:
             auto config = m_host->services().get<PluginConfiguration>();
             config->enablePlanefinderSchedules = !config->enablePlanefinderSchedules;
             m_host->writeLog("PLUGIN|Plane Finder live schedules %s", config->enablePlanefinderSchedules ? "enabled" : "disabled");
+            m_host->getWorld()->notifyConfigurationChanged();
+        }
+
+        void toggleTcasTargets()
+        {
+            auto config = m_host->services().get<PluginConfiguration>();
+            config->enableTcasTargets = !config->enableTcasTargets;
+            m_host->writeLog("PLUGIN|TCAS targets %s", config->enableTcasTargets ? "enabled" : "disabled");
             m_host->getWorld()->notifyConfigurationChanged();
         }
 

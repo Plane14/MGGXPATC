@@ -1,0 +1,197 @@
+Running main() from C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/googletest/src/gtest_main.cc
+[==========] Running 69 tests from 14 test suites.
+[----------] Global test environment set-up.
+[----------] 5 tests from AirlineReferenceTableTest
+[ RUN      ] AirlineReferenceTableTest.tryFindByIcao_success
+[       OK ] AirlineReferenceTableTest.tryFindByIcao_success (1 ms)
+[ RUN      ] AirlineReferenceTableTest.tryFindByIcao_failure
+[       OK ] AirlineReferenceTableTest.tryFindByIcao_failure (0 ms)
+[ RUN      ] AirlineReferenceTableTest.tryFindByName_success
+[       OK ] AirlineReferenceTableTest.tryFindByName_success (2 ms)
+[ RUN      ] AirlineReferenceTableTest.tryFindByFLightNumber_success
+[       OK ] AirlineReferenceTableTest.tryFindByFLightNumber_success (0 ms)
+[ RUN      ] AirlineReferenceTableTest.tryFindByFLightNumber_failure
+[       OK ] AirlineReferenceTableTest.tryFindByFLightNumber_failure (0 ms)
+[----------] 5 tests from AirlineReferenceTableTest (3 ms total)
+
+[----------] 4 tests from ControllerPositionTest
+[ RUN      ] ControllerPositionTest.receivesOnlyAddressedControllerIntents
+[       OK ] ControllerPositionTest.receivesOnlyAddressedControllerIntents (0 ms)
+[ RUN      ] ControllerPositionTest.appliesDefaultControllerScopeBoundariesByPositionType
+[       OK ] ControllerPositionTest.appliesDefaultControllerScopeBoundariesByPositionType (0 ms)
+[ RUN      ] ControllerPositionTest.clearanceDeliveryFallbackRespectsScopedFallbackPositions
+[       OK ] ControllerPositionTest.clearanceDeliveryFallbackRespectsScopedFallbackPositions (0 ms)
+[ RUN      ] ControllerPositionTest.appliesVerticalAirspaceBoundsWhenSelectingPosition
+[       OK ] ControllerPositionTest.appliesVerticalAirspaceBoundsWhenSelectingPosition (0 ms)
+[----------] 4 tests from ControllerPositionTest (1 ms total)
+
+[----------] 14 tests from TaxiPathTest
+[ RUN      ] TaxiPathTest.findClosestNodeOnRunway
+[       OK ] TaxiPathTest.findClosestNodeOnRunway (0 ms)
+[ RUN      ] TaxiPathTest.arrival_runwayToGate_straight
+[       OK ] TaxiPathTest.arrival_runwayToGate_straight (0 ms)
+[ RUN      ] TaxiPathTest.departurePathIncludesRunwayEntryFromHoldShort
+[       OK ] TaxiPathTest.departurePathIncludesRunwayEntryFromHoldShort (0 ms)
+[ RUN      ] TaxiPathTest.findPath_trivialSingleEdgeNet
+[       OK ] TaxiPathTest.findPath_trivialSingleEdgeNet (0 ms)
+[ RUN      ] TaxiPathTest.findPath_trivialTriangleNet
+[       OK ] TaxiPathTest.findPath_trivialTriangleNet (0 ms)
+[ RUN      ] TaxiPathTest.findPath_mediumSizeNet
+========================== n1 -> n7 ========================
+========================== n7 -> n1 ========================
+========================== n6 -> n1 ========================
+[       OK ] TaxiPathTest.findPath_mediumSizeNet (0 ms)
+[ RUN      ] TaxiPathTest.findPath_neverUseGroundways
+[       OK ] TaxiPathTest.findPath_neverUseGroundways (0 ms)
+[ RUN      ] TaxiPathTest.findPath_neverUseRunways
+[       OK ] TaxiPathTest.findPath_neverUseRunways (0 ms)
+[ RUN      ] TaxiPathTest.findPath_assignFlightPhaseAllocation
+[       OK ] TaxiPathTest.findPath_assignFlightPhaseAllocation (0 ms)
+[ RUN      ] TaxiPathTest.findPath_assignFlightPhaseAllocation_keepExistingAllocations
+[       OK ] TaxiPathTest.findPath_assignFlightPhaseAllocation_keepExistingAllocations (0 ms)
+[ RUN      ] TaxiPathTest.findPath_useCostFunction
+[       OK ] TaxiPathTest.findPath_useCostFunction (0 ms)
+[ RUN      ] TaxiPathTest.taxiNetFindPaths_avoidArrivalDepartureConflict
+[       OK ] TaxiPathTest.taxiNetFindPaths_avoidArrivalDepartureConflict (1 ms)
+[ RUN      ] TaxiPathTest.departureTaxiPath_backtracksOnRunwayWhenNeeded
+[       OK ] TaxiPathTest.departureTaxiPath_backtracksOnRunwayWhenNeeded (0 ms)
+[ RUN      ] TaxiPathTest.tryFindReturnsNullWhenNoPathExists
+[       OK ] TaxiPathTest.tryFindReturnsNullWhenNoPathExists (0 ms)
+[----------] 14 tests from TaxiPathTest (1 ms total)
+
+[----------] 2 tests from TaxiNodeTest
+[ RUN      ] TaxiNodeTest.findEdgeTo
+[       OK ] TaxiNodeTest.findEdgeTo (0 ms)
+[ RUN      ] TaxiNodeTest.tryFindEdge
+[       OK ] TaxiNodeTest.tryFindEdge (0 ms)
+[----------] 2 tests from TaxiNodeTest (0 ms total)
+
+[----------] 3 tests from HostServicesTest
+[ RUN      ] HostServicesTest.canGetTypeNameAtRuntime
+[       OK ] HostServicesTest.canGetTypeNameAtRuntime (0 ms)
+[ RUN      ] HostServicesTest.canUseSharedPtrOfVoid
+[       OK ] HostServicesTest.canUseSharedPtrOfVoid (0 ms)
+[ RUN      ] HostServicesTest.servicesContainer
+[       OK ] HostServicesTest.servicesContainer (0 ms)
+[----------] 3 tests from HostServicesTest (0 ms total)
+
+[----------] 12 tests from GeoMathTest
+[ RUN      ] GeoMathTest.flipHeading
+[       OK ] GeoMathTest.flipHeading (0 ms)
+[ RUN      ] GeoMathTest.headingToAngleDegrees
+[       OK ] GeoMathTest.headingToAngleDegrees (0 ms)
+[ RUN      ] GeoMathTest.getPointAtDistance
+[       OK ] GeoMathTest.getPointAtDistance (0 ms)
+[ RUN      ] GeoMathTest.getHeadingFromPoints
+[       OK ] GeoMathTest.getHeadingFromPoints (0 ms)
+[ RUN      ] GeoMathTest.getRadiansAngleFromHeadingFromPoints
+[       OK ] GeoMathTest.getRadiansAngleFromHeadingFromPoints (0 ms)
+[ RUN      ] GeoMathTest.headingToAngleRadians
+[       OK ] GeoMathTest.headingToAngleRadians (0 ms)
+[ RUN      ] GeoMathTest.getRadiansFromPoints
+[       OK ] GeoMathTest.getRadiansFromPoints (0 ms)
+[ RUN      ] GeoMathTest.calculateTurn
+[       OK ] GeoMathTest.calculateTurn (1 ms)
+[ RUN      ] GeoMathTest.isPointInRectangle_not_rotated
+[       OK ] GeoMathTest.isPointInRectangle_not_rotated (0 ms)
+[ RUN      ] GeoMathTest.isPointInRectangle_rotated_45deg
+[       OK ] GeoMathTest.isPointInRectangle_rotated_45deg (0 ms)
+[ RUN      ] GeoMathTest.isPointInRectangle_kjfk_13R
+------ABCD------
+------BCDA------
+------CDAB------
+------DABC------
+[       OK ] GeoMathTest.isPointInRectangle_kjfk_13R (0 ms)
+[ RUN      ] GeoMathTest.isPointInRectangle_eham_36R
+------ABCD------
+------BCDA------
+------CDAB------
+------DABC------
+[       OK ] GeoMathTest.isPointInRectangle_eham_36R (0 ms)
+[----------] 12 tests from GeoMathTest (1 ms total)
+
+[----------] 2 tests from UniPointTest
+[ RUN      ] UniPointTest.initGeo
+[       OK ] UniPointTest.initGeo (0 ms)
+[ RUN      ] UniPointTest.initLocal
+[       OK ] UniPointTest.initLocal (0 ms)
+[----------] 2 tests from UniPointTest (0 ms total)
+
+[----------] 4 tests from AirportTest
+[ RUN      ] AirportTest.findLongestRunway
+[       OK ] AirportTest.findLongestRunway (0 ms)
+[ RUN      ] AirportTest.findLongestParallelRunwayGroup
+[       OK ] AirportTest.findLongestParallelRunwayGroup (0 ms)
+[ RUN      ] AirportTest.clearanceDeliveryFallsBackToGroundWhenMissing
+[       OK ] AirportTest.clearanceDeliveryFallsBackToGroundWhenMissing (0 ms)
+[ RUN      ] AirportTest.findPreferredArrivalRunwayPrefersIlsCoverage
+[       OK ] AirportTest.findPreferredArrivalRunwayPrefersIlsCoverage (0 ms)
+[----------] 4 tests from AirportTest (0 ms total)
+
+[----------] 3 tests from IntentFactoryTest
+[ RUN      ] IntentFactoryTest.pilotReportHoldingShortUsesArrivalGroundDuringArrivalTaxi
+[       OK ] IntentFactoryTest.pilotReportHoldingShortUsesArrivalGroundDuringArrivalTaxi (0 ms)
+[ RUN      ] IntentFactoryTest.arrivalIntentsReturnNullWithoutControllerPositions
+[       OK ] IntentFactoryTest.arrivalIntentsReturnNullWithoutControllerPositions (0 ms)
+[ RUN      ] IntentFactoryTest.pilotReportFinalDoesNotTreatApproachAsTower
+[       OK ] IntentFactoryTest.pilotReportFinalDoesNotTreatApproachAsTower (0 ms)
+[----------] 3 tests from IntentFactoryTest (0 ms total)
+
+[----------] 2 tests from FrequencyTest
+[ RUN      ] FrequencyTest.replyCanMatchEarlierOpenConversationWhileAnotherConversationIsAlsoOpen
+[       OK ] FrequencyTest.replyCanMatchEarlierOpenConversationWhileAnotherConversationIsAlsoOpen (0 ms)
+[ RUN      ] FrequencyTest.pushToTalkCallbackExceptionsDoNotCrashTransmissionProgress
+[       OK ] FrequencyTest.pushToTalkCallbackExceptionsDoNotCrashTransmissionProgress (0 ms)
+[----------] 2 tests from FrequencyTest (0 ms total)
+
+[----------] 1 test from FlightPlanTest
+[ RUN      ] FlightPlanTest.rebuildsProcedureLegsAndCursorAdvancesThroughStoredProcedures
+[       OK ] FlightPlanTest.rebuildsProcedureLegsAndCursorAdvancesThroughStoredProcedures (1 ms)
+[----------] 1 test from FlightPlanTest (1 ms total)
+
+[----------] 6 tests from WorldTest
+[ RUN      ] WorldTest.canAddFlights
+[       OK ] WorldTest.canAddFlights (0 ms)
+[ RUN      ] WorldTest.canAddAirport
+[       OK ] WorldTest.canAddAirport (0 ms)
+[ RUN      ] WorldTest.canClearAllFlights
+[       OK ] WorldTest.canClearAllFlights (0 ms)
+[ RUN      ] WorldTest.clearAllFlights_clearsAllWorkItems
+[       OK ] WorldTest.clearAllFlights_clearsAllWorkItems (0 ms)
+[ RUN      ] WorldTest.canClearAllWorkItems
+[       OK ] WorldTest.canClearAllWorkItems (0 ms)
+[ RUN      ] WorldTest.detectAircraftInRect_handlesDatelineWrapping
+[       OK ] WorldTest.detectAircraftInRect_handlesDatelineWrapping (0 ms)
+[----------] 6 tests from WorldTest (0 ms total)
+
+[----------] 9 tests from WorldBuilderTest
+[ RUN      ] WorldBuilderTest.buildTaxiNet_singleEdge
+[       OK ] WorldBuilderTest.buildTaxiNet_singleEdge (0 ms)
+[ RUN      ] WorldBuilderTest.buildTaxiNet_triangle
+[       OK ] WorldBuilderTest.buildTaxiNet_triangle (0 ms)
+[ RUN      ] WorldBuilderTest.buildTaxiNet_hasTaxiway_hasRunways
+[       OK ] WorldBuilderTest.buildTaxiNet_hasTaxiway_hasRunways (0 ms)
+[ RUN      ] WorldBuilderTest.assembleAirport_taxiNetAndRunways
+[       OK ] WorldBuilderTest.assembleAirport_taxiNetAndRunways (0 ms)
+[ RUN      ] WorldBuilderTest.buildTaxiNet_isHighSpeedExitRunway
+[       OK ] WorldBuilderTest.buildTaxiNet_isHighSpeedExitRunway (0 ms)
+[ RUN      ] WorldBuilderTest.buildTaxiNet_runwayEdgeDirection
+[       OK ] WorldBuilderTest.buildTaxiNet_runwayEdgeDirection (0 ms)
+[ RUN      ] WorldBuilderTest.tidyAirportElevations_runways
+[       OK ] WorldBuilderTest.tidyAirportElevations_runways (0 ms)
+[ RUN      ] WorldBuilderTest.assembleAirport_detectParallelRunways_positive
+[       OK ] WorldBuilderTest.assembleAirport_detectParallelRunways_positive (0 ms)
+[ RUN      ] WorldBuilderTest.assembleAirport_detectParallelRunways_negative
+[       OK ] WorldBuilderTest.assembleAirport_detectParallelRunways_negative (1 ms)
+[----------] 9 tests from WorldBuilderTest (1 ms total)
+
+[----------] 2 tests from TaxiEdgeTest
+[ RUN      ] TaxiEdgeTest.calculateTaxiDistance
+[       OK ] TaxiEdgeTest.calculateTaxiDistance (0 ms)
+[ RUN      ] TaxiEdgeTest.flipOver
+[       OK ] TaxiEdgeTest.flipOver (0 ms)
+[----------] 2 tests from TaxiEdgeTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 69 tests from 14 test suites ran. (8 ms total)
+[  PASSED  ] 69 tests.

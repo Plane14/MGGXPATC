@@ -1,0 +1,848 @@
+Running main() from C:/Users/marti/source/repos/Plane14/MGGXPATC/libs/googletest/googletest/src/gtest_main.cc
+[==========] Running 92 tests from 6 test suites.
+[----------] Global test environment set-up.
+[----------] 35 tests from RunwayMutexTest
+[ RUN      ] RunwayMutexTest.repeatedArrivalCheckInRefreshesExistingStrip
+AT&C [+         0] Added flight: TES 101(IJKL->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+     30000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 101] number-in-line[1] rwy-state[0x0]
+AT&C [+     35000] AICONT|TWR-RWY-MUTEX[09] refreshed arrival flight[TES 101] number-in-line[1] rwy-state[0x0]
+[       OK ] RunwayMutexTest.repeatedArrivalCheckInRefreshesExistingStrip (1 ms)
+[ RUN      ] RunwayMutexTest.arrivalBlockedByCrossingRemainsQueuedForFollowingArrival
+AT&C [+         0] Added flight: TES 101(IJKL->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 103(IJKL->EFGH) aircraft id=12345 model=A319 nature=2
+AT&C [+     30000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 101] number-in-line[1] rwy-state[0x0]
+AT&C [+     45000] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 102] number-in-line[1] rwy-state[0x0]
+AT&C [+     45000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 102] to cross
+AT&C [+     60000] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 101] to land: state[0x4] INCOMPATIBLE WITH LANDING CLEARANCE
+AT&C [+     65000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 103] number-in-line[2] rwy-state[0x4]
+[       OK ] RunwayMutexTest.arrivalBlockedByCrossingRemainsQueuedForFollowingArrival (0 ms)
+[ RUN      ] RunwayMutexTest.longRun_successive_takeoffs_landings
+AT&C [+         0] Added flight: TES 101(IJKL->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 102(IJKL->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=B747 nature=2
+AT&C [+         1] Added flight: TES 104(EFGH->IJKL) aircraft id=12345 model=A319 nature=2
+AT&C [+         1] Added flight: TES 105(EFGH->IJKL) aircraft id=12345 model=B777 nature=2
+AT&C [+         1] Added flight: TES 106(EFGH->IJKL) aircraft id=12345 model=A380 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 105] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 105] to cross
+AT&C [+     25000] AICONT|TWR-RWY-MUTEX[09] crossing [TES 105] vacated, now state[0x4]
+AT&C [+     30000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 101] number-in-line[1] rwy-state[0x0]
+AT&C [+     60000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 101] to land
+AT&C [+    180000] AICONT|TWR-RWY-MUTEX[09] arrival [TES 101] vacated, now state[0x0]
+AT&C [+    230000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 102] number-in-line[1] rwy-state[0x0]
+AT&C [+    230000] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 106] number-in-line[1] rwy-state[0x0]
+AT&C [+    230000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 106] to cross
+AT&C [+    255000] AICONT|TWR-RWY-MUTEX[09] crossing [TES 106] vacated, now state[0x4]
+AT&C [+    260000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 102] to land
+AT&C [+    380000] AICONT|TWR-RWY-MUTEX[09] arrival [TES 102] vacated, now state[0x0]
+AT&C [+    400000] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 103] number-in-line[1] rwy-state[0x0]
+AT&C [+    400000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 103] for takeoff
+AT&C [+    415000] AICONT|TWR-RWY-MUTEX[09] departure [TES 103] began takeoff roll, state[0x2]
+AT&C [+    440000] AICONT|TWR-RWY-MUTEX[09] departure [TES 103] vacated, now state[0x0]
+AT&C [+    455000] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 104] number-in-line[1] rwy-state[0x0]
+AT&C [+    455000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 104] for takeoff
+AT&C [+    470000] AICONT|TWR-RWY-MUTEX[09] departure [TES 104] began takeoff roll, state[0x2]
+AT&C [+    495000] AICONT|TWR-RWY-MUTEX[09] departure [TES 104] vacated, now state[0x0]
+[       OK ] RunwayMutexTest.longRun_successive_takeoffs_landings (1 ms)
+[ RUN      ] RunwayMutexTest.longRun_goAround
+AT&C [+         0] Added flight: TES 101(IJKL->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 102(IJKL->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 103(IJKL->EFGH) aircraft id=12345 model=B747 nature=2
+AT&C [+         0] Added flight: TES 104(IJKL->EFGH) aircraft id=12345 model=A319 nature=2
+AT&C [+         0] Added flight: TES 105(EFGH->IJKL) aircraft id=12345 model=B777 nature=2
+AT&C [+         0] Added flight: TES 106(IJKL->EFGH) aircraft id=12345 model=A380 nature=2
+AT&C [+     30000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 101] number-in-line[1] rwy-state[0x0]
+AT&C [+     60000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 101] to land
+AT&C [+     80000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 102] number-in-line[1] rwy-state[0x1]
+AT&C [+    180000] AICONT|TWR-RWY-MUTEX[09] arrival [TES 101] vacated, now state[0x0]
+AT&C [+    180000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 102] to land
+AT&C [+    210000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 103] number-in-line[1] rwy-state[0x1]
+AT&C [+    230000] AICONT|TWR-RWY-MUTEX[09] arrival [TES 102] vacated, now state[0x0]
+AT&C [+    235000] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 105] number-in-line[1] rwy-state[0x0]
+AT&C [+    235000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 105] to cross
+AT&C [+    240000] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 103] to land: state[0x4] INCOMPATIBLE WITH LANDING CLEARANCE
+AT&C [+    260000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 104] number-in-line[2] rwy-state[0x4]
+AT&C [+    315000] AICONT|TWR-RWY-MUTEX[09] arrival [TES 103] stt[14] GO AROUND reason[130], state[0x4]
+AT&C [+    320000] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 104] to land: state[0x4] INCOMPATIBLE WITH LANDING CLEARANCE
+AT&C [+    355000] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 106] number-in-line[2] rwy-state[0x4]
+AT&C [+    365000] AICONT|TWR-RWY-MUTEX[09] arrival [TES 104] stt[14] GO AROUND reason[130], state[0x4]
+AT&C [+    385000] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 106] to land: state[0x4] INCOMPATIBLE WITH LANDING CLEARANCE
+AT&C [+    430000] AICONT|TWR-RWY-MUTEX[09] crossing [TES 105] vacated, now state[0x4]
+AT&C [+    430000] AICONT|TWR-RWY-MUTEX[09] clearing [TES 106] to land
+AT&C [+    500000] AICONT|TWR-RWY-MUTEX[09] arrival [TES 106] vacated, now state[0x0]
+[       OK ] RunwayMutexTest.longRun_goAround (1 ms)
+[ RUN      ] RunwayMutexTest.A__vacated_arrival_more90sec__checkIn__continue
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] Added flight: TES 102(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[2] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 102] to land
+[       OK ] RunwayMutexTest.A__vacated_arrival_more90sec__checkIn__continue (0 ms)
+[ RUN      ] RunwayMutexTest.A__vacated_arrival_1stInLine_less90sec__checkIn__clear
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] to land
+AT&C [+         0] Added flight: TES 102(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[2] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 102] to land
+[       OK ] RunwayMutexTest.A__vacated_arrival_1stInLine_less90sec__checkIn__clear (0 ms)
+[ RUN      ] RunwayMutexTest.A__vacated_arrival_checkedIn_notCleared_1stInLine__60sec__clear
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] to land
+[       OK ] RunwayMutexTest.A__vacated_arrival_checkedIn_notCleared_1stInLine__60sec__clear (0 ms)
+[ RUN      ] RunwayMutexTest.A__luaw_arrival_1stInLine_more90sec__checkIn__continue_traffic
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[1] rwy-state[0x14]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to land: state[0x14] INCOMPATIBLE WITH LANDING CLEARANCE
+[       OK ] RunwayMutexTest.A__luaw_arrival_1stInLine_more90sec__checkIn__continue_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.A__luaw_arrival_2ndInLine_more90sec__checkIn__continue
+AT&C [+         0] Added flight: TES 102(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[2] rwy-state[0x14]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] to land: state[0x14] INCOMPATIBLE WITH LANDING CLEARANCE
+[       OK ] RunwayMutexTest.A__luaw_arrival_2ndInLine_more90sec__checkIn__continue (1 ms)
+[ RUN      ] RunwayMutexTest.A__landing_more90sec__checkIn__continue_traffic
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[1] rwy-state[0x1]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to land: state[0x1] INCOMPATIBLE WITH LANDING CLEARANCE
+[       OK ] RunwayMutexTest.A__landing_more90sec__checkIn__continue_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.A__landing_15to60sec__arrivalVacates__clear
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] arrival [TES 456] vacated, now state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] to land
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] arrival [TES 456] vacated, now state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] to land
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] arrival [TES 456] vacated, now state[0x0]
+[       OK ] RunwayMutexTest.A__landing_15to60sec__arrivalVacates__clear (0 ms)
+[ RUN      ] RunwayMutexTest.A__takeoff_more90sec__checkIn__continue_traffic
+AT&C [+         0] Added flight: TES 102(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[2] rwy-state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] to land: runway occupied by [TES 456], state[0x2]
+------
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[1] rwy-state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to land: runway occupied by [TES 456], state[0x2]
+[       OK ] RunwayMutexTest.A__takeoff_more90sec__checkIn__continue_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.A__takeoff_checkedIn_notCleared_more15sec__depBeginsRoll__clear_traffic
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to land: [TES 456] departing ahead, stt[15.999999] need[111.482758], state[0x2]
+AT&C [+         0] Added flight: TES 102(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] to land: [TES 456] departing ahead, stt[8.000000] need[111.482758], state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] arrival [TES 102] stt[7] GO AROUND reason[30], state[0x2]
+[       OK ] RunwayMutexTest.A__takeoff_checkedIn_notCleared_more15sec__depBeginsRoll__clear_traffic (1 ms)
+[ RUN      ] RunwayMutexTest.A__crossing_more90sec__continue_traffic
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[1] rwy-state[0x4]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to land: state[0x4] INCOMPATIBLE WITH LANDING CLEARANCE
+AT&C [+         0] Added flight: TES 102(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added arrival flight[TES 123] number-in-line[2] rwy-state[0x4]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] to land: state[0x4] INCOMPATIBLE WITH LANDING CLEARANCE
+[       OK ] RunwayMutexTest.A__crossing_more90sec__continue_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.A__occupied_checkedIn__15sec__goAround
+AT&C [+         1] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to land: state[0x4] INCOMPATIBLE WITH LANDING CLEARANCE
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] arrival [TES 123] stt[14] GO AROUND reason[130], state[0x4]
+-------
+AT&C [+         1] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] arrival [TES 123] stt[14] GO AROUND reason[130], state[0x4]
+-------
+AT&C [+         1] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to land: runway occupied by [TES 456], state[0x2]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] arrival [TES 123] stt[14] GO AROUND reason[130], state[0x2]
+-------
+AT&C [+         1] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] arrival [TES 123] stt[14] GO AROUND reason[130], state[0x2]
+-------
+AT&C [+         1] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] arrival [TES 123] stt[14] GO AROUND reason[130], state[0x1]
+-------
+AT&C [+         1] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to land: state[0x14] INCOMPATIBLE WITH LANDING CLEARANCE
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] arrival [TES 123] stt[14] GO AROUND reason[130], state[0x14]
+-------
+AT&C [+         1] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] arrival [TES 123] stt[14] GO AROUND reason[130], state[0x14]
+-------
+AT&C [+         1] Added flight: TES 123(ABCD->EFGH) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] RUNWAY INCURSION ALERT: unauthorized occupant [TES 456] detected in active runway bounds
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] arrival [TES 123] stt[14] GO AROUND reason[130], state[0x0]
+[       OK ] RunwayMutexTest.A__occupied_checkedIn__15sec__goAround (1 ms)
+[ RUN      ] RunwayMutexTest.D__2ndInLine__checkIn__continue_in_line
+AT&C [+         0] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[2] rwy-state[0x0]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] clearing [TES 102] for takeoff
+AT&C [+         1] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[2] rwy-state[0x1]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] for takeoff: state[0x1] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         1] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[2] rwy-state[0x2]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         1] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[2] rwy-state[0x14]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] for takeoff: state[0x14] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         1] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[2] rwy-state[0x4]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] for takeoff: state[0x4] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] authorizing [TES 102] for LUAW
+[       OK ] RunwayMutexTest.D__2ndInLine__checkIn__continue_in_line (1 ms)
+[ RUN      ] RunwayMutexTest.D__vacated_1stInLine_more360sec__checkIn__clear
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] for takeoff
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] for takeoff
+[       OK ] RunwayMutexTest.D__vacated_1stInLine_more360sec__checkIn__clear (0 ms)
+[ RUN      ] RunwayMutexTest.D__vacated_1stInLine_180to360sec__checkIn__clear_traffic
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] for takeoff
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] for takeoff
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] for takeoff
+AT&C [+         1] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] for takeoff
+[       OK ] RunwayMutexTest.D__vacated_1stInLine_180to360sec__checkIn__clear_traffic (1 ms)
+[ RUN      ] RunwayMutexTest.D__vacated_1stInLine_90to180sec__checkIn__clear_immediate_traffic
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: [TES 456] landing in [91.000000] sec need[111.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT AUTHORIZE [TES 123] for LUAW: [TES 456] landing in [91.000000] sec need[119.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: [TES 456] landing in [91.000000] sec need[111.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT AUTHORIZE [TES 123] for LUAW: [TES 456] landing in [91.000000] sec need[119.482758], state[0x0]
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: [TES 456] landing in [91.000000] sec need[111.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT AUTHORIZE [TES 123] for LUAW: [TES 456] landing in [91.000000] sec need[119.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: [TES 456] landing in [91.000000] sec need[111.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT AUTHORIZE [TES 123] for LUAW: [TES 456] landing in [91.000000] sec need[119.482758], state[0x0]
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] for takeoff
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] for takeoff
+[       OK ] RunwayMutexTest.D__vacated_1stInLine_90to180sec__checkIn__clear_immediate_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.D__vacated_1stInLine_less90sec__checkIn__hold_traffic
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: [TES 456] landing in [89.000000] sec need[111.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT AUTHORIZE [TES 123] for LUAW: [TES 456] landing in [89.000000] sec need[119.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 456] to land
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x1] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: [TES 456] landing in [89.000000] sec need[111.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT AUTHORIZE [TES 123] for LUAW: [TES 456] landing in [89.000000] sec need[119.482758], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 456] to land
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x1] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+[       OK ] RunwayMutexTest.D__vacated_1stInLine_less90sec__checkIn__hold_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.D__landing__checkIn__hold_traffic
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x1]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x1] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         1] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[2] rwy-state[0x1]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] for takeoff: state[0x1] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+[       OK ] RunwayMutexTest.D__landing__checkIn__hold_traffic (1 ms)
+[ RUN      ] RunwayMutexTest.D__luaw__checkIn__hold_waitInLine
+AT&C [+         0] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[2] rwy-state[0x14]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] for takeoff: state[0x14] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x14]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x14] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x14]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x14] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 789] to land: state[0x14] INCOMPATIBLE WITH LANDING CLEARANCE
+[       OK ] RunwayMutexTest.D__luaw__checkIn__hold_waitInLine (0 ms)
+[ RUN      ] RunwayMutexTest.D__takeoff__checkIn__hold_traffic
+AT&C [+         0] Added flight: TES 102(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[2] rwy-state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 102] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x2]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 789] to land: runway occupied by [TES 456], state[0x2]
+[       OK ] RunwayMutexTest.D__takeoff__checkIn__hold_traffic (1 ms)
+[ RUN      ] RunwayMutexTest.D__rolling_takeoff__new_departure_waits_in_line
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+[       OK ] RunwayMutexTest.D__rolling_takeoff__new_departure_waits_in_line (0 ms)
+[ RUN      ] RunwayMutexTest.D__crossing_more360sec__checkIn__luaw_trafficTaxiing
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x4]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x4] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] authorizing [TES 123] for LUAW
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x4]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x4] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] authorizing [TES 123] for LUAW
+[       OK ] RunwayMutexTest.D__crossing_more360sec__checkIn__luaw_trafficTaxiing (0 ms)
+[ RUN      ] RunwayMutexTest.D__crossing_180to360sec__checkIn__luaw_trafficTaxiing_trafficFinal
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x4]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x4] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] authorizing [TES 123] for LUAW
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x4]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x4] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] authorizing [TES 123] for LUAW
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x4]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x4] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] authorizing [TES 123] for LUAW
+AT&C [+         1] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         1] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] added departure flight[TES 123] number-in-line[1] rwy-state[0x4]
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x4] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         1] AICONT|TWR-RWY-MUTEX[09] authorizing [TES 123] for LUAW
+[       OK ] RunwayMutexTest.D__crossing_180to360sec__checkIn__luaw_trafficTaxiing_trafficFinal (1 ms)
+[ RUN      ] RunwayMutexTest.D__luaw_checkedIn_1stInLine_more360sec__luawBeginsRoll__luaw_trafficDeparting
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] crossing [TES 103] vacated, now state[0x14]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 456] for takeoff
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+[       OK ] RunwayMutexTest.D__luaw_checkedIn_1stInLine_more360sec__luawBeginsRoll__luaw_trafficDeparting (0 ms)
+[ RUN      ] RunwayMutexTest.D__takeoff_checkedIn_1stInLine_more360sec__departureBeginsRoll__luaw_trafficDeparting
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+[       OK ] RunwayMutexTest.D__takeoff_checkedIn_1stInLine_more360sec__departureBeginsRoll__luaw_trafficDeparting (0 ms)
+[ RUN      ] RunwayMutexTest.D__luaw_checkedIn_1stInLine_180to360sec__luawBeginsRoll__luaw_trafficDeparting_trafficFinal
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] crossing [TES 103] vacated, now state[0x14]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 456] for takeoff
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 103(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] crossing [TES 103] vacated, now state[0x14]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 456] for takeoff
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+[       OK ] RunwayMutexTest.D__luaw_checkedIn_1stInLine_180to360sec__luawBeginsRoll__luaw_trafficDeparting_trafficFinal (0 ms)
+[ RUN      ] RunwayMutexTest.D__takeoff_checkedIn_1stInLine_180to360sec__departureBeginsRoll__luaw_trafficDeparting_trafficFinal
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] Added flight: TES 789(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] departure [TES 456] began takeoff roll, state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] for takeoff: state[0x2] INCOMPATIBLE WITH TAKEOFF CLEARANCE
+[       OK ] RunwayMutexTest.D__takeoff_checkedIn_1stInLine_180to360sec__departureBeginsRoll__luaw_trafficDeparting_trafficFinal (1 ms)
+[ RUN      ] RunwayMutexTest.C__vacated_1stInLine_more360sec__holdingShort__clear
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] to cross
+[       OK ] RunwayMutexTest.C__vacated_1stInLine_more360sec__holdingShort__clear (0 ms)
+[ RUN      ] RunwayMutexTest.C__vacated_1stInLine_more360sec__holdingShort__clear_withoutDelay_traffic
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] to cross
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 123] to cross
+[       OK ] RunwayMutexTest.C__vacated_1stInLine_more360sec__holdingShort__clear_withoutDelay_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.C__vacated_1stInLine_less90sec__holdingShort__hold_traffic
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 123] number-in-line[1] rwy-state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to cross: [TES 456] landing in [89.000000] sec need[90.000000], state[0x0]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] clearing [TES 456] to land
+[       OK ] RunwayMutexTest.C__vacated_1stInLine_less90sec__holdingShort__hold_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.C__landing_1stInLine__holdingShort__hold_traffic
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(ABCD->EFGH) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 123] number-in-line[1] rwy-state[0x1]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to cross: state[0x1] INCOMPATIBLE WITH CROSSING CLEARANCE
+[       OK ] RunwayMutexTest.C__landing_1stInLine__holdingShort__hold_traffic (0 ms)
+[ RUN      ] RunwayMutexTest.C__takeoff_1stInLine__holdingShort__hold_traffic
+AT&C [+         0] Added flight: TES 123(EFGH->IJKL) aircraft id=12345 model=B738 nature=2
+AT&C [+         0] Added flight: TES 456(EFGH->IJKL) aircraft id=12345 model=A320 nature=2
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] added crossing flight[TES 123] number-in-line[1] rwy-state[0x2]
+AT&C [+         0] AICONT|TWR-RWY-MUTEX[09] CONFLICT CANNOT CLEAR [TES 123] to cross: state[0x2] INCOMPATIBLE WITH CROSSING CLEARANCE
+[       OK ] RunwayMutexTest.C__takeoff_1stInLine__holdingShort__hold_traffic (0 ms)
+[----------] 35 tests from RunwayMutexTest (13 ms total)
+
+[----------] 26 tests from ManeuverFactoryTest
+[ RUN      ] ManeuverFactoryTest.animation_scalar
+[       OK ] ManeuverFactoryTest.animation_scalar (0 ms)
+[ RUN      ] ManeuverFactoryTest.animation_shiftedTicks
+[       OK ] ManeuverFactoryTest.animation_shiftedTicks (0 ms)
+[ RUN      ] ManeuverFactoryTest.animation_geoPoint
+[       OK ] ManeuverFactoryTest.animation_geoPoint (0 ms)
+[ RUN      ] ManeuverFactoryTest.animation_startValueFactory
+[       OK ] ManeuverFactoryTest.animation_startValueFactory (0 ms)
+[ RUN      ] ManeuverFactoryTest.awaitManeuver
+[       OK ] ManeuverFactoryTest.awaitManeuver (0 ms)
+[ RUN      ] ManeuverFactoryTest.awaitManeuver_inSequence
+[       OK ] ManeuverFactoryTest.awaitManeuver_inSequence (0 ms)
+[ RUN      ] ManeuverFactoryTest.sequential_singleChild
+[       OK ] ManeuverFactoryTest.sequential_singleChild (0 ms)
+[ RUN      ] ManeuverFactoryTest.sequential_multipleChildren
+[       OK ] ManeuverFactoryTest.sequential_multipleChildren (0 ms)
+[ RUN      ] ManeuverFactoryTest.sequential_shiftedTicks
+[       OK ] ManeuverFactoryTest.sequential_shiftedTicks (0 ms)
+[ RUN      ] ManeuverFactoryTest.sequential_getStatusString
+[       OK ] ManeuverFactoryTest.sequential_getStatusString (0 ms)
+[ RUN      ] ManeuverFactoryTest.parallel_singleChild
+[       OK ] ManeuverFactoryTest.parallel_singleChild (0 ms)
+[ RUN      ] ManeuverFactoryTest.parallel_multipleChildren
+[       OK ] ManeuverFactoryTest.parallel_multipleChildren (0 ms)
+[ RUN      ] ManeuverFactoryTest.parallel_sequencesWithDelays
+[       OK ] ManeuverFactoryTest.parallel_sequencesWithDelays (0 ms)
+[ RUN      ] ManeuverFactoryTest.parallel_sequencesWithDeferredDelays
+[       OK ] ManeuverFactoryTest.parallel_sequencesWithDeferredDelays (0 ms)
+[ RUN      ] ManeuverFactoryTest.parallel_getStatusString
+[       OK ] ManeuverFactoryTest.parallel_getStatusString (0 ms)
+[ RUN      ] ManeuverFactoryTest.deferredManeuver_instantAction
+[       OK ] ManeuverFactoryTest.deferredManeuver_instantAction (0 ms)
+[ RUN      ] ManeuverFactoryTest.taxiStraight_acceleratesFromCurrentSpeed
+[       OK ] ManeuverFactoryTest.taxiStraight_acceleratesFromCurrentSpeed (0 ms)
+[ RUN      ] ManeuverFactoryTest.aircraftProgressDoesNotDoubleApplyDirectPositionManeuver
+[       OK ] ManeuverFactoryTest.aircraftProgressDoesNotDoubleApplyDirectPositionManeuver (0 ms)
+[ RUN      ] ManeuverFactoryTest.taxiStop_deceleratesSmoothly
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/maneuverFactoryTest.cpp:890: Failure
+The difference between aircraft->groundSpeedKt() and 0.0 is 8, which exceeds 0.1, where
+aircraft->groundSpeedKt() evaluates to 8,
+0.0 evaluates to 0, and
+0.1 evaluates to 0.10000000000000001.
+[  FAILED  ] ManeuverFactoryTest.taxiStop_deceleratesSmoothly (1 ms)
+[ RUN      ] ManeuverFactoryTest.taxiTurn_rightAngleCounterClockwise
+[       OK ] ManeuverFactoryTest.taxiTurn_rightAngleCounterClockwise (0 ms)
+[ RUN      ] ManeuverFactoryTest.taxiTurn_obtuseAngleClockwise
+loc(0/3)   = 40,47.9289
+hdg(0/3)   = 90
+loc(1/3)   = 39.8296,49.223
+hdg(1/3) = 105
+loc(2/3)   = 39.3301,50.4289
+hdg(2/3) = 120
+loc(3/3)   = 38.5355,51.4645
+hdg(3/3)   = 135
+[       OK ] ManeuverFactoryTest.taxiTurn_obtuseAngleClockwise (0 ms)
+[ RUN      ] ManeuverFactoryTest.taxiTurn_kjfk_1
+[       OK ] ManeuverFactoryTest.taxiTurn_kjfk_1 (0 ms)
+[ RUN      ] ManeuverFactoryTest.taxiByPath
+t=1000 > 0, 0, 74.6602
+t=2000 > 1.31523e-05, 5.26093e-05, 74.6602
+t=3000 > 2.63046e-05, 0.000105219, 74.6602
+t=4000 > 3.94569e-05, 0.000157828, 74.6602
+t=5000 > 5.26093e-05, 0.000210437, 74.6602
+t=6000 > 6.57616e-05, 0.000263046, 74.6602
+t=7000 > 7.89139e-05, 0.000315656, 74.6602
+t=8000 > 9.20662e-05, 0.000368265, 74.6602
+t=9000 > 0.000105219, 0.000420874, 74.6602
+t=10000 > 0.000118371, 0.000473483, 74.6602
+t=11000 > 0.000131523, 0.000526093, 74.6602
+t=12000 > 0.000144675, 0.000578702, 74.6602
+t=13000 > 0.000157828, 0.000631311, 74.6602
+t=14000 > 0.00017098, 0.00068392, 74.6602
+t=15000 > 0.000184132, 0.00073653, 74.6602
+t=16000 > 0.000197285, 0.000789139, 74.6602
+t=17000 > 0.000210437, 0.000841748, 74.6602
+t=18000 > 0.000223589, 0.000894357, 74.6602
+t=19000 > 0.000236742, 0.000946967, 74.6602
+t=20000 > 0.000249894, 0.000999576, 74.6602
+t=21000 > 0.000263046, 0.00105219, 74.6602
+t=22000 > 0.000276199, 0.00110479, 74.6602
+t=23000 > 0.000289351, 0.0011574, 74.6602
+t=24000 > 0.000302503, 0.00121001, 74.6602
+t=25000 > 0.000315656, 0.00126262, 74.6602
+t=26000 > 0.000328808, 0.00131523, 74.6602
+t=27000 > 0.00034196, 0.00136784, 74.6602
+t=28000 > 0.000355113, 0.00142045, 74.6602
+t=29000 > 0.000368265, 0.00147306, 74.6602
+t=30000 > 0.000381417, 0.00152567, 74.6602
+t=31000 > 0.000394569, 0.00157828, 74.6602
+t=32000 > 0.000407722, 0.00163089, 74.6602
+t=33000 > 0.000420874, 0.0016835, 74.6602
+t=34000 > 0.000434026, 0.00173611, 74.6602
+t=35000 > 0.000447179, 0.00178871, 74.6602
+t=36000 > 0.000460331, 0.00184132, 74.6602
+t=37000 > 0.000473483, 0.00189393, 74.6602
+t=38000 > 0.000486636, 0.00194654, 74.6602
+t=39000 > 0.000499788, 0.00199915, 74.6602
+t=40000 > 0.00051294, 0.00205176, 74.6602
+t=41000 > 0.000526093, 0.00210437, 74.6602
+t=42000 > 0.000539245, 0.00215698, 74.6602
+t=43000 > 0.000552397, 0.00220959, 74.6602
+t=44000 > 0.00056555, 0.0022622, 74.6602
+t=45000 > 0.000578702, 0.00231481, 74.6602
+t=46000 > 0.000591854, 0.00236742, 74.6602
+t=47000 > 0.000605007, 0.00242003, 74.6602
+t=48000 > 0.000618159, 0.00247264, 74.6602
+t=49000 > 0.000631311, 0.00252524, 74.6602
+t=50000 > 0.000644463, 0.00257785, 74.6602
+t=51000 > 0.000657616, 0.00263046, 74.6602
+t=52000 > 0.000670768, 0.00268307, 74.6602
+t=53000 > 0.00068392, 0.00273568, 74.6602
+t=54000 > 0.000697073, 0.00278829, 74.6602
+t=55000 > 0.000710225, 0.0028409, 74.6602
+t=56000 > 0.000723377, 0.00289351, 74.6602
+t=57000 > 0.00073653, 0.00294612, 74.6602
+t=58000 > 0.000749682, 0.00299873, 74.6602
+t=59000 > 0.000762834, 0.00305134, 74.6602
+t=60000 > 0.000775987, 0.00310395, 74.6602
+t=61000 > 0.000789139, 0.00315656, 74.6602
+t=62000 > 0.000802291, 0.00320917, 74.6602
+t=63000 > 0.000815444, 0.00326177, 74.6602
+t=64000 > 0.000828596, 0.00331438, 74.6602
+t=65000 > 0.000841748, 0.00336699, 74.6602
+t=66000 > 0.000854901, 0.0034196, 74.6602
+t=67000 > 0.000868053, 0.00347221, 74.6602
+t=68000 > 0.000881205, 0.00352482, 74.6602
+t=69000 > 0.000894357, 0.00357743, 74.6602
+t=70000 > 0.00090751, 0.00363004, 74.6602
+t=71000 > 0.000920662, 0.00368265, 74.6602
+t=72000 > 0.000933814, 0.00373526, 74.6602
+t=73000 > 0.000946967, 0.00378787, 74.6602
+t=74000 > 0.000960119, 0.00384048, 74.6602
+t=75000 > 0.000973271, 0.00389309, 74.6602
+t=76000 > 0.000986424, 0.00394569, 74.6602
+t=77000 > 0.000999576, 0.0039983, 74.6602
+t=78000 > 0.00101273, 0.00405091, 74.6602
+t=79000 > 0.00102588, 0.00410352, 74.6602
+t=80000 > 0.00103903, 0.00415613, 74.6602
+t=81000 > 0.00105219, 0.00420874, 74.6602
+t=82000 > 0.00106534, 0.00426135, 74.6602
+t=83000 > 0.00107849, 0.00431396, 74.6602
+t=84000 > 0.00109164, 0.00436657, 74.6602
+t=85000 > 0.00110479, 0.00441918, 74.6602
+t=86000 > 0.00111795, 0.00447179, 74.6602
+t=87000 > 0.0011311, 0.0045244, 74.6602
+t=88000 > 0.00114425, 0.00457701, 74.6602
+t=89000 > 0.0011574, 0.00462962, 74.6602
+t=90000 > 0.00117056, 0.00468222, 74.6602
+t=91000 > 0.00118371, 0.00473483, 74.6602
+t=92000 > 0.00119686, 0.00478744, 74.6602
+t=93000 > 0.00121001, 0.00484005, 74.6602
+t=94000 > 0.00122317, 0.00489266, 74.6602
+t=95000 > 0.00123632, 0.00494527, 74.6602
+t=96000 > 0.00124947, 0.00499788, 74.6602
+t=97000 > 0.00126262, 0.00505049, 74.6602
+t=98000 > 0.00127577, 0.0051031, 74.6602
+t=99000 > 0.00128893, 0.00515571, 74.6602
+[       OK ] ManeuverFactoryTest.taxiByPath (1 ms)
+[ RUN      ] ManeuverFactoryTest.obstacleScanSemaphore_detectsHeadOnTraffic
+[       OK ] ManeuverFactoryTest.obstacleScanSemaphore_detectsHeadOnTraffic (0 ms)
+[ RUN      ] ManeuverFactoryTest.obstacleScanSemaphore_arrivalTreatsDepartureAheadAsObstacle
+[       OK ] ManeuverFactoryTest.obstacleScanSemaphore_arrivalTreatsDepartureAheadAsObstacle (0 ms)
+[ RUN      ] ManeuverFactoryTest.obstacleScanSemaphore_pushbackTimeoutEventuallyOpens
+[       OK ] ManeuverFactoryTest.obstacleScanSemaphore_pushbackTimeoutEventuallyOpens (0 ms)
+[----------] 26 tests from ManeuverFactoryTest (4 ms total)
+
+[----------] 1 test from StaleCrossClearanceTest
+[ RUN      ] StaleCrossClearanceTest.staleClearanceIsRemovedAtStartOfSecondCrossing
+[       OK ] StaleCrossClearanceTest.staleClearanceIsRemovedAtStartOfSecondCrossing (1 ms)
+[----------] 1 test from StaleCrossClearanceTest (1 ms total)
+
+[----------] 7 tests from DepartureRunwayNormalizationTest
+[ RUN      ] DepartureRunwayNormalizationTest.groundControllerHandsOffUnpaddedDepartureRunway
+[       OK ] DepartureRunwayNormalizationTest.groundControllerHandsOffUnpaddedDepartureRunway (0 ms)
+[ RUN      ] DepartureRunwayNormalizationTest.localControllerResolvesUnpaddedRunwayMutex
+[       OK ] DepartureRunwayNormalizationTest.localControllerResolvesUnpaddedRunwayMutex (0 ms)
+[ RUN      ] DepartureRunwayNormalizationTest.departureTowerLookupFallsBackWhenLocalMissing
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/departureRunwayNormalizationTest.cpp:186: Failure
+Expected equality of these values:
+  tower->type()
+    Which is: 4-byte object <03-00 00-00>
+  ControllerPosition::Type::Departure
+    Which is: 4-byte object <05-00 00-00>
+[  FAILED  ] DepartureRunwayNormalizationTest.departureTowerLookupFallsBackWhenLocalMissing (0 ms)
+[ RUN      ] DepartureRunwayNormalizationTest.takeoffClearanceFallsBackWhenLocalMissing
+[       OK ] DepartureRunwayNormalizationTest.takeoffClearanceFallsBackWhenLocalMissing (0 ms)
+[ RUN      ] DepartureRunwayNormalizationTest.pushAndStartApprovalEndsAtTaxiStart
+[       OK ] DepartureRunwayNormalizationTest.pushAndStartApprovalEndsAtTaxiStart (0 ms)
+[ RUN      ] DepartureRunwayNormalizationTest.landingClearanceDoesNotFallBackToApproachWhenLocalMissing
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/departureRunwayNormalizationTest.cpp:279: Failure
+Expected equality of these values:
+  landingClearance
+    Which is: 16-byte object <60-54 55-49 D5-01 00-00 60-26 56-49 D5-01 00-00>
+  nullptr
+    Which is: (nullptr)
+[  FAILED  ] DepartureRunwayNormalizationTest.landingClearanceDoesNotFallBackToApproachWhenLocalMissing (0 ms)
+[ RUN      ] DepartureRunwayNormalizationTest.automaticHandoffIsNotQueuedTwice
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/departureRunwayNormalizationTest.cpp:327: Failure
+Expected equality of these values:
+  handoffTransmissions
+    Which is: 0
+  1
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/departureRunwayNormalizationTest.cpp:328: Failure
+Expected equality of these values:
+  groundController.m_departureTaxiHandedOffToTower.count(flight)
+    Which is: 0
+  1u
+    Which is: 1
+[  FAILED  ] DepartureRunwayNormalizationTest.automaticHandoffIsNotQueuedTwice (0 ms)
+[----------] 7 tests from DepartureRunwayNormalizationTest (0 ms total)
+
+[----------] 9 tests from AircraftPerformanceTableTest
+[ RUN      ] AircraftPerformanceTableTest.parsesDoc8643As50PerformanceData
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aircraftPerformanceTableTest.cpp:52: Failure
+Expected equality of these values:
+  profile.approachSpeedKt
+    Which is: 65
+  70.0f
+    Which is: 70
+[  FAILED  ] AircraftPerformanceTableTest.parsesDoc8643As50PerformanceData (1 ms)
+[ RUN      ] AircraftPerformanceTableTest.parsesDoc8643Dc3PerformanceData
+[       OK ] AircraftPerformanceTableTest.parsesDoc8643Dc3PerformanceData (0 ms)
+[ RUN      ] AircraftPerformanceTableTest.parsesDoc8643F22PerformanceData
+[       OK ] AircraftPerformanceTableTest.parsesDoc8643F22PerformanceData (0 ms)
+[ RUN      ] AircraftPerformanceTableTest.classifiesHelicopterFamiliesFromIcao
+[       OK ] AircraftPerformanceTableTest.classifiesHelicopterFamiliesFromIcao (0 ms)
+[ RUN      ] AircraftPerformanceTableTest.usesDeterministicFallbackForCommonProfilesWithoutHostAccess
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aircraftPerformanceTableTest.cpp:100: Failure
+Expected: (jetProfile.approachSpeedKt) > (180.0f), actual: 145 vs 180
+[  FAILED  ] AircraftPerformanceTableTest.usesDeterministicFallbackForCommonProfilesWithoutHostAccess (0 ms)
+[ RUN      ] AircraftPerformanceTableTest.excludesRegionalAirlinerTurbopropsFromGaTraffic
+[       OK ] AircraftPerformanceTableTest.excludesRegionalAirlinerTurbopropsFromGaTraffic (0 ms)
+[ RUN      ] AircraftPerformanceTableTest.usesDistinctTakeoffProfilesForJetAndTurboprop
+[       OK ] AircraftPerformanceTableTest.usesDistinctTakeoffProfilesForJetAndTurboprop (0 ms)
+[ RUN      ] AircraftPerformanceTableTest.usesDistinctLandingProfilesForJetAndLightProp
+[       OK ] AircraftPerformanceTableTest.usesDistinctLandingProfilesForJetAndLightProp (0 ms)
+[ RUN      ] AircraftPerformanceTableTest.helicoptersCanOperateWithoutRunwayLengthConstraint
+[       OK ] AircraftPerformanceTableTest.helicoptersCanOperateWithoutRunwayLengthConstraint (0 ms)
+[----------] 9 tests from AircraftPerformanceTableTest (1 ms total)
+
+[----------] 14 tests from AIPilotTest
+[ RUN      ] AIPilotTest.flightCycleIncludesFinalApproachHandoff
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:362: Failure
+Expected equality of these values:
+  childCount
+    Which is: 12
+  11u
+    Which is: 11
+[  FAILED  ] AIPilotTest.flightCycleIncludesFinalApproachHandoff (0 ms)
+[ RUN      ] AIPilotTest.finalToGateStartsWithFinalAndLanding
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:398: Failure
+Expected equality of these values:
+  firstChild->id()
+    Which is: ""
+  "final"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:402: Failure
+Value of: secondChild->isProxy()
+  Actual: false
+Expected: true
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:403: Failure
+Value of: secondChild->id().empty()
+  Actual: false
+Expected: true
+[  FAILED  ] AIPilotTest.finalToGateStartsWithFinalAndLanding (0 ms)
+[ RUN      ] AIPilotTest.finalToGateIncludesStarAndApproachWhenAvailable
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:446: Failure
+Expected equality of these values:
+  firstChild->id()
+    Which is: ""
+  "star_leg"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:450: Failure
+Expected equality of these values:
+  secondChild->id()
+    Which is: "star_leg"
+  "approach_leg"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:454: Failure
+Expected equality of these values:
+  thirdChild->id()
+    Which is: "approach_leg"
+  "final"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:458: Failure
+Value of: fourthChild->isProxy()
+  Actual: false
+Expected: true
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:459: Failure
+Value of: fourthChild->id().empty()
+  Actual: false
+Expected: true
+[  FAILED  ] AIPilotTest.finalToGateIncludesStarAndApproachWhenAvailable (1 ms)
+[ RUN      ] AIPilotTest.fighterFlightCycleIncludesUnrestrictedClimboutWhenHostRandomAllowsIt
+[       OK ] AIPilotTest.fighterFlightCycleIncludesUnrestrictedClimboutWhenHostRandomAllowsIt (0 ms)
+[ RUN      ] AIPilotTest.fighterWingmanFlightCycleSkipsOwnIfrAndUnrestrictedClimbout
+[       OK ] AIPilotTest.fighterWingmanFlightCycleSkipsOwnIfrAndUnrestrictedClimbout (0 ms)
+[ RUN      ] AIPilotTest.helicopterFlightCycleUsesRunwayFreeHelipadRoutingWhenNoRunwaysAreAssigned
+[       OK ] AIPilotTest.helicopterFlightCycleUsesRunwayFreeHelipadRoutingWhenNoRunwaysAreAssigned (0 ms)
+[ RUN      ] AIPilotTest.finalToGateIncludesBridgeLegBetweenStarAndApproachWhenNeeded
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:590: Failure
+Expected equality of these values:
+  firstChild->id()
+    Which is: ""
+  "star_leg"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:594: Failure
+Expected equality of these values:
+  secondChild->id()
+    Which is: "star_leg"
+  "arrival_bridge_leg"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:598: Failure
+Expected equality of these values:
+  thirdChild->id()
+    Which is: "arrival_bridge_leg"
+  "approach_leg"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:602: Failure
+Expected equality of these values:
+  fourthChild->id()
+    Which is: "approach_leg"
+  "final"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:606: Failure
+Value of: fifthChild->isProxy()
+  Actual: false
+Expected: true
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:607: Failure
+Value of: fifthChild->id().empty()
+  Actual: false
+Expected: true
+[  FAILED  ] AIPilotTest.finalToGateIncludesBridgeLegBetweenStarAndApproachWhenNeeded (0 ms)
+[ RUN      ] AIPilotTest.arrivalAircraftCannotTouchDownBeforePassingThreshold
+[       OK ] AIPilotTest.arrivalAircraftCannotTouchDownBeforePassingThreshold (0 ms)
+[ RUN      ] AIPilotTest.lecoArrivalFlowReachesIdotuAndStaysTerrainSafe
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:795: Failure
+Expected equality of these values:
+  bridgeLeg->toNavaid()
+    Which is: "CO05W"
+  "IDOTU"
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:798: Failure
+Expected equality of these values:
+  firstApproachLeg->fromNavaid()
+    Which is: "CO05W"
+  "IDOTU"
+[  FAILED  ] AIPilotTest.lecoArrivalFlowReachesIdotuAndStaysTerrainSafe (1 ms)
+[ RUN      ] AIPilotTest.setOnFinalStartsOnInboundStarLegHeadingTowardAirport
+[       OK ] AIPilotTest.setOnFinalStartsOnInboundStarLegHeadingTowardAirport (0 ms)
+[ RUN      ] AIPilotTest.setOnFinalMovesLaterArrivalBehindExistingTraffic
+[       OK ] AIPilotTest.setOnFinalMovesLaterArrivalBehindExistingTraffic (1 ms)
+[ RUN      ] AIPilotTest.approachProcedureSpeedUsesAircraftPerformanceProfile
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:948: Failure
+Expected: (lightAircraft->groundSpeedKt()) < (jetAircraft->groundSpeedKt()), actual: 0 vs 0
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:950: Failure
+Expected: (jetAircraft->groundSpeedKt()) > (180.0), actual: 0 vs 180
+[  FAILED  ] AIPilotTest.approachProcedureSpeedUsesAircraftPerformanceProfile (0 ms)
+[ RUN      ] AIPilotTest.arrivalDescentClampsToTerrainBeforePenetratingIt
+C:/Users/marti/source/repos/Plane14/MGGXPATC/src/libai_test/aiPilotTest.cpp:983: Failure
+Expected equality of these values:
+  aircraft->altitude().type()
+    Which is: 4-byte object <01-00 00-00>
+  Altitude::Type::Ground
+    Which is: 4-byte object <00-00 00-00>
+[  FAILED  ] AIPilotTest.arrivalDescentClampsToTerrainBeforePenetratingIt (0 ms)
+[ RUN      ] AIPilotTest.departureClimbLeavesGroundBasedAltitudeDuringSIDTransition
+[       OK ] AIPilotTest.departureClimbLeavesGroundBasedAltitudeDuringSIDTransition (0 ms)
+[----------] 14 tests from AIPilotTest (3 ms total)
+
+[----------] Global test environment tear-down
+[==========] 92 tests from 6 test suites ran. (22 ms total)
+[  PASSED  ] 79 tests.
+[  FAILED  ] 13 tests, listed below:
+[  FAILED  ] ManeuverFactoryTest.taxiStop_deceleratesSmoothly
+[  FAILED  ] DepartureRunwayNormalizationTest.departureTowerLookupFallsBackWhenLocalMissing
+[  FAILED  ] DepartureRunwayNormalizationTest.landingClearanceDoesNotFallBackToApproachWhenLocalMissing
+[  FAILED  ] DepartureRunwayNormalizationTest.automaticHandoffIsNotQueuedTwice
+[  FAILED  ] AircraftPerformanceTableTest.parsesDoc8643As50PerformanceData
+[  FAILED  ] AircraftPerformanceTableTest.usesDeterministicFallbackForCommonProfilesWithoutHostAccess
+[  FAILED  ] AIPilotTest.flightCycleIncludesFinalApproachHandoff
+[  FAILED  ] AIPilotTest.finalToGateStartsWithFinalAndLanding
+[  FAILED  ] AIPilotTest.finalToGateIncludesStarAndApproachWhenAvailable
+[  FAILED  ] AIPilotTest.finalToGateIncludesBridgeLegBetweenStarAndApproachWhenNeeded
+[  FAILED  ] AIPilotTest.lecoArrivalFlowReachesIdotuAndStaysTerrainSafe
+[  FAILED  ] AIPilotTest.approachProcedureSpeedUsesAircraftPerformanceProfile
+[  FAILED  ] AIPilotTest.arrivalDescentClampsToTerrainBeforePenetratingIt
+
+13 FAILED TESTS
