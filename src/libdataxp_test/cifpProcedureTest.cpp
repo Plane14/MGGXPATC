@@ -66,7 +66,7 @@ namespace
         static string sampleCifp()
         {
             return
-                "SID:010,4,BANNG3,RW08B, , , , ,    , ,   ,VA, , , , , ,      ,    ,    ,0950,    ,+,01430,     ,18000, ,   ,    ,   , , , , , , ,J,S;\n"
+                "SID:010,4,BANNG3,RW08B, , , , ,    , ,   ,VI, , , , , ,      ,    ,    ,0950,    ,+,01430,     ,18000, ,   ,    ,   , , , , , , ,J,S;\n"
                 "SID:020,4,BANNG3,RW08B,SKNNR,K7,P,C,E   , ,   ,DF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , ,J,S;\n"
                 "SID:030,4,BANNG3,RW08B,GRITZ,K7,P,C,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,     ,     ,     , ,   ,    ,   , , , , , , , ,J,S;\n"
                 "SID:040,4,BANNG3,RW08B,HYZMN,K7,E,A,E   , ,   ,TF, , , , , ,      ,    ,    ,    ,    , ,250,    ,   , , , , , , , ,J,S;\n"

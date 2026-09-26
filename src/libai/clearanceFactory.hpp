@@ -254,7 +254,43 @@ namespace ai
             auto airport = getArrivalAirport(flight);
             airport->getRunwayEndOrThrow(runwayName);
 
-            auto controller = resolveArrivalTowerPosition(flight, flight->aircraft()->location());
+            auto controller = [&]() -> shared_ptr<ControllerPosition> {
+                const GeoPoint location = flight->aircraft()->location();
+
+                try
+                {
+                    if (auto local = airport->localAt(location))
+                    {
+                        return local;
+                    }
+                }
+                catch (const exception&)
+                {
+                }
+
+                auto tower = airport->tower();
+                if (!tower)
+                {
+                    return nullptr;
+                }
+
+                if (auto departure = tower->tryFindPosition(ControllerPosition::Type::Departure, location))
+                {
+                    return departure;
+                }
+
+                if (auto ground = tower->tryFindPosition(ControllerPosition::Type::Ground, location))
+                {
+                    return ground;
+                }
+
+                if (auto delivery = tower->tryFindPosition(ControllerPosition::Type::ClearanceDelivery, location))
+                {
+                    return delivery;
+                }
+
+                return nullptr;
+            }();
             if (!controller)
             {
                 return nullptr;
@@ -365,7 +401,8 @@ namespace ai
             const vector<ControllerPosition::Type> fallbackTypes = {
                 ControllerPosition::Type::Local,
                 ControllerPosition::Type::Departure,
-                ControllerPosition::Type::Approach
+                ControllerPosition::Type::Ground,
+                ControllerPosition::Type::ClearanceDelivery
             };
 
             for (const auto fallbackType : fallbackTypes)
@@ -406,27 +443,9 @@ namespace ai
                 return nullptr;
             }
 
-            // At many airports the Local position may not cover the aircraft's
-            // current location (e.g. it is still on approach).  Fall through
-            // Approach and Departure positions before giving up, mirroring the
-            // departure-side fallback logic.
-            const vector<ControllerPosition::Type> arrivalFallbacks = {
-                ControllerPosition::Type::Local,
-                ControllerPosition::Type::Approach,
-                ControllerPosition::Type::Departure
-            };
-
-            for (const auto fallbackType : arrivalFallbacks)
+            if (auto departure = tower->tryFindPosition(ControllerPosition::Type::Departure, location))
             {
-                if (auto fallback = tower->tryFindPosition(fallbackType, location))
-                {
-                    return fallback;
-                }
-            }
-
-            if (!tower->positions().empty())
-            {
-                return tower->positions().front();
+                return departure;
             }
 
             return nullptr;

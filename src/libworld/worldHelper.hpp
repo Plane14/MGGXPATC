@@ -265,6 +265,14 @@ namespace world
                 ControllerPosition::Type::Approach
             };
 
+            for (const auto& position : tower->positions())
+            {
+                if (position && position->type() == ControllerPosition::Type::Departure)
+                {
+                    return position;
+                }
+            }
+
             for (const auto fallbackType : fallbackTypes)
             {
                 if (auto fallback = tower->tryFindPosition(fallbackType, location, altitudeMslFeet))

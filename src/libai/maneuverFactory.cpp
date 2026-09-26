@@ -463,8 +463,8 @@ namespace ai
                 return instantAction([]{});
             }
 
-            const float brakeRate = max(4.0f, aircraft->performanceProfile().landingRolloutDecelerationKtPerSecond * 0.6f);
-            const auto duration = chrono::milliseconds(max(500, static_cast<int>(1000.0f * startSpeedKnots / brakeRate)));
+            const float brakeRate = max(7.0f, aircraft->performanceProfile().landingRolloutDecelerationKtPerSecond * 0.9f);
+            const auto duration = chrono::milliseconds(max(500, static_cast<int>(750.0f * startSpeedKnots / brakeRate)));
 
             return shared_ptr<Maneuver>(new AnimationManeuver<double>(
                 "taxi_stop",
