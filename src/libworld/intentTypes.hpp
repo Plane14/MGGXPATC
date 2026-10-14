@@ -1055,6 +1055,73 @@ namespace world
         int groundKhz() const { return m_groundKhz; }
     };
 
+    class TowerClearedForApproachIntent : public Intent
+    {
+    public:
+        static constexpr int IntentCode = 1195;
+    private:
+        bool m_cleared;
+        shared_ptr<ApproachClearance> m_clearance;
+        vector<TrafficAdvisory> m_traffic;
+    public:
+        TowerClearedForApproachIntent(
+            uint64_t _id,
+            uint64_t _replyToId,
+            shared_ptr<ControllerPosition> tower,
+            shared_ptr<Flight> flight, 
+            bool _cleared, 
+            shared_ptr<ApproachClearance> _clearance,
+            const vector<TrafficAdvisory>& _traffic
+        ) : Intent(
+                _id,
+                _replyToId,
+                Direction::ControllerToPilot, 
+                Type::Clearance, 
+                IntentCode,
+                ConversationState::Continue,
+                tower,
+                flight
+            ),
+            m_cleared(_cleared),
+            m_clearance(_clearance),
+            m_traffic(_traffic)
+        {
+        }
+    public:
+        bool cleared() const { return m_cleared; }
+        shared_ptr<ApproachClearance> clearance() const { return m_clearance; }
+        const vector<TrafficAdvisory>& traffic() const { return m_traffic; }
+    };
+
+    class PilotApproachClearanceReadbackIntent : public Intent
+    {
+    public:
+        static constexpr int IntentCode = 1196;
+    private:
+        shared_ptr<ApproachClearance> m_clearance;
+    public:
+        PilotApproachClearanceReadbackIntent(
+            uint64_t _id,
+            uint64_t _replyToId,
+            shared_ptr<ApproachClearance> _clearance
+        ) : Intent(
+                _id,
+                _replyToId,
+                Direction::PilotToController, 
+                Type::ClearanceReadback, 
+                IntentCode,
+                ConversationState::End,
+                _clearance->header().issuedBy,
+                _clearance->header().issuedTo
+            ),
+            m_clearance(_clearance)
+        {
+        }
+    public:
+        shared_ptr<ApproachClearance> clearance() const { return m_clearance; }
+        bool isCritical() const override { return true; }
+    };
+
     class PilotLandingClearanceReadbackIntent : public Intent
     {
     public:

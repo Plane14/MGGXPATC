@@ -53,6 +53,8 @@ namespace ai
         bool m_arrivalTowerCheckInDone = false;
         bool m_departureRadarCheckInDone = false;
         bool m_arrivalRadarCheckInDone = false;
+        bool m_uncontrolledArrivalLanding = false;
+        bool m_arrivalTowerRadarCheckInDone = false;
         bool m_stoppedBeforeTakeoff = false;
         bool m_doUnrestrictedClimbout = false;
     public:
@@ -95,9 +97,12 @@ namespace ai
         {
             return maneuverHelipadArrivalToGate(landingStand);
         }
-        void progressTo(chrono::microseconds timestamp) override 
+        void progressTo(chrono::microseconds timestamp) override
         {
-            //TODO
+            // Intentionally a no-op: this pilot's behaviour lives in the maneuver tree
+            // returned from getFlightCycle()/getFinalToGate(), which AIAircraft::progressTo
+            // advances each tick before this hook is called. Time-deferred work is
+            // scheduled through World::deferBy instead.
         }
         string getStatusString() const override
         {
@@ -231,11 +236,38 @@ namespace ai
                 case GroundArrivalTaxiReplyIntent::IntentCode:
                     newClearance = dynamic_pointer_cast<GroundArrivalTaxiReplyIntent>(intent)->clearance();
                     break;
+                case TowerClearedForApproachIntent::IntentCode:
+                    {
+                        auto approachClearance = dynamic_pointer_cast<TowerClearedForApproachIntent>(intent)->clearance();
+                        m_arrivalGroundKhz = approachClearance->groundKhz();
+                        flight()->setArrivalRunway(approachClearance->runway());
+                        m_continueApproach = false;
+                        m_finalReportedTimestamp = chrono::microseconds(0);
+                        m_arrivalTowerCheckInDone = false;
+                        newClearance = approachClearance;
+                    }
+                    break;
                 }
 
                 if (newClearance)
                 {
                     flight()->addClearance(newClearance);
+                }
+
+                // Approach clearances are answered straight away: the pilot has no
+                // maneuver tick to rely on here, so enqueue the readback on the
+                // aircraft's own frequency exactly like ManeuverFactory::transmitIntent
+                // does (a short silence, then push-to-talk).
+                if (intent->code() == TowerClearedForApproachIntent::IntentCode)
+                {
+                    auto approachClearance =
+                        dynamic_pointer_cast<TowerClearedForApproachIntent>(intent)->clearance();
+                    if (approachClearance && aircraft()->frequency())
+                    {
+                        aircraft()->frequency()->enqueuePushToTalk(
+                            chrono::milliseconds(150),
+                            I.pilotApproachClearanceReadback(approachClearance, m_lastReceivedIntentId));
+                    }
                 }
             }
         }
@@ -251,6 +283,33 @@ namespace ai
             });
 
             return value;
+        }
+
+        // Reduce runway designators to a canonical key so a waypoint stored as "RW03"
+        // is found when queried as "03" (and vice versa). Only names that begin with an
+        // "RW" prefix followed by a runway designator (digits with an optional single
+        // L/R/C suffix) are reduced; every other name is returned unchanged so ordinary
+        // waypoint lookups keep their exact-name behaviour.
+        static string waypointRunwayAliasKey(const string& normalizedName)
+        {
+            if (normalizedName.rfind("RW", 0) != 0)
+            {
+                return normalizedName;
+            }
+
+            const string designator = normalizedName.substr(2);
+            size_t digitCount = 0;
+            while (digitCount < designator.size() &&
+                isdigit(static_cast<unsigned char>(designator[digitCount])))
+            {
+                ++digitCount;
+            }
+
+            const bool hasRunwayDesignator =
+                digitCount >= 1 &&
+                (designator.size() == digitCount || designator.size() == digitCount + 1);
+
+            return hasRunwayDesignator ? designator : normalizedName;
         }
 
         static bool tryFindWaypointLocation(
@@ -297,6 +356,47 @@ namespace ai
             if (found)
             {
                 location = bestLocation;
+                return true;
+            }
+
+            // No exact-name match: resolve runway-designator aliases so a waypoint
+            // stored as "RW03" is found when queried as "03". Exact (non-runway) lookups
+            // are already fully handled above, so this only adds runway equivalence.
+            const string targetAliasKey = waypointRunwayAliasKey(normalizedWaypointName);
+            bool aliasFound = false;
+            double aliasBestDistanceMeters = std::numeric_limits<double>::max();
+            GeoPoint aliasBestLocation = GeoPoint::empty;
+
+            for (const auto& routeWaypoint : plan->knownWaypoints())
+            {
+                if (routeWaypoint.location == GeoPoint::empty)
+                {
+                    continue;
+                }
+
+                if (waypointRunwayAliasKey(normalizeWaypointName(routeWaypoint.name)) != targetAliasKey)
+                {
+                    continue;
+                }
+
+                if (referencePoint == GeoPoint::empty)
+                {
+                    location = routeWaypoint.location;
+                    return true;
+                }
+
+                const double candidateDistanceMeters = GeoMath::getDistanceMeters(referencePoint, routeWaypoint.location);
+                if (!aliasFound || candidateDistanceMeters < aliasBestDistanceMeters)
+                {
+                    aliasFound = true;
+                    aliasBestDistanceMeters = candidateDistanceMeters;
+                    aliasBestLocation = routeWaypoint.location;
+                }
+            }
+
+            if (aliasFound)
+            {
+                location = aliasBestLocation;
                 return true;
             }
 
@@ -476,7 +576,12 @@ namespace ai
             case FlightPlan::LegType::Approach:
                 return constrainedSpeed(approachSpeed);
             case FlightPlan::LegType::Landing:
-                return constrainedSpeed(max(70.0f, approachSpeed - 20.0f));
+                // Touchdown profile: settle toward landing touchdown speed on the final
+                // leg (never faster than approach speed, never slower than touchdown+5 kt)
+                // instead of the older generic approach-minus-20 rule.
+                return constrainedSpeed(
+                    max(performance.landingTouchdownSpeedKt + 5.0f,
+                        min(performance.landingTouchdownSpeedKt * 0.9f, approachSpeed)));
             case FlightPlan::LegType::GoAround:
                 return max(140.0f, leg->targetSpeed() > 0.0f ? leg->targetSpeed() : approachSpeed + 20.0f);
             default:
@@ -1152,6 +1257,8 @@ namespace ai
             m_arrivalTowerCheckInDone = false;
             m_departureRadarCheckInDone = false;
             m_arrivalRadarCheckInDone = false;
+            m_uncontrolledArrivalLanding = false;
+            m_arrivalTowerRadarCheckInDone = false;
             m_stoppedBeforeTakeoff = false;
             m_doUnrestrictedClimbout = false;
             m_departureTowerKhz = 0;
@@ -1566,8 +1673,8 @@ namespace ai
                 steps.push_back(maneuverProcedureLeg(FlightPlan::LegType::Approach, Flight::Phase::Arrival, "approach_leg"));
             }
 
-            steps.push_back(M.deferred(Maneuver::Type::ArrivalApproach, "final", [this]() {
-                return maneuverFinal();
+            steps.push_back(M.deferred(Maneuver::Type::ArrivalApproach, "final", [this, landingRunway]() {
+                return maneuverFinal(landingRunway);
             }));
             steps.push_back(M.deferred([this, landingRunway]() {
                 if (flight()->tryFindClearance<GoAroundRequest>(Clearance::Type::GoAroundRequest))
@@ -1610,8 +1717,8 @@ namespace ai
                 steps.push_back(maneuverProcedureLeg(FlightPlan::LegType::Landing, Flight::Phase::Arrival, "landing_retry_align_leg"));
             }
 
-            steps.push_back(M.deferred(Maneuver::Type::ArrivalApproach, "final", [this]() {
-                return maneuverFinal();
+            steps.push_back(M.deferred(Maneuver::Type::ArrivalApproach, "final", [this, landingRunway]() {
+                return maneuverFinal(landingRunway);
             }));
             steps.push_back(M.deferred([this, landingRunway]() {
                 if (flight()->tryFindClearance<GoAroundRequest>(Clearance::Type::GoAroundRequest))
@@ -1630,7 +1737,7 @@ namespace ai
             return M.sequence(Maneuver::Type::ArrivalApproach, "approach_retry_to_gate", steps);
         }
 
-        shared_ptr<Maneuver> maneuverFinal()
+        shared_ptr<Maneuver> maneuverFinal(const Runway::End& landingRunway)
         {
             auto flaps15GearDown = M.sequence(Maneuver::Type::Unspecified, "flaps_15_gear_down", {
                 shared_ptr<Maneuver>(new AnimationManeuver<double>(
@@ -1699,17 +1806,39 @@ namespace ai
 
             string landingRunwayName = m_helper.getLandingRunwayEnd(flight()).name();
 
+            // Tracks whether the landing-configuration work below has finished, so the
+            // parallel runway-tracking gate always terminates with the rest of the phase.
+            auto landingConfigured = make_shared<bool>(false);
+
             auto aviate = M.sequence(Maneuver::Type::Unspecified, "aviate", {
                 M.delay(chrono::seconds(3)),
                 flaps15GearDown,
                 M.delay(chrono::seconds(12)),
                 flaps40,
+                M.instantAction([landingConfigured]{ *landingConfigured = true; })
             });
 
             m_finalReportedTimestamp = chrono::microseconds(0);
-            
+
+            // Lateral guidance for the whole final segment. Once the approach legs are
+            // done the aircraft holds whatever heading the last leg left it with and
+            // simply flies straight, so with real (non-synthetic) procedure geometry —
+            // where the last approach fix sits off the extended runway centreline — it
+            // would drift past the runway while being configured for landing. Steering it
+            // onto the runway centreline here keeps the track alive until the landing
+            // sequence's own short-final gates take over.
+            auto trackRunway = M.await(Maneuver::Type::Unspecified, "track_runway_on_final",
+                [this, landingRunway, landingConfigured]() {
+                    if (m_aircraft->altitude().type() != Altitude::Type::Ground)
+                    {
+                        steerOntoRunwayShortFinal(landingRunway);
+                    }
+
+                    return *landingConfigured;
+                });
             auto finalCore = M.parallel(Maneuver::Type::ArrivalApproach, "final_core", {
                 aviate,
+                trackRunway,
                 M.sequence(Maneuver::Type::Unspecified, "communicate", {
                     M.deferred([this]() {
                         if (m_arrivalTowerCheckInDone)
@@ -1735,18 +1864,14 @@ namespace ai
 
                         return M.sequence(Maneuver::Type::Unspecified, "arrival_tower_checkin_final", {
                             M.tuneComRadio(flight(), reportFinal->subjectControl()->frequency()),
-                            M.transmitIntent(flight(), reportFinal, "twr_report_final")
+                            transmitIntentBounded(reportFinal, "twr_report_final", chrono::seconds(20))
                         });
                     }),
                     M.await(Maneuver::Type::Unspecified, "await_twr_reply", [this]{
-                        if (shouldAutoGoAroundForRunwayOvershoot())
-                        {
-                            ensureAutoGoAroundRequested("runway_overshoot_before_reply");
-                        }
-                        else if (shouldAutoGoAroundForLateLandingClearance())
-                        {
-                            ensureAutoGoAroundRequested("landing_clearance_timeout_before_reply");
-                        }
+                        ensureAutoGoAroundOnFinal(
+                            "runway_overshoot_before_reply",
+                            "weather_on_final_before_reply",
+                            "landing_clearance_timeout_before_reply");
 
                         return (
                             m_continueApproach ||
@@ -1775,14 +1900,10 @@ namespace ai
                         return M.instantAction([]{});
                     }),
                     M.await(Maneuver::Type::Unspecified, "await_landing_or_go_around", [this]{
-                        if (shouldAutoGoAroundForRunwayOvershoot())
-                        {
-                            ensureAutoGoAroundRequested("runway_overshoot_no_landing_clearance");
-                        }
-                        else if (shouldAutoGoAroundForLateLandingClearance())
-                        {
-                            ensureAutoGoAroundRequested("landing_clearance_timeout_on_final");
-                        }
+                        ensureAutoGoAroundOnFinal(
+                            "runway_overshoot_no_landing_clearance",
+                            "weather_on_final_no_landing_clearance",
+                            "landing_clearance_timeout_on_final");
 
                         return (
                             flight()->tryFindClearance<LandingClearance>(Clearance::Type::LandingClearance) ||
@@ -1792,15 +1913,24 @@ namespace ai
                         auto goAround = flight()->tryFindClearance<GoAroundRequest>(Clearance::Type::GoAroundRequest);
                         if (goAround)
                         {
-                            return M.transmitIntent(
-                                flight(),
-                                I.pilotGoAroundReadback(goAround, m_lastReceivedIntentId),
-                                "readback_go_around");
+                            return maneuverGoAroundReadback(goAround);
                         }
 
                         auto clearance = flight()->findClearanceOrThrow<LandingClearance>(Clearance::Type::LandingClearance);
                         auto readback = I.pilotLandingClearanceReadback(flight(), clearance, m_lastReceivedIntentId);
-                        return M.transmitIntent(flight(), readback, "readback_landing_clrnc");
+                        if (!readback || !readback->subjectControl())
+                        {
+                            // The clearance was not issued by a resolvable controller (headless
+                            // clearance, no arrival position): there is nobody to read back to,
+                            // so skip the call instead of handing the frequency an intent with a
+                            // null subject.
+                            host()->writeLog(
+                                "AIPILO|WARNING: unable to resolve arrival control for landing-clearance readback flight[%s]",
+                                flight()->callSign().c_str());
+                            return M.instantAction([]{});
+                        }
+
+                        return transmitIntentBounded(readback, "readback_landing_clrnc", chrono::seconds(20));
                     })
                 })
             });
@@ -1811,9 +1941,35 @@ namespace ai
             });
         }
 
+        // Read back a tower go-around instruction. Skipped entirely when no arrival
+        // controller can be resolved (there is nobody to transmit to), so the
+        // returned maneuver is still a valid no-op rather than a null pointer.
+        shared_ptr<Maneuver> maneuverGoAroundReadback(shared_ptr<GoAroundRequest> request)
+        {
+            return M.deferred([this, request]() {
+                auto arrivalControl = m_lastReceivedControl
+                    ? m_lastReceivedControl
+                    : tryResolveArrivalControlPosition();
+                if (!arrivalControl)
+                {
+                    host()->writeLog(
+                        "AIPILO|WARNING: unable to resolve arrival control for go-around readback flight[%s]",
+                        flight()->callSign().c_str());
+                    return M.instantAction([]{});
+                }
+
+                return transmitIntentBounded(
+                    I.pilotGoAroundReadback(request, m_lastReceivedIntentId),
+                    "readback_go_around",
+                    chrono::seconds(20));
+            });
+        }
+
         shared_ptr<Maneuver> maneuverGoAround(const Runway::End& landingRunway)
         {
-            const auto performance = m_aircraft->performanceProfile();
+            const auto goAroundGroundSpeedKt = static_cast<double>(goAroundTargetGroundSpeedKt());
+            const auto goAroundVerticalSpeedFpm = static_cast<double>(goAroundTargetVerticalSpeedFpm());
+            const auto goAroundFlapState = static_cast<double>(goAroundTargetFlapState());
 
             vector<shared_ptr<Maneuver>> steps = {
                 M.instantAction([this]() {
@@ -1836,7 +1992,7 @@ namespace ai
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "go_around_speed",
                         max(120.0, m_aircraft->groundSpeedKt()),
-                        max(160.0f, performance.approachSpeedKt + 20.0f),
+                        goAroundGroundSpeedKt,
                         chrono::seconds(8),
                         [](const double& from, const double& to, double progress, double& value) {
                             value = from + (to - from) * progress;
@@ -1848,7 +2004,7 @@ namespace ai
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "go_around_climb",
                         max(0.0, m_aircraft->verticalSpeedFpm()),
-                        max(1200.0f, performance.initialClimbRocFpm * 0.6f),
+                        goAroundVerticalSpeedFpm,
                         chrono::seconds(6),
                         [](const double& from, const double& to, double progress, double& value) {
                             value = from + (to - from) * progress;
@@ -1872,7 +2028,7 @@ namespace ai
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "go_around_flaps",
                         m_aircraft->flapState(),
-                        0.15,
+                        goAroundFlapState,
                         chrono::seconds(8),
                         [](const double& from, const double& to, double progress, double& value) {
                             value = from + (to - from) * progress;
@@ -1923,6 +2079,19 @@ namespace ai
             const auto performance = m_aircraft->performanceProfile();
             const float touchdownSpeedKt = max(15.0f, min(performance.approachSpeedKt, performance.landingTouchdownSpeedKt));
             const float exitSpeedKt = max(0.0f, min(touchdownSpeedKt, performance.landingExitSpeedKt));
+
+            // The landing runway end is captured once, at build time, exactly like
+            // maneuverFinal does. When no runway exists yet the gates below complete
+            // immediately rather than deadlocking, so no test regresses.
+            shared_ptr<Runway::End> landingRunwayEnd;
+            try
+            {
+                landingRunwayEnd = make_shared<Runway::End>(m_helper.getLandingRunwayEnd(flight()));
+            }
+            catch (const exception&)
+            {
+                landingRunwayEnd = nullptr;
+            }
 
             // Calculate rollout duration using Eurocontrol landing distance data if available
             // Eurocontrol landingDistanceMeters is total distance from threshold to full stop
@@ -1987,37 +2156,38 @@ namespace ai
                     )),
                 });
             });
-            const float preFlarePitchEnd = static_cast<float>(max(2.0, m_aircraft->attitude().pitch() + 1.5));
-            const float currentVsFpm = static_cast<float>(m_aircraft->verticalSpeedFpm());
-            const float flarePitchDelta = (isHelicopter() ? 0.5f :
-                (m_aircraft->category() == Aircraft::Category::Heavy ? 4.0f :
-                (m_aircraft->category() == Aircraft::Category::LightProp ? 1.5f : 2.5f)))
-                + std::max(0.0f, -currentVsFpm / 400.0f);
-            auto flare = M.parallel(Maneuver::Type::ArrivalLanding, "flare", {
-                shared_ptr<Maneuver>(new AnimationManeuver<double>(
-                    "pitch",
-                    preFlarePitchEnd,
-                    preFlarePitchEnd + flarePitchDelta,
-                    chrono::seconds(3),
-                    [](const double& from, const double& to, double progress, double& value) {
-                        value = from + (to - from) * progress; 
-                    },
-                    [=](const double& value, double progress) {
-                        m_aircraft->setAttitude(m_aircraft->attitude().withPitch(value));
-                    }
-                )),
-                shared_ptr<Maneuver>(new AnimationManeuver<double>(
-                    "gndspd",
-                    performance.approachSpeedKt,
-                    touchdownSpeedKt,
-                    chrono::seconds(3),
-                    [](const double& from, const double& to, double progress, double& value) {
-                        value = from + (to - from) * progress;
-                    },
-                    [=](const double& value, double progress) {
-                        m_aircraft->setGroundSpeedKt(value);
-                    }
-                )),
+             const float preFlarePitchEnd = static_cast<float>(max(2.0, m_aircraft->attitude().pitch() + 1.5));
+             const float currentVsFpm = static_cast<float>(m_aircraft->verticalSpeedFpm());
+             const double flareStartGroundSpeedKt = max(0.0, m_aircraft->groundSpeedKt());
+             const float flarePitchDelta = (isHelicopter() ? 0.5f :
+                 (m_aircraft->category() == Aircraft::Category::Heavy ? 4.0f :
+                 (m_aircraft->category() == Aircraft::Category::LightProp ? 1.5f : 2.5f)))
+                 + std::max(0.0f, -currentVsFpm / 400.0f);
+             auto flare = M.parallel(Maneuver::Type::ArrivalLanding, "flare", {
+                 shared_ptr<Maneuver>(new AnimationManeuver<double>(
+                     "pitch",
+                     preFlarePitchEnd,
+                     preFlarePitchEnd + flarePitchDelta,
+                     chrono::seconds(3),
+                     [](const double& from, const double& to, double progress, double& value) {
+                         value = from + (to - from) * progress;
+                     },
+                     [=](const double& value, double progress) {
+                         m_aircraft->setAttitude(m_aircraft->attitude().withPitch(value));
+                     }
+                 )),
+                 shared_ptr<Maneuver>(new AnimationManeuver<double>(
+                     "gndspd",
+                     flareStartGroundSpeedKt,
+                     touchdownSpeedKt,
+                     chrono::seconds(3),
+                     [](const double& from, const double& to, double progress, double& value) {
+                         value = from + (to - from) * progress;
+                     },
+                     [=](const double& value, double progress) {
+                         m_aircraft->setGroundSpeedKt(value);
+                     }
+                 )),
                 M.sequence(Maneuver::Type::Unspecified, "", {
                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
                         "verspd_1",
@@ -2031,11 +2201,16 @@ namespace ai
                             m_aircraft->setVerticalSpeedFpm(value);
                         }
                     )),
-                    shared_ptr<Maneuver>(new AnimationManeuver<double>(
-                        "verspd_2",
-                        -performance.descentRateFpm * 0.05,
-                        isHelicopter() ? -15.0 : (m_aircraft->category() == Aircraft::Category::Heavy ? -60.0 : (m_aircraft->category() == Aircraft::Category::LightProp ? -30.0 : -45.0)),
-                        chrono::seconds(1),
+                     shared_ptr<Maneuver>(new AnimationManeuver<double>(
+                         "verspd_2",
+                         -performance.descentRateFpm * 0.05,
+                         // Gentle sink for heavies/rotorcraft/light props; for jet and
+                         // fighter categories scale with approach speed so a fast aircraft
+                         // settles onto the runway promptly instead of floating far past
+                         // the aim point while waiting for a -45 fpm descent.
+                         isHelicopter() ? -15.0 : (m_aircraft->category() == Aircraft::Category::Heavy ? -60.0 : (m_aircraft->category() == Aircraft::Category::LightProp ? -30.0 :
+                             -max(150.0, min(450.0, flareStartGroundSpeedKt * 2.2)))),
+                         chrono::seconds(1),
                         [](const double &from, const double &to, double progress, double &value) {
                             value = from + (to - from) * progress;
                         },
@@ -2115,8 +2290,64 @@ namespace ai
 
             return M.sequence(Maneuver::Type::ArrivalLanding, "landing", {
                 landingProcedure,
-                M.await(Maneuver::Type::Unspecified, "await_55_agl", [=]() {
-                    return currentAglFeet() <= 80;
+                // Gate 1: fly/stay on short final until the aircraft is inside the runway
+                // corridor. The predicate drives the short-final guidance so that a landing
+                // sequence still reaches the runway even when no landing leg survived
+                // flight-plan construction.
+                M.await(Maneuver::Type::Unspecified, "short_final", [this, landingRunwayEnd]() {
+                    if (!landingRunwayEnd)
+                    {
+                        // No runway resolvable at build time: never deadlock.
+                        return true;
+                    }
+
+                    if (m_aircraft->altitude().type() == Altitude::Type::Ground)
+                    {
+                        return true;
+                    }
+
+                    const Runway::End& runwayEnd = *landingRunwayEnd;
+                    steerOntoRunwayShortFinal(runwayEnd);
+
+                    const auto aimPoint = landingShortFinalAimPoint(runwayEnd);
+                    if (landingShortFinalAimPointReached(runwayEnd, aimPoint) &&
+                        isInsideLandingCorridor(runwayEnd))
+                    {
+                        return true;
+                    }
+
+                    const double distanceToThresholdMeters = GeoMath::getDistanceMeters(
+                        m_aircraft->location(),
+                        runwayEnd.centerlinePoint().geo());
+                    // Threshold proximity only counts as "on short final" when the aircraft
+                    // is already lined up with the runway; otherwise keep steering it in.
+                    return isInsideLandingCorridor(runwayEnd) &&
+                        (distanceToThresholdMeters <= 1500.0 || currentAglFeet() <= 80.0);
+                }),
+                // Gate 2: wait until the runway-alignment commit criteria are met.
+                // Ground contact and a very low AGL act as safe escapes so the landing
+                // never stalls waiting for perfect alignment.
+                M.await(Maneuver::Type::Unspecified, "await_landing_commit", [this, landingRunwayEnd]() {
+                    if (!landingRunwayEnd)
+                    {
+                        // No runway resolvable at build time: never deadlock.
+                        return true;
+                    }
+
+                    if (m_aircraft->altitude().type() == Altitude::Type::Ground)
+                    {
+                        return true;
+                    }
+
+                    steerOntoRunwayShortFinal(*landingRunwayEnd);
+
+                    if (currentAglFeet() <= 5.0)
+                    {
+                        // Very low AGL: do not hold the landing up, it must touch down.
+                        return true;
+                    }
+
+                    return landingShortFinalReadyToCommit(*landingRunwayEnd);
                 }),
                 preFlare,
                 M.await(Maneuver::Type::Unspecified, "await_20_agl", [=]() {
@@ -3910,6 +4141,88 @@ namespace ai
             });
         }
 
+        // State of a radio call the pilot made and is now waiting on.
+        struct BoundedRadioCallState
+        {
+            bool enqueuedPushToTalk = false;
+            shared_ptr<Transmission> transmission;
+            chrono::microseconds startedAt = chrono::microseconds(0);
+        };
+
+        // Same silence/priority rules ManeuverFactory::transmitIntent applies, reproduced
+        // here because that factory method cannot be re-parameterized from the pilot.
+        int radioCallSilenceMilliseconds(const shared_ptr<Intent>& intent) const
+        {
+            if (intent->isReply())
+            {
+                return 150;
+            }
+
+            if (intent->isCritical())
+            {
+                return 1500;
+            }
+
+            return flight()->phase() == Flight::Phase::Arrival ? 3000 : 4000;
+        }
+
+        // A pilot transmission the pilot is only willing to wait a bounded time for.
+        // A frequency that cannot vocalize (a host without a speech service) orphans the
+        // transmission in a non-terminal state, and waiting for it unconditionally used
+        // to wedge the whole arrival flow: the aircraft kept flying its last commanded
+        // speed/heading/vertical speed with no guidance at all until it sank onto the
+        // terrain. The pilot now gives up on the call and continues the procedure.
+        shared_ptr<Maneuver> transmitIntentBounded(
+            shared_ptr<Intent> intent,
+            const string& id,
+            chrono::seconds waitLimit)
+        {
+            auto state = make_shared<BoundedRadioCallState>();
+            auto flightPtr = flight();
+            const chrono::milliseconds silenceMilliseconds(radioCallSilenceMilliseconds(intent));
+            const chrono::microseconds waitLimitMicroseconds = chrono::microseconds(waitLimit);
+
+            return M.sequence(Maneuver::Type::Unspecified, id, {
+                M.await(Maneuver::Type::AwaitSilenceOnFrequency, id + "_silence", [=]() {
+                    auto frequency = flightPtr->aircraft()->frequency();
+                    if (!frequency)
+                    {
+                        return true;
+                    }
+
+                    if (!state->enqueuedPushToTalk)
+                    {
+                        state->startedAt = host()->getWorld()->timestamp();
+                        frequency->enqueuePushToTalk(
+                            silenceMilliseconds,
+                            intent,
+                            [=](shared_ptr<Transmission> transmission) {
+                                state->transmission = transmission;
+                            });
+                        state->enqueuedPushToTalk = true;
+                    }
+
+                    return !!state->transmission ||
+                        (host()->getWorld()->timestamp() - state->startedAt) >= waitLimitMicroseconds;
+                }),
+                M.await(Maneuver::Type::Unspecified, id + "_await_end", [=]() {
+                    if (!state->transmission)
+                    {
+                        return true;
+                    }
+
+                    const auto transmissionState = state->transmission->state();
+                    if (transmissionState == Transmission::State::Completed ||
+                        transmissionState == Transmission::State::Cancelled)
+                    {
+                        return true;
+                    }
+
+                    return (host()->getWorld()->timestamp() - state->startedAt) >= waitLimitMicroseconds;
+                })
+            });
+        }
+
         shared_ptr<Maneuver> maneuverArrivalRadarCheckIn()
         {
             return M.deferred([this]() {
@@ -3919,6 +4232,12 @@ namespace ai
                 }
 
                 auto targetControl = m_helper.tryGetArrivalApproach(flight(), m_aircraft->location());
+                if (!targetControl)
+                {
+                    // No dedicated approach position exists (e.g. a non-radar airport):
+                    // fall back to the Local/tower position so the flight still checks in.
+                    targetControl = tryResolveArrivalControlPosition();
+                }
                 if (!targetControl)
                 {
                     host()->writeLog(
@@ -3936,6 +4255,7 @@ namespace ai
                 }
 
                 m_arrivalRadarCheckInDone = true;
+                m_arrivalTowerRadarCheckInDone = true;
                 host()->writeLog(
                     "AIPILO|ARR_CHECKIN flight[%s] contacting %s on %.3f",
                     flight()->callSign().c_str(),
@@ -3943,7 +4263,10 @@ namespace ai
                     targetControl->frequency()->khz() / 1000.0f);
                 return M.sequence(Maneuver::Type::ArrivalDescentFromTop, "arrival_radar_checkin", {
                     M.tuneComRadio(flight(), targetControl->frequency()),
-                    M.transmitIntent(flight(), I.pilotCheckInWithRadar(flight(), targetControl), "arrival_radar_checkin_tx")
+                    transmitIntentBounded(
+                        I.pilotCheckInWithRadar(flight(), targetControl),
+                        "arrival_radar_checkin_tx",
+                        chrono::seconds(20))
                 });
             });
         }
@@ -4022,6 +4345,298 @@ namespace ai
             return nullptr;
         }
 
+    public:
+        // Why (or why not) the pilot would initiate an automatic go-around on final.
+        enum class AutoGoAroundTrigger
+        {
+            None = 0,
+            RunwayOvershoot,
+            LateLandingClearance
+        };
+
+        // On-final go-around decision. Uncontrolled arrivals honour their own landing and
+        // never trigger one; otherwise a runway overshoot takes priority over a late or
+        // missing landing clearance.
+        AutoGoAroundTrigger autoGoAroundTriggerOnFinal()
+        {
+            if (m_uncontrolledArrivalLanding)
+            {
+                return AutoGoAroundTrigger::None;
+            }
+
+            if (shouldAutoGoAroundForRunwayOvershoot())
+            {
+                return AutoGoAroundTrigger::RunwayOvershoot;
+            }
+
+            if (shouldAutoGoAroundForLateLandingClearance())
+            {
+                return AutoGoAroundTrigger::LateLandingClearance;
+            }
+
+            return AutoGoAroundTrigger::None;
+        }
+
+        // The touchdown aim point: threshold plus the touchdown distance along the runway.
+        GeoPoint landingShortFinalAimPoint(const Runway::End& runwayEnd)
+        {
+            return GeoMath::getPointAtDistance(
+                runwayEnd.centerlinePoint().geo(),
+                runwayEnd.heading(),
+                landingShortFinalTouchdownDistanceMeters(runwayEnd));
+        }
+
+        // Signed [0] along-track metres from the threshold (positive ahead of it) and
+        // [1] cross-track metres (positive right of runway heading). Mirrors
+        // AIAircraft::runwayAlignmentMeters (which is private), reproduced here so the
+        // pilot can reason about short-final geometry without touching AIAircraft.
+        tuple<double, double> landingRunwayAlignmentMeters(const Runway::End& runwayEnd, const GeoPoint& point)
+        {
+            const GeoPoint threshold = runwayEnd.centerlinePoint().geo();
+            const double distanceMeters = GeoMath::getDistanceMeters(threshold, point);
+            const double headingToPoint = GeoMath::getHeadingFromPoints(threshold, point);
+            const double headingOffsetRad = GeoMath::degreesToRadians(
+                GeoMath::getTurnDegrees(runwayEnd.heading(), static_cast<float>(headingToPoint)));
+            return make_tuple(
+                cos(headingOffsetRad) * distanceMeters,
+                sin(headingOffsetRad) * distanceMeters);
+        }
+
+        // True once the aircraft has reached/passed the aim point along the centreline;
+        // used to switch short-final guidance from steering toward the aim point to
+        // holding the runway heading through the touchdown zone.
+        bool landingShortFinalAimPointReached(const Runway::End& runwayEnd, const GeoPoint& aimPoint)
+        {
+            const auto aimAlignment = landingRunwayAlignmentMeters(runwayEnd, aimPoint);
+            const auto aircraftAlignment = landingRunwayAlignmentMeters(runwayEnd, m_aircraft->location());
+            return get<0>(aircraftAlignment) >= get<0>(aimAlignment) - 1.0;
+        }
+
+        // Short-final guidance heading: steer toward the aim point until it is reached,
+        // then hold the runway heading.
+        float landingShortFinalGuidanceHeading(const Runway::End& runwayEnd)
+        {
+            const GeoPoint aimPoint = landingShortFinalAimPoint(runwayEnd);
+            if (landingShortFinalAimPointReached(runwayEnd, aimPoint))
+            {
+                return runwayEnd.heading();
+            }
+
+            return GeoMath::getHeadingFromPoints(m_aircraft->location(), aimPoint);
+        }
+
+        // Steer the aircraft onto the runway: point the attitude (and hence the target
+        // track) at a rendezvous point on the extended runway centreline so that both the
+        // along-track and the cross-track error close together. Used by the short-final
+        // gate of maneuverLanding, whose landing leg may have been skipped.
+        void steerOntoRunwayShortFinal(const Runway::End& runwayEnd)
+        {
+            // Skip only aircraft that are truly on the ground (rolling out); AGL
+            // altitudes mean airborne on short final, which is exactly when the
+            // steering below is needed to close a cross-track offset onto the
+            // runway centreline.
+            if (!m_aircraft || m_aircraft->altitude().type() == Altitude::Type::Ground)
+            {
+                return;
+            }
+
+            const auto alignment = landingRunwayAlignmentMeters(runwayEnd, m_aircraft->location());
+            const double alongTrackMeters = get<0>(alignment);
+            const double crossTrackMeters = get<1>(alignment);
+
+            auto runway = resolveRunwayForEnd(runwayEnd);
+            const double halfWidthMeters = runway
+                ? static_cast<double>(runway->widthMeters()) * 0.5
+                : 25.0;
+            // Inside the corridor it is enough to fly the runway heading.
+            if (fabs(crossTrackMeters) <= halfWidthMeters && alongTrackMeters > -300.0)
+            {
+                const float guidanceHeading = landingShortFinalGuidanceHeading(runwayEnd);
+                if (fabs(GeoMath::getTurnDegrees(m_aircraft->attitude().heading(), guidanceHeading)) > 1.5f)
+                {
+                    m_aircraft->setAttitude(AircraftAttitude(guidanceHeading, 0.0f, 0.0f));
+                }
+                return;
+            }
+
+            // Aim at the centreline, never before the aim point, so the rendezvous
+            // point stays on or beyond the touchdown distance.
+            const double rendezvousAlongTrackMeters =
+                max(landingTouchdownDistanceMeters(runwayEnd), static_cast<double>(alongTrackMeters) + 300.0);
+            const GeoPoint rendezvousPoint = GeoMath::getPointAtDistance(
+                runwayEnd.centerlinePoint().geo(),
+                runwayEnd.heading(),
+                static_cast<float>(rendezvousAlongTrackMeters));
+
+            const float steerHeading = GeoMath::getHeadingFromPoints(
+                m_aircraft->location(),
+                rendezvousPoint);
+            if (fabs(GeoMath::getTurnDegrees(m_aircraft->attitude().heading(), steerHeading)) > 1.0f)
+            {
+                m_aircraft->setAttitude(AircraftAttitude(steerHeading, 0.0f, 0.0f));
+            }
+        }
+
+        // True when the cross-track error is inside the runway corridor.
+        bool isInsideLandingCorridor(const Runway::End& runwayEnd)
+        {
+            const auto alignment = landingRunwayAlignmentMeters(runwayEnd, m_aircraft->location());
+            const double crossTrackMeters = fabs(get<1>(alignment));
+
+            auto runway = resolveRunwayForEnd(runwayEnd);
+            const double halfWidthMeters = runway
+                ? static_cast<double>(runway->widthMeters()) * 0.5
+                : 25.0;
+
+            return crossTrackMeters <= halfWidthMeters;
+        }
+
+        // The along-track distance from the threshold at which this aircraft touches down.
+        double landingTouchdownDistanceMeters(const Runway::End& runwayEnd)
+        {
+            auto runway = resolveRunwayForEnd(runwayEnd);
+            if (!runway)
+            {
+                return max(15.0, static_cast<double>(m_aircraft->performanceProfile().landingTouchdownDistanceMeters));
+            }
+
+            return m_aircraft->landingTouchdownDistanceMetersForRunway(*runway);
+        }
+
+        // Geometry-only short-final commit gate: the aircraft must be inside the runway
+        // corridor (cross-track within max(12 m, half the runway width)) and within ~75 m
+        // of the touchdown point along-track (or already past it).
+        bool landingShortFinalReadyToCommit(const Runway::End& runwayEnd)
+        {
+            const auto alignment = landingRunwayAlignmentMeters(runwayEnd, m_aircraft->location());
+            const double alongTrackMeters = get<0>(alignment);
+            const double crossTrackMeters = fabs(get<1>(alignment));
+
+            auto runway = resolveRunwayForEnd(runwayEnd);
+            const double halfWidthMeters = runway
+                ? static_cast<double>(runway->widthMeters()) * 0.5
+                : 25.0;
+            const double lateralToleranceMeters = max(12.0, halfWidthMeters);
+
+            const double touchdownDistanceMeters =
+                static_cast<double>(landingShortFinalTouchdownDistanceMeters(runwayEnd));
+
+            const bool withinCorridor = crossTrackMeters <= lateralToleranceMeters;
+            const bool nearTouchdown = alongTrackMeters >= touchdownDistanceMeters - 75.0;
+            return withinCorridor && nearTouchdown;
+        }
+
+        // Go-around target profile sized to what the aircraft can actually hold at the low,
+        // dirty configuration it reaches on final.
+        float goAroundTargetGroundSpeedKt()
+        {
+            const auto& performance = m_aircraft->performanceProfile();
+            const bool helicopter = m_aircraft->category() == Aircraft::Category::Helicopter;
+            return helicopter
+                ? max(45.0f, performance.takeoffInitialClimbSpeedKt)
+                : max(160.0f, performance.approachSpeedKt + 20.0f);
+        }
+
+        float goAroundTargetVerticalSpeedFpm()
+        {
+            const auto& performance = m_aircraft->performanceProfile();
+            const bool helicopter = m_aircraft->category() == Aircraft::Category::Helicopter;
+            return helicopter
+                ? max(800.0f, performance.initialClimbRocFpm * 0.5f)
+                : max(1200.0f, performance.initialClimbRocFpm * 0.6f);
+        }
+
+        float goAroundTargetFlapState()
+        {
+            const bool helicopter = m_aircraft->category() == Aircraft::Category::Helicopter;
+            return helicopter ? 0.0f : 0.15f;
+        }
+
+        // Mark this landing as uncontrolled (e.g. a non-towered arrival): suppresses
+        // automatic go-arounds for missing ATC clearances and clears the final-reported
+        // deadline. Idempotent.
+        void markUncontrolledArrivalLanding(const string& reasonTag)
+        {
+            if (m_uncontrolledArrivalLanding)
+            {
+                return;
+            }
+
+            m_uncontrolledArrivalLanding = true;
+            m_finalReportedTimestamp = chrono::microseconds(0);
+
+            host()->writeLog(
+                "AIPILO|UNCONTROLLED_ARRIVAL flight[%s] reason[%s]",
+                flight()->callSign().c_str(),
+                reasonTag.c_str());
+        }
+
+        // Dispatch the on-final auto go-around decision: request a go-around for a runway
+        // overshoot or a late landing clearance, otherwise only log (using the
+        // uncontrolled-arrival tag when this is an uncontrolled landing).
+        void ensureAutoGoAroundOnFinal(
+            const string& overshootReasonTag,
+            const string& uncontrolledArrivalReasonTag,
+            const string& lateClearanceReasonTag)
+        {
+            switch (autoGoAroundTriggerOnFinal())
+            {
+            case AutoGoAroundTrigger::RunwayOvershoot:
+                ensureAutoGoAroundRequested(overshootReasonTag);
+                break;
+            case AutoGoAroundTrigger::LateLandingClearance:
+                ensureAutoGoAroundRequested(lateClearanceReasonTag);
+                break;
+            case AutoGoAroundTrigger::None:
+            default:
+                {
+                    const string& reasonTag = m_uncontrolledArrivalLanding
+                        ? uncontrolledArrivalReasonTag
+                        : lateClearanceReasonTag;
+                    host()->writeLog(
+                        "AIPILO|NO_AUTO_GO_AROUND flight[%s] reason[%s]",
+                        flight()->callSign().c_str(),
+                        reasonTag.c_str());
+                }
+                break;
+            }
+        }
+    private:
+        // Runway::End carries no back-reference to its parent Runway, so recover the
+        // owning Runway from the arrival airport (matched by end name) whenever its length
+        // or width is needed. Returns nullptr if it cannot be resolved.
+        shared_ptr<Runway> resolveRunwayForEnd(const Runway::End& runwayEnd)
+        {
+            try
+            {
+                auto airport = m_helper.getArrivalAirport(flight());
+                return airport ? airport->tryFindRunway(runwayEnd.name()) : nullptr;
+            }
+            catch (const exception&)
+            {
+                return nullptr;
+            }
+        }
+
+        // Touchdown distance along the runway, reproducing
+        // AIAircraft::landingTouchdownDistanceMetersForRunway exactly by resolving and
+        // delegating to it (Runway::End cannot reach its parent, so the runway is matched
+        // by end name). This is the reference the aim point, commit gate and reached test
+        // all compare against.
+        float landingShortFinalTouchdownDistanceMeters(const Runway::End& runwayEnd)
+        {
+            auto runway = resolveRunwayForEnd(runwayEnd);
+            if (runway)
+            {
+                return m_aircraft->landingTouchdownDistanceMetersForRunway(*runway);
+            }
+
+            // Fallback if the runway cannot be resolved: the profile floor, which equals
+            // the true distance whenever the runway is long enough for a normal touchdown
+            // zone (the usual case).
+            return max(15.0f, m_aircraft->performanceProfile().landingTouchdownDistanceMeters);
+        }
+
         void ensureAutoGoAroundRequested(const string& reasonTag)
         {
             if (flight()->tryFindClearance<GoAroundRequest>(Clearance::Type::GoAroundRequest))
@@ -4073,14 +4688,63 @@ namespace ai
             }
 
             const auto elapsed = now - m_finalReportedTimestamp;
-            if (elapsed < chrono::seconds(75))
-            {
-                return false;
-            }
 
             const auto& runwayEnd = m_helper.getLandingRunwayEnd(flight());
             const GeoPoint threshold = runwayEnd.centerlinePoint().geo();
             const float distanceMeters = GeoMath::getDistanceMeters(m_aircraft->location(), threshold);
+
+            // The grace period scales with how far out the aircraft still is. On short
+            // final (within ~1 NM of the threshold and at/below ~500 ft AGL) the wait
+            // collapses to ~10 s so a committed landing is not left hanging, while a
+            // still-inbound aircraft waits progressively longer, capped at 75 s (and
+            // never dropping below 10 s), matching the original fixed-timeout behaviour
+            // at long range.
+            constexpr float kShortFinalDistanceMeters = 1852.0f;   // 1 NM
+            constexpr float kFullWaitDistanceMeters = 12000.0f;    // ~6.5 NM, matches the proximity cap
+            constexpr float kMinWaitSeconds = 10.0f;
+            constexpr float kMaxWaitSeconds = 75.0f;
+            constexpr float kShortFinalAglFeet = 500.0f;
+
+            const Altitude& altitude = m_aircraft->altitude();
+            float aglFeet = 0.0f;
+            switch (altitude.type())
+            {
+            case Altitude::Type::AGL:
+                aglFeet = altitude.feet();
+                break;
+            case Altitude::Type::MSL:
+                aglFeet = max(0.0f, altitude.feet() - host()->queryTerrainElevationAt(m_aircraft->location()));
+                break;
+            case Altitude::Type::Ground:
+            default:
+                aglFeet = 0.0f;
+                break;
+            }
+
+            const bool shortFinal =
+                distanceMeters <= kShortFinalDistanceMeters && aglFeet <= kShortFinalAglFeet;
+
+            float requiredWaitSeconds;
+            if (shortFinal)
+            {
+                requiredWaitSeconds = kMinWaitSeconds;
+            }
+            else
+            {
+                const float progress =
+                    (distanceMeters - kShortFinalDistanceMeters) /
+                    (kFullWaitDistanceMeters - kShortFinalDistanceMeters);
+                const float clampedProgress = max(0.0f, min(1.0f, progress));
+                requiredWaitSeconds =
+                    kMinWaitSeconds + clampedProgress * (kMaxWaitSeconds - kMinWaitSeconds);
+            }
+
+            const auto requiredWait =
+                chrono::duration_cast<chrono::microseconds>(chrono::duration<float>(requiredWaitSeconds));
+            if (elapsed < requiredWait)
+            {
+                return false;
+            }
 
             // Only trigger once close enough to be committed on final.
             return distanceMeters <= 12000.0f;

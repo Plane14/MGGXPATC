@@ -17,7 +17,7 @@ set(LINUX TRUE)
 endif()
 
 if(UNIX)
-    set(PLATFORM_COMPILE_OPTIONS -Wall -Wextra -Wfloat-equal -pedantic)
+    set(PLATFORM_COMPILE_OPTIONS -Wall -Wextra -Wfloat-equal -pedantic -fPIC)
 else()
     # set(PLATFORM_COMPILE_OPTIONS /W3 /wd4996)
 endif()
@@ -37,7 +37,9 @@ if(LINUX)
         LIN=1
         IBM=0)
     set(PLATFORM_INCLUDE_DIRECTORIES
-        /usr/include/freetype2)
+        /usr/include/freetype2
+        include/glew/include
+        include/openal-soft/include)
 else()
     set(PLATFORM_CORE_DEFINITIONS
         APL=0

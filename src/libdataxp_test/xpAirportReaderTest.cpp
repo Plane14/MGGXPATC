@@ -19,6 +19,8 @@
 using namespace world;
 using namespace std;
 
+void createTestOutputStream(const string& fileName, ofstream& str);
+
 namespace
 {
     class NavdataHostServices : public TestHostServices
@@ -618,12 +620,10 @@ TEST(XPAirportReaderTest, readAptDat_realKJFK) {
 TEST(XPAirportReaderTest, findTaxiPath_KJFK_1) {
     XPAirportReader reader(makeHost());
     ifstream aptDat;
-    aptDat.exceptions(ifstream::failbit | ifstream::badbit);
-    aptDat.open("../../src/libdataxp_test/testInputs/apt_kjfk.dat");
+    openTestInputStream("apt_kjfk.dat", aptDat);
     reader.readAirport(aptDat);
     ofstream jsonOutput;
-    jsonOutput.exceptions(ofstream::failbit | ofstream::badbit);
-    jsonOutput.open("../../src/libdataxp_test/testOutputs/taxi_kjfk_79_378.json", std::ios_base::out | std::ios_base::trunc);
+    createTestOutputStream("taxi_kjfk_79_378.json", jsonOutput);
     
     const auto airport = reader.getAirport();
     const auto taxiNet = airport->taxiNet();
@@ -638,12 +638,10 @@ TEST(XPAirportReaderTest, findTaxiPath_KJFK_1) {
 TEST(XPAirportReaderTest, findTaxiPath_KJFK_2) {
     XPAirportReader reader(makeHost());
     ifstream aptDat;
-    aptDat.exceptions(ifstream::failbit | ifstream::badbit);
-    aptDat.open("../../src/libdataxp_test/testInputs/apt_kjfk.dat");
+    openTestInputStream("apt_kjfk.dat", aptDat);
     reader.readAirport(aptDat);
     ofstream jsonOutput;
-    jsonOutput.exceptions(ofstream::failbit | ofstream::badbit);
-    jsonOutput.open("../../src/libdataxp_test/testOutputs/taxi_kjfk_79_581.json", std::ios_base::out | std::ios_base::trunc);
+    createTestOutputStream("taxi_kjfk_79_581.json", jsonOutput);
     
     const auto airport = reader.getAirport();
     const auto taxiNet = airport->taxiNet();
@@ -1238,16 +1236,61 @@ stringstream makeAptDat(const vector<string>& lines)
     return output;
 }
 
+// Finds the libdataxp_test source directory (which holds the "testInputs" and
+// "testOutputs" subdirectories) regardless of the CWD the test binary is launched
+// from. Candidate roots (relative to the CWD, and derived from __FILE__, which is
+// available on MSVC/MinGW as well so this stays C++14-portable):
+//   1. "../../src/libdataxp_test/"  - the original path, tried first so the
+//      intended CMake WORKING_DIRECTORY behaviour is unchanged
+//   2. "src/libdataxp_test/"          - CWD is the repository root
+//   3. the directory of this source file (as recorded in __FILE__)
+// The directory is validated by probing for a data file that is known to exist in
+// its "testInputs" subdirectory (a plain open test works for input files and avoids
+// the C++14 <filesystem> and MSVC/MinGW directory-API differences).
+string findTestSourceDir()
+{
+    string thisFile = __FILE__;
+    for (char& c : thisFile)
+    {
+        if (c == '\\')
+        {
+            c = '/';
+        }
+    }
+    size_t lastSlash = thisFile.rfind('/');
+    string testSourceDir = lastSlash == string::npos ? string(".") : thisFile.substr(0, lastSlash);
+
+    vector<string> candidates;
+    candidates.push_back("../../src/libdataxp_test/");
+    candidates.push_back("src/libdataxp_test/");
+    candidates.push_back(testSourceDir + "/");
+
+    for (const string& candidate : candidates)
+    {
+        ifstream probe((candidate + "testInputs/apt_many.dat").c_str());
+        if (probe.good())
+        {
+            return candidate;
+        }
+    }
+
+    // Nothing found: fall back to the original path so any failure keeps its
+    // previously established behaviour and error reporting.
+    return candidates.front();
+}
+
 void openTestInputStream(const string& fileName, ifstream& str)
 {
-    string fullPath = "../../src/libdataxp_test/testInputs/" + fileName;
+    string fullPath = findTestSourceDir() + "testInputs/" + fileName;
+    str.clear();
     str.exceptions(ifstream::failbit | ifstream::badbit);
     str.open(fullPath.c_str());
 }
 
 void createTestOutputStream(const string& fileName, ofstream& str)
 {
-    string fullPath = "../../src/libdataxp_test/testInputs/" + fileName;
+    string fullPath = findTestSourceDir() + "testOutputs/" + fileName;
+    str.clear();
     str.exceptions(ofstream::failbit | ofstream::badbit);
     str.open(fullPath.c_str(), ofstream::out | ofstream::trunc);
 }
