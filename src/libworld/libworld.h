@@ -1770,6 +1770,17 @@ namespace world
                 const string& _fromNavaid,
                 const string& _toNavaid,
                 float _targetAltitude,
+                float _targetSpeed
+            ) : Leg(_type, _geometry, _fromNavaid, _toNavaid, _targetAltitude, ' ', _targetSpeed)
+            {
+            }
+
+            Leg(
+                LegType _type,
+                const GeoPolygon& _geometry,
+                const string& _fromNavaid,
+                const string& _toNavaid,
+                float _targetAltitude,
                 char _altitudeConstraintType,
                 float _targetSpeed
             ) : m_type(_type),
@@ -2428,21 +2439,45 @@ namespace world
             ControllerPosition::Type type,
             const GeoPoint& location,
             float altitudeFeetMsl = -1.0f) const {
+            if (!m_tower)
+            {
+                throw runtime_error("Airport has no tower facility");
+            }
             return m_tower->findPositionOrThrow(type, location, altitudeFeetMsl);
         }
         shared_ptr<ControllerPosition> clearanceDeliveryAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            if (!m_tower)
+            {
+                throw runtime_error("Airport has no tower facility");
+            }
             return m_tower->findPositionOrThrow(ControllerPosition::Type::ClearanceDelivery, location, altitudeFeetMsl);
         }
         shared_ptr<ControllerPosition> groundAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            if (!m_tower)
+            {
+                throw runtime_error("Airport has no tower facility");
+            }
             return m_tower->findPositionOrThrow(ControllerPosition::Type::Ground, location, altitudeFeetMsl);
         }
         shared_ptr<ControllerPosition> localAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            if (!m_tower)
+            {
+                throw runtime_error("Airport has no tower facility");
+            }
             return m_tower->findPositionOrThrow(ControllerPosition::Type::Local, location, altitudeFeetMsl);
         }
         shared_ptr<ControllerPosition> departureAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            if (!m_tower)
+            {
+                throw runtime_error("Airport has no tower facility");
+            }
             return m_tower->findPositionOrThrow(ControllerPosition::Type::Departure, location, altitudeFeetMsl);
         }
         shared_ptr<ControllerPosition> approachAt(const GeoPoint& location, float altitudeFeetMsl = -1.0f) const {
+            if (!m_tower)
+            {
+                throw runtime_error("Airport has no tower facility");
+            }
             return m_tower->findPositionOrThrow(ControllerPosition::Type::Approach, location, altitudeFeetMsl);
         }
     public:

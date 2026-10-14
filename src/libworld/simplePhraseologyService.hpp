@@ -135,6 +135,8 @@ namespace world
             MAP_VERBALIZER_INTENT(PilotContinueApproachReadbackIntent, verbalizePilotContinueApproachReadback);
             MAP_VERBALIZER_INTENT(TowerGoAroundIntent, verbalizeTowerGoAround);
             MAP_VERBALIZER_INTENT(PilotGoAroundReadbackIntent, verbalizePilotGoAroundReadback);
+            MAP_VERBALIZER_INTENT(TowerClearedForApproachIntent, verbalizeTowerClearedForApproach);
+            MAP_VERBALIZER_INTENT(PilotApproachClearanceReadbackIntent, verbalizePilotApproachClearanceReadback);
 
 //            m_verbalizerByIntentCode.insert({ PilotAffirmationIntent::IntentCode, [this](UtteranceBuilder& builder, shared_ptr<Intent> intent) {
 //                verbalizePilotAffirmation(builder, dynamic_pointer_cast<PilotAffirmationIntent>(intent));
@@ -890,6 +892,42 @@ namespace world
         void verbalizePilotGoAroundReadback(UtteranceBuilder& builder, shared_ptr<PilotGoAroundReadbackIntent> intent)
         {
             builder.addText("going around");
+            builder.addPunctuation();
+            builder.addFarewell(spellCallsign(intent->subjectFlight()->callSign()));
+        }
+
+        void verbalizeTowerClearedForApproach(UtteranceBuilder& builder, shared_ptr<TowerClearedForApproachIntent> intent)
+        {
+            auto clearance = intent->clearance();
+
+            builder.addData(spellCallsign(intent->subjectFlight()->callSign()));
+            builder.addPunctuation();
+            builder.addText("cleared for the");
+            builder.addData(clearance->approachTypeString());
+            builder.addText("approach");
+            builder.addData(spellRunway(clearance->runway()));
+            if (clearance->altitudeFloorFeet() > 0.0f)
+            {
+                builder.addPunctuation();
+                builder.addText("maintain");
+                builder.addData(spellAltitude(clearance->altitudeFloorFeet()));
+                builder.addText("until established");
+            }
+            if (!intent->traffic().empty())
+            {
+                builder.addPunctuation();
+                addTrafficAdvisory(builder, intent->traffic());
+            }
+        }
+
+        void verbalizePilotApproachClearanceReadback(UtteranceBuilder& builder, shared_ptr<PilotApproachClearanceReadbackIntent> intent)
+        {
+            auto clearance = intent->clearance();
+
+            builder.addText("cleared for the");
+            builder.addData(clearance->approachTypeString());
+            builder.addText("approach");
+            builder.addData(spellRunway(clearance->runway()));
             builder.addPunctuation();
             builder.addFarewell(spellCallsign(intent->subjectFlight()->callSign()));
         }

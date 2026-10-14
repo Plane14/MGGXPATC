@@ -100,7 +100,12 @@ FUNCTION(add_xplane_plugin library_name library_version ...)
     IF(APPLE)
         SET_PROPERTY(TARGET ${library_name} APPEND_STRING PROPERTY LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fPIC -fvisibility=hidden -bundle")
     ELSEIF(UNIX)
-        SET_PROPERTY(TARGET ${library_name} APPEND_STRING PROPERTY LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic -nodefaultlibs -undefined_warning -fPIC -fvisibility=hidden")
+        # The XPLM/Widgets symbols are intentionally left undefined in the output:
+        # X-Plane resolves them when it loads the plugin at run time. Note that the
+        # Apple linker flag "-undefined_warning" must NOT be used here - GNU ld
+        # parses it as "-u ndefined_warning", which forces a bogus undefined symbol
+        # named "ndefined_warning" into the module and breaks dlopen() on Linux.
+        SET_PROPERTY(TARGET ${library_name} APPEND_STRING PROPERTY LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic -nodefaultlibs -fPIC -fvisibility=hidden")
     ENDIF()
 
 	TARGET_LINK_LIBRARIES(${library_name} PUBLIC ${XPLM_LIBRARY} ${XPWIDGETS_LIBRARY})

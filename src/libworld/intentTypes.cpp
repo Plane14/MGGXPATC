@@ -31,6 +31,8 @@ namespace world
     constexpr int PilotTakeoffClearanceReadbackIntent::IntentCode;
     constexpr int PilotReportFinalIntent::IntentCode;
     constexpr int TowerClearedForLandingIntent::IntentCode;
+    constexpr int TowerClearedForApproachIntent::IntentCode;
+    constexpr int PilotApproachClearanceReadbackIntent::IntentCode;
     constexpr int PilotLandingClearanceReadbackIntent::IntentCode;
     constexpr int PilotArrivalCheckInWithGroundIntent::IntentCode;
     constexpr int GroundArrivalTaxiReplyIntent::IntentCode;

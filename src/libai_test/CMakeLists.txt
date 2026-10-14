@@ -7,6 +7,7 @@ enable_testing()
 
 add_executable(libai_test 
     aiPilotTest.cpp
+    aiPilotLandingSpeedTest.cpp
     aircraftPerformanceTableTest.cpp
     departureRunwayNormalizationTest.cpp
     staleCrossClearanceTest.cpp

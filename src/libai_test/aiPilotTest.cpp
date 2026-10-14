@@ -302,6 +302,15 @@ RWY:RW21 ,     ,      ,00272, ,LCO ,2,   ;N43183094,W008221881,0000;
         }
     };
 
+    class NoopPhraseologyService : public PhraseologyService
+    {
+    public:
+        shared_ptr<Utterance> verbalizeIntent(shared_ptr<Intent>) override
+        {
+            return make_shared<Utterance>();
+        }
+    };
+
     bool containsManeuverId(const shared_ptr<Maneuver>& maneuver, const string& expectedId)
     {
         if (!maneuver)
@@ -1010,4 +1019,136 @@ TEST(AIPilotTest, departureClimbLeavesGroundBasedAltitudeDuringSIDTransition)
     EXPECT_EQ(aircraft->altitude().type(), Altitude::Type::MSL);
     EXPECT_FALSE(aircraft->altitude().isGroundBased());
     EXPECT_GT(aircraft->altitude().feet(), terrainElevationFeet);
+}
+
+TEST(AIPilotTest, lecoRnp03ApproachTouchdownStaysOnRunwayWithRealGeometry)
+{
+    auto host = make_shared<LecoArrivalTestHostServices>();
+    host->services().use<PhraseologyService>(make_shared<NoopPhraseologyService>());
+    auto intentFactory = make_shared<IntentFactory>(host);
+    auto maneuverFactory = make_shared<ManeuverFactory>(host);
+    host->services().use<IntentFactory>(intentFactory);
+
+    auto departureAirport = createMinimalDepartureAirport(host);
+    auto arrivalAirport = createLecoArrivalAirport(host);
+    auto world = WorldBuilder::assembleSampleWorld(host, { departureAirport, arrivalAirport });
+    host->useWorld(world);
+
+    const auto runway = arrivalAirport->getRunwayOrThrow("RW03");
+    const auto& landingRunwayEnd = runway->getEndOrThrow("RW03");
+    const GeoPoint runwayThreshold = landingRunwayEnd.centerlinePoint().geo();
+
+    world->onQueryTerrainElevation([runwayThreshold](const GeoPoint& location) {
+        const float distanceNm = GeoMath::getDistanceMeters(location, runwayThreshold) / METERS_IN_1_NAUTICAL_MILE;
+
+        if (distanceNm > 4.0f)
+        {
+            return 900.0f;
+        }
+
+        if (distanceNm > 1.5f)
+        {
+            return 1100.0f;
+        }
+
+        return 330.0f;
+    });
+
+    const time_t departureTime = world->currentTime() + 3600;
+    const time_t arrivalTime = departureTime + 7200;
+
+    auto plan = make_shared<FlightPlan>(departureTime, arrivalTime, "KAAA", "LECO");
+    plan->setStar("LOMD4A");
+    plan->setApproach("R03");
+    plan->setArrivalRunway("RW03");
+    plan->setArrivalGate("G1");
+
+    auto aircraft = make_shared<AIAircraft>(host, 202, "B738", "DAL", "N202", Aircraft::Category::Jet);
+    auto flight = make_shared<Flight>(host, 202, Flight::RulesType::IFR, "DAL", "202", "DAL 202", plan);
+    flight->setAircraft(aircraft);
+
+    auto pilot = make_shared<AIPilot>(host, 8, Actor::Gender::Male, flight, maneuverFactory, intentFactory);
+    flight->setPilot(pilot);
+    world->addFlight(flight);
+
+    const auto& knownWaypoints = flight->plan()->knownWaypoints();
+    EXPECT_TRUE(any_of(knownWaypoints.begin(), knownWaypoints.end(), [](const FlightPlan::RouteWaypoint& waypoint) {
+        return waypoint.name == "IDOTU";
+    }));
+    EXPECT_TRUE(any_of(knownWaypoints.begin(), knownWaypoints.end(), [](const FlightPlan::RouteWaypoint& waypoint) {
+        return waypoint.name == "CO05W";
+    }));
+    EXPECT_TRUE(any_of(knownWaypoints.begin(), knownWaypoints.end(), [](const FlightPlan::RouteWaypoint& waypoint) {
+        return waypoint.name == "CO03W";
+    }));
+    EXPECT_TRUE(any_of(knownWaypoints.begin(), knownWaypoints.end(), [](const FlightPlan::RouteWaypoint& waypoint) {
+        return waypoint.name == "CO401";
+    }));
+
+    const auto landingLegIt = find_if(
+        flight->plan()->legs().begin(),
+        flight->plan()->legs().end(),
+        [](const shared_ptr<FlightPlan::Leg>& leg) {
+            return leg && leg->type() == FlightPlan::LegType::Landing;
+        });
+    ASSERT_NE(landingLegIt, flight->plan()->legs().end());
+    EXPECT_EQ((*landingLegIt)->toNavaid(), "RW03");
+
+    auto landingClearance = shared_ptr<LandingClearance>(new LandingClearance(
+        { 1, Clearance::Type::LandingClearance, world->timestamp(), nullptr, flight },
+        "RW03",
+        121705));
+    flight->addClearance(landingClearance);
+
+    aircraft->setOnFinal(landingRunwayEnd);
+
+    const double initialDistanceToRunwayNm = GeoMath::getDistanceMeters(
+        aircraft->location(),
+        runwayThreshold) / METERS_IN_1_NAUTICAL_MILE;
+
+    const auto startTimestamp = world->timestamp();
+    bool touchedDown = false;
+    GeoPoint touchdownLocation = GeoPoint::empty;
+    int elapsedSeconds = 0;
+
+    for (int step = 1; step <= 400; ++step)
+    {
+        const auto timestamp = startTimestamp + chrono::seconds(step);
+        elapsedSeconds = step;
+        aircraft->progressTo(timestamp);
+        world->progressTo(timestamp);
+
+        if (aircraft->altitude().type() == Altitude::Type::Ground)
+        {
+            touchedDown = true;
+            touchdownLocation = aircraft->location();
+            break;
+        }
+    }
+
+    EXPECT_TRUE(touchedDown)
+        << fixed << setprecision(9)
+        << "elapsedSec=" << elapsedSeconds
+        << " final lat=" << aircraft->location().latitude
+        << " lon=" << aircraft->location().longitude
+        << " altType=" << static_cast<int>(aircraft->altitude().type())
+        << " altFt=" << aircraft->altitude().feet()
+        << " gsKt=" << aircraft->groundSpeedKt()
+        << " vsFpm=" << aircraft->verticalSpeedFpm()
+        << " hdg=" << aircraft->attitude().heading();
+    if (touchedDown)
+    {
+        const auto alignment = pilot->landingRunwayAlignmentMeters(landingRunwayEnd, touchdownLocation);
+        const double alongTrackMeters = get<0>(alignment);
+        const double crossTrackMeters = fabs(get<1>(alignment));
+
+        EXPECT_GE(
+            alongTrackMeters,
+            aircraft->landingTouchdownDistanceMetersForRunway(*runway) - 60.0f);
+        EXPECT_LE(alongTrackMeters, runway->lengthMeters() + 60.0);
+        EXPECT_LE(crossTrackMeters, max(12.0, static_cast<double>(runway->widthMeters()) * 0.5))
+            << fixed << setprecision(9)
+            << "touchdown lat=" << touchdownLocation.latitude
+            << " lon=" << touchdownLocation.longitude;
+    }
 }

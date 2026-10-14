@@ -593,6 +593,30 @@ namespace world
             ));
         }
 
+        shared_ptr<Intent> towerClearedForApproach(shared_ptr<ApproachClearance> clearance, const vector<TrafficAdvisory>& traffic, uint64_t replyToId)
+        {
+            auto flight = clearance->header().issuedTo;
+
+            return shared_ptr<Intent>(new TowerClearedForApproachIntent(
+                m_nextIntentId++,
+                replyToId,
+                clearance->header().issuedBy,
+                flight,
+                true,
+                clearance,
+                traffic
+            ));
+        }
+
+        shared_ptr<Intent> pilotApproachClearanceReadback(shared_ptr<ApproachClearance> clearance, uint64_t replyToId)
+        {
+            return shared_ptr<Intent>(new PilotApproachClearanceReadbackIntent(
+                m_nextIntentId++,
+                replyToId,
+                clearance
+            ));
+        }
+
         shared_ptr<Intent> pilotArrivalCheckInWithGround(
             shared_ptr<Flight> flight,
             const string& runway,

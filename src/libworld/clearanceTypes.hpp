@@ -301,4 +301,70 @@ namespace world
         const string& runway() const { return m_runway; }
         int groundKhz() const { return m_groundKhz; }
     };
+
+    class ApproachClearance : public Clearance
+    {
+    public:
+        enum class ApproachType
+        {
+            Unknown = 0,
+            ILS = 1,
+            Visual = 2,
+            RNAV = 3,
+            RNP = 4,
+            VOR = 5,
+            NDB = 6,
+            GPS = 7
+        };
+    private:
+        string m_runway;
+        ApproachType m_approachType;
+        float m_altitudeFloorFeet;
+        bool m_circling;
+        int m_groundKhz;
+    public:
+        ApproachClearance(
+            const Header& _header,
+            const string& _runway,
+            ApproachType _approachType,
+            float _altitudeFloorFeet,
+            bool _circling,
+            int _groundKhz
+        ) : Clearance(_header),
+            m_runway(_runway),
+            m_approachType(_approachType),
+            m_altitudeFloorFeet(_altitudeFloorFeet),
+            m_circling(_circling),
+            m_groundKhz(_groundKhz)
+        {
+        }
+    public:
+        const string& runway() const { return m_runway; }
+        ApproachType approachType() const { return m_approachType; }
+        string approachTypeString() const
+        {
+            switch (m_approachType)
+            {
+            case ApproachType::ILS:
+                return "ILS";
+            case ApproachType::Visual:
+                return "Visual";
+            case ApproachType::RNAV:
+                return "RNAV";
+            case ApproachType::RNP:
+                return "RNP";
+            case ApproachType::VOR:
+                return "VOR";
+            case ApproachType::NDB:
+                return "NDB";
+            case ApproachType::GPS:
+                return "GPS";
+            default:
+                return "Unknown";
+            }
+        }
+        float altitudeFloorFeet() const { return m_altitudeFloorFeet; }
+        bool circling() const { return m_circling; }
+        int groundKhz() const { return m_groundKhz; }
+    };
 }
